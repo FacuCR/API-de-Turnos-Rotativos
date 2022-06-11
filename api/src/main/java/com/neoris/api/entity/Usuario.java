@@ -15,13 +15,13 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(	name = "usurio",
+@Table(	name = "usuario",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "username")
         })
 public class Usuario {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotBlank
     @Size(max = 20)

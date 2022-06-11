@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/test")
+// Clase para probar los niveles de acceso
 // Hay 3 APIs:
 // /api/test/all para el acceso público
 // /api/test/user para los usuarios que tienen ROLE_USER o ROLE_ADMIN

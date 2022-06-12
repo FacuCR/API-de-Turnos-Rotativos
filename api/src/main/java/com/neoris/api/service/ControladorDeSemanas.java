@@ -16,17 +16,16 @@ import java.util.stream.Stream;
 @Service
 public class ControladorDeSemanas implements IControladorDeSemanas{
     private static final Logger logger = LoggerFactory.getLogger(ControladorDeSemanas.class);
+    private final ZoneId zoneId = ZoneId.of( "America/Buenos_Aires" );
 
     @Override
     public int semanaDelAnio(Date fecha) {
-        ZoneId zoneId = ZoneId.of( "America/Buenos_Aires" );
         ZonedDateTime fechaElegida = ZonedDateTime.of(convertToLocalDateTimeViaSqlTimestamp(fecha), zoneId);
         return fechaElegida.get (IsoFields.WEEK_OF_WEEK_BASED_YEAR );
     }
 
     @Override
     public int anioDeUnaFecha(Date fecha) {
-        ZoneId zoneId = ZoneId.of( "America/Buenos_Aires" );
         ZonedDateTime fechaElegida = ZonedDateTime.of(convertToLocalDateTimeViaSqlTimestamp(fecha), zoneId);
         return fechaElegida.get ( IsoFields.WEEK_BASED_YEAR );
     }
@@ -78,6 +77,33 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
         } catch(Exception e) {
             logger.error("Ocurrio un error al comparar las fechas: {}", e);
             return  false;
+        }
+    }
+
+    @Override
+    public boolean isTurnoOcupado(List<Turno> turnos, Turno turnoNuevo) {
+       try(Stream<Turno> turnoStream = turnos.stream()) {
+           int cantMaxDeTurnos = 2;
+           int cantDeTurnos = (int) turnoStream
+                   .filter(turno -> turno.getFecha().compareTo(turnoNuevo.getFecha()) == 0)
+                   .filter(turno -> turno.getTurno().equals(turnoNuevo.getTurno()))
+                   .count();
+           return cantDeTurnos < cantMaxDeTurnos;
+       } catch(Exception e) {
+           logger.error("Ocurrio un error al revisar si el turno esta completamente ocupado: {}", e);
+           return  false;
+       }
+    }
+
+    @Override
+    public boolean isElMismoUsuarioEnElMismoTurno(List<Turno> turnos, Turno turnoNuevo) {
+        try(Stream<Turno> turnoStream = turnos.stream()) {
+            return turnoStream
+                    .filter(turno -> turno.getTurno().equals(turnoNuevo.getTurno()))
+                    .count() > 0;
+        } catch(Exception e) {
+            logger.error("Ocurrio un error al revisar si el turno esta completamente ocupado: {}", e);
+            return true;
         }
     }
 }

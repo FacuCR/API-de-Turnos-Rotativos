@@ -10,8 +10,10 @@ import java.util.List;
 public interface IControladorDeSemanas {
     int semanaDelAnio(Date fecha);
     boolean dosVecesEnLaMismaSemana(List<Date> fechas, Date fechaNueva);
+    boolean isTurnoOcupado(List<Turno> turnos, Turno turnoNuevo);
     int anioDeUnaFecha(Date fecha);
     int cantDehorasSemana(List<Turno> turnos, Turno turnoNuevo);
-    public int cantDeHoras(Date fechaI, Date fechaF);
+    int cantDeHoras(Date fechaI, Date fechaF);
     LocalDateTime convertToLocalDateTimeViaSqlTimestamp(Date fechaAConvertir);
+    boolean isElMismoUsuarioEnElMismoTurno(List<Turno> turnos, Turno turnoNuevo);
 }

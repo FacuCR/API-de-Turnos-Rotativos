@@ -1,8 +1,10 @@
 package com.neoris.api.controller;
 
 import com.neoris.api.entity.TurnoNormal;
+import com.neoris.api.model.Turno;
 import com.neoris.api.payload.request.TurnoNormalRequest;
 import com.neoris.api.payload.response.MessageResponse;
+import com.neoris.api.service.IControladorDeSemanas;
 import com.neoris.api.service.ITurnoNormalService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +15,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -21,19 +26,9 @@ import java.util.*;
 public class JornadaLaboralController {
     @Autowired
     private ITurnoNormalService turnoNormalService;
+    @Autowired
+    private IControladorDeSemanas controladorDeSemanas;
     private static final Logger logger = LoggerFactory.getLogger(JornadaLaboralController.class);
-
-    public int semanaDelAño(Date fecha){
-        Calendar calendarDeFecha = new GregorianCalendar();
-        calendarDeFecha.setTime(fecha);
-        int anio = calendarDeFecha.get(Calendar.YEAR);
-        int mes = calendarDeFecha.get(Calendar.MONTH) + 1;
-        int dia = calendarDeFecha.get(Calendar.DAY_OF_MONTH);
-
-        Calendar calendar = Calendar.getInstance(Locale.getDefault());
-        calendar.set(anio, mes, dia);
-        return calendar.get(Calendar.WEEK_OF_YEAR);
-    }
 
     @PostMapping("/save/normal/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")

@@ -23,7 +23,7 @@ public class TurnoNormalService implements ITurnoNormalService{
     public List<TurnoNormal> getAllTurnosNormales(Long jornadaId) {
         List<TurnoNormal> turnosNormales = null;
         try {
-            turnosNormales = turnoNormalRepository.findAllByJornadaId(jornadaId);
+            turnosNormales = turnoNormalRepository.findAllByJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
         } catch (Exception e) {
             logger.error("No se pudo acceder a los turnos normales: {}", e);
         }

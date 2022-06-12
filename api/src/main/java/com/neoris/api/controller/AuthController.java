@@ -1,5 +1,6 @@
 package com.neoris.api.controller;
 
+import com.neoris.api.entity.JornadaLaboral;
 import com.neoris.api.entity.Role;
 import com.neoris.api.entity.Usuario;
 import com.neoris.api.enums.ERole;
@@ -7,6 +8,7 @@ import com.neoris.api.payload.request.LoginRequest;
 import com.neoris.api.payload.request.SignupRequest;
 import com.neoris.api.payload.response.JwtResponse;
 import com.neoris.api.payload.response.MessageResponse;
+import com.neoris.api.repository.JornadaLaboralRepository;
 import com.neoris.api.repository.RoleRepository;
 import com.neoris.api.repository.UsuarioRepository;
 import com.neoris.api.security.jwt.AuthTokenFilter;
@@ -44,6 +46,8 @@ public class AuthController {
     private PasswordEncoder encoder;
     @Autowired
     private JwtUtils jwtUtils;
+    @Autowired
+    private JornadaLaboralRepository jornadaLaboralRepository;
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
     // autenticar { nombre de usuario, contraseña }
@@ -112,6 +116,10 @@ public class AuthController {
         }
         user.setRoles(roles);
         usuarioRepository.save(user);
-        return ResponseEntity.ok(new MessageResponse("Usuario registrado con éxito  !"));
+        // Le asigno la jornada laboral al nuevo usuario
+        JornadaLaboral jornada = new JornadaLaboral();
+        jornada.setUsuario(usuarioRepository.findByUsername(signUpRequest.getUsername()).get());
+        jornadaLaboralRepository.save(jornada);
+        return ResponseEntity.ok(new MessageResponse("Usuario registrado con éxito!"));
     }
 }

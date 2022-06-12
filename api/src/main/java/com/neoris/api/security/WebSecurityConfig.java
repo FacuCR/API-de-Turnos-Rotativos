@@ -55,6 +55,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests().antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
                 .antMatchers("/api/test/**").permitAll()
+                .antMatchers("/api/empleados/**").permitAll()
                 .anyRequest().authenticated();
         http.headers().frameOptions().sameOrigin(); // Para poder ver la consola h2
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

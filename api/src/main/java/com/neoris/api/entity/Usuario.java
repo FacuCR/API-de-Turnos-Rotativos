@@ -1,6 +1,5 @@
 package com.neoris.api.entity;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,6 +33,8 @@ public class Usuario {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
+    @Embedded
+    private Empleado empleado;
 
     public Usuario(String username, String password) {
         this.username = username;

@@ -20,7 +20,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -72,7 +71,7 @@ public class AuthController {
             logger.error("No se puede establecer la autenticación del usuario: {}", e);
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: El usuairo o la contraseña son incorrectos!"));
+                    .body(new MessageResponse("Error: El usuario o la contraseña son incorrectos!"));
         }
     }
 

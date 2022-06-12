@@ -27,5 +27,5 @@ public class TurnoNormal {
     @JoinColumn(name = "jornada_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
-    private JornadaLaboral jornadaLaboral;
+    private JornadaLaboral jornadaId;
 }

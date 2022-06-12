@@ -38,16 +38,15 @@ public class EmpleadoService implements IEmpleadoService{
 
     @Override
     public boolean saveEmpleado(Empleado empleado, Long idUsuario) {
-        boolean request = false;
         try {
             Optional<Usuario> user = usuarioRepository.findById(idUsuario);
             user.get().setEmpleado(empleado);
             usuarioRepository.save(user.get());
-            request = true;
+            return true;
         } catch (Exception e) {
             logger.error("No se pudo guardar el empleado: {}", e);
+            return false;
         }
-        return request;
     }
 
     @Override

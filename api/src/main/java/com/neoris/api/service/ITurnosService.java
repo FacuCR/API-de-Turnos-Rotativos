@@ -12,5 +12,5 @@ public interface ITurnosService {
     List<Turno> casteoDeTurnosNormales(List<TurnoNormal> turnosNormales);
     Turno casteoDeTurnoNormal(TurnoNormalRequest turnoNormal);
     TurnoNormal casteoDeRequestATurnoNormal(TurnoNormalRequest turnoNormalRequest);
-    ResponseEntity<MessageResponse> controlarRequsitosDelTurno(List<Turno> turnosActuales, Turno turnoNuevo, int cantMaxHsDeJornadaSemanal);
+    ResponseEntity<MessageResponse> controlarRequsitosDelTurno(List<Turno> turnosActuales, List<Turno> turnosActualesDeLosDemasUsuarios, Turno turnoNuevo, int cantMaxHsDeJornadaSemanal);
 }

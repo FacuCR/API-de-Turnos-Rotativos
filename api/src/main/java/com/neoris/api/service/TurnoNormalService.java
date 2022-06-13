@@ -21,13 +21,12 @@ public class TurnoNormalService implements ITurnoNormalService{
 
     @Override
     public List<TurnoNormal> getAllTurnosNormales(Long jornadaId) {
-        List<TurnoNormal> turnosNormales = null;
         try {
-            turnosNormales = turnoNormalRepository.findAllByJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
+            return turnoNormalRepository.findAllByJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
         } catch (Exception e) {
             logger.error("No se pudo acceder a los turnos normales: {}", e);
+            return null;
         }
-        return turnosNormales;
     }
 
     @Override

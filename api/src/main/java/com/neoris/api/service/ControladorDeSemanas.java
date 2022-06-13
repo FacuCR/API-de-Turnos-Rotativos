@@ -98,9 +98,10 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
     @Override
     public boolean isElMismoUsuarioEnElMismoTurno(List<Turno> turnos, Turno turnoNuevo) {
         try(Stream<Turno> turnoStream = turnos.stream()) {
-            return turnoStream
+            boolean result = turnoStream
                     .filter(turno -> turno.getTurno().equals(turnoNuevo.getTurno()))
                     .count() > 0;
+            return  !result;
         } catch(Exception e) {
             logger.error("Ocurrio un error al revisar si el turno esta completamente ocupado: {}", e);
             return true;

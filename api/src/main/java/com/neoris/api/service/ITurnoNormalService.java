@@ -10,4 +10,5 @@ public interface ITurnoNormalService {
     Optional<TurnoNormal> getTurnoById(Long turnoNormalId);
     boolean saveTurnoNormal(Long jornadaId, Long turnoNormalId, TurnoNormal turnoNormal);
     boolean saveTurnoNormal(Long jornadaId, TurnoNormal turnoNormal);
+    boolean deleteTurnoNormal(Long idTurnoNormal);
 }

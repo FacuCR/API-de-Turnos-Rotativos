@@ -1,6 +1,5 @@
 package com.neoris.api.service;
 
-import com.neoris.api.entity.TurnoNormal;
 import com.neoris.api.model.Turno;
 
 import java.time.LocalDateTime;

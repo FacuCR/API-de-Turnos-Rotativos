@@ -58,4 +58,13 @@ public class TurnoNormalService implements ITurnoNormalService{
             return false;
         }
     }
+
+    @Override
+    public boolean deleteTurnoNormal(Long idTurnoNormal) {
+        if (turnoNormalRepository.existsById(idTurnoNormal)) {
+            turnoNormalRepository.deleteById(idTurnoNormal);
+            return true;
+        }
+        return false;
+    }
 }

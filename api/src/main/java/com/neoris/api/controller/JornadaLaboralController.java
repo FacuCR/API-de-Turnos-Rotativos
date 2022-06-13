@@ -120,8 +120,7 @@ public class JornadaLaboralController {
             try {
                 int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(castTurnosActuales, turnoNuevo) + turnoNuevo.getCantHoras();
                 TurnoNormal castTurnoNormal = turnosService.casteoDeRequestATurnoNormal(turnoNormalRequest);
-                castTurnoNormal.setIdTurnoNormal(turnoNormalId);
-                turnoNormalService.saveTurnoNormal(jornadaId, castTurnoNormal);
+                turnoNormalService.saveTurnoNormal(jornadaId, turnoNormalId, castTurnoNormal);
                 String mensajeResponse = "Los datos del turno normal se guardaron con exito!";
                 if (cantidadDeHorasQueQuedarian < 30) {
                     mensajeResponse += " Aun necesita cargar mas hs para llegar a las 30hs minimas de esa semana";
@@ -163,6 +162,26 @@ public class JornadaLaboralController {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(new MessageResponse("Error: Ups ucurrio algo al intentar obtener los turnos normales del empleado!"));
+        }
+    }
+
+    @DeleteMapping("/delete/normal/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> deleteTurnoNormal(@PathVariable("id") Long idTurnoNormal){
+        try {
+            if(turnoNormalService.deleteTurnoNormal(idTurnoNormal))
+                return ResponseEntity
+                        .ok()
+                        .body(new MessageResponse("El turno se elimino correctamente!"));
+            else
+                return ResponseEntity
+                        .status(HttpStatus.NOT_MODIFIED)
+                        .body(new MessageResponse("Error: Ups ucurrio algo al intentar borrar el turno normal!"));
+        } catch (Exception e) {
+            logger.error("Error: No se pudo borrar el turno normal! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new MessageResponse("Error: Ups ucurrio algo al intentar borrar el turno normal!"));
         }
     }
 }

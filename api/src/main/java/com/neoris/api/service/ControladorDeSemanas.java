@@ -99,6 +99,7 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
     public boolean isElMismoUsuarioEnElMismoTurno(List<Turno> turnos, Turno turnoNuevo) {
         try(Stream<Turno> turnoStream = turnos.stream()) {
             boolean result = turnoStream
+                    .filter(turno -> turno.getFecha().compareTo(turnoNuevo.getFecha()) == 0)
                     .filter(turno -> turno.getTurno().equals(turnoNuevo.getTurno()))
                     .count() > 0;
             return  !result;

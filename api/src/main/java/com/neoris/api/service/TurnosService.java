@@ -1,7 +1,9 @@
 package com.neoris.api.service;
 
+import com.neoris.api.entity.TurnoExtra;
 import com.neoris.api.entity.TurnoNormal;
 import com.neoris.api.model.Turno;
+import com.neoris.api.payload.request.TurnoExtraRequest;
 import com.neoris.api.payload.request.TurnoNormalRequest;
 import com.neoris.api.payload.response.MessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +50,37 @@ public class TurnosService implements ITurnosService{
         castTurnoNormal.setTurno(turnoNormalRequest.getTurno());
         castTurnoNormal.setFecha(turnoNormalRequest.getFecha());
         castTurnoNormal.setCantHoras(turnoNormalRequest.getCantHoras());
+        return castTurnoNormal;
+    }
+
+    @Override
+    public List<Turno> casteoDeTurnosExtras(List<TurnoExtra> turnoExtraes) {
+        List<Turno> castTurnosActuales = new ArrayList<>();
+        for (TurnoExtra turnoNext : turnoExtraes) {
+            Turno turno = new Turno();
+            turno.setTurno(turnoNext.getTurno());
+            turno.setFecha(turnoNext.getFecha());
+            turno.setCantHoras(turnoNext.getCantHoras());
+            castTurnosActuales.add(turno);
+        }
+        return castTurnosActuales;
+    }
+
+    @Override
+    public Turno casteoDeTurnoExtra(TurnoExtraRequest turnoExtra) {
+        Turno turnoCasteado = new Turno();
+        turnoCasteado.setTurno(turnoExtra.getTurno());
+        turnoCasteado.setFecha(turnoExtra.getFecha());
+        turnoCasteado.setCantHoras(turnoExtra.getCantHoras());
+        return turnoCasteado;
+    }
+
+    @Override
+    public TurnoExtra casteoDeRequestATurnoExtra(TurnoExtraRequest turnoExtraRequest) {
+        TurnoExtra castTurnoNormal = new TurnoExtra();
+        castTurnoNormal.setTurno(turnoExtraRequest.getTurno());
+        castTurnoNormal.setFecha(turnoExtraRequest.getFecha());
+        castTurnoNormal.setCantHoras(turnoExtraRequest.getCantHoras());
         return castTurnoNormal;
     }
 

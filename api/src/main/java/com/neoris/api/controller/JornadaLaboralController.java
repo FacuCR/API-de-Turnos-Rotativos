@@ -148,7 +148,7 @@ public class JornadaLaboralController {
             logger.error("Error: No se pudo obtener los datos del empleado! {}", e);
             return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(new MessageResponse("Error: Ups ucurrio algo al intentar obtener los turnos normales del empleado!"));
+                .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener los turnos normales del empleado!"));
         }
     }
 
@@ -161,7 +161,7 @@ public class JornadaLaboralController {
             logger.error("Error: No se pudo obtener los datos del empleado! {}", e);
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(new MessageResponse("Error: Ups ucurrio algo al intentar obtener los turnos normales del empleado!"));
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener los turnos normales del empleado!"));
         }
     }
 
@@ -176,7 +176,7 @@ public class JornadaLaboralController {
             else
                 return ResponseEntity
                         .status(HttpStatus.NOT_MODIFIED)
-                        .body(new MessageResponse("Error: Ups ucurrio algo al intentar borrar el turno normal!"));
+                        .body(new MessageResponse("Error: Ups ocurrio algo al intentar borrar el turno normal!"));
         } catch (Exception e) {
             logger.error("Error: No se pudo borrar el turno normal! {}", e);
             return ResponseEntity

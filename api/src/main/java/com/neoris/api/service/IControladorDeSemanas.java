@@ -1,5 +1,7 @@
 package com.neoris.api.service;
 
+import com.neoris.api.entity.TurnoExtra;
+import com.neoris.api.entity.TurnoNormal;
 import com.neoris.api.model.Turno;
 
 import java.time.LocalDateTime;
@@ -15,4 +17,7 @@ public interface IControladorDeSemanas {
     int cantDeHoras(Date fechaI, Date fechaF);
     LocalDateTime convertToLocalDateTimeViaSqlTimestamp(Date fechaAConvertir);
     boolean isElMismoUsuarioEnElMismoTurno(List<Turno> turnos, Turno turnoNuevo);
+    boolean isMaxDeHorasDeJornadaLaboralSuperada(List<Turno> turnos, Turno turnoNuevo);
+    boolean isTurnoExtraAsignadoEnEseDia(List<TurnoExtra> turnosExtras, Turno turnoExtra);
+    boolean isTurnoNormalAsignadoEnEseDia(List<TurnoNormal> turnosNormales, Turno turnoNormal);
 }

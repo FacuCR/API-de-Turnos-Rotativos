@@ -21,6 +21,7 @@ import java.util.Locale;
 public class TurnosService implements ITurnosService{
     @Autowired
     private ControladorDeSemanas controladorDeSemanas;
+    private final int cantMaxHsDeJornadaSemanal = 48;
 
     @Override
     public List<Turno> casteoDeTurnosNormales(List<TurnoNormal> turnosNormales) {
@@ -86,7 +87,7 @@ public class TurnosService implements ITurnosService{
 
     @Override
     // Elegi controlar los requisitos desde un metodo para no duplicar tanto codigo ya  que lo utilizaba varias veces
-    public ResponseEntity<MessageResponse> controlarRequsitosDelTurno(List<Turno> turnosActuales, List<Turno> turnosActualesDeLosDemasUsuarios, Turno turnoNuevo, int cantMaxHsDeJornadaSemanal) {
+    public ResponseEntity<MessageResponse> controlarRequsitosDelTurno(List<Turno> turnosActuales, List<Turno> turnosActualesDeLosDemasUsuarios, Turno turnoNuevo, List<TurnoExtra> turnosExtras, List<TurnoNormal> turnosNormales) {
         // Controlo que la fecha no sea de antes de la fecha actual
         Date fechaActual = new Date();
         if (turnoNuevo.getFecha().before(fechaActual)){
@@ -97,10 +98,24 @@ public class TurnosService implements ITurnosService{
         }
 
         // Controlo que no se guarda en la misma jornada laboral el mismo turno
-        if (!controladorDeSemanas.isElMismoUsuarioEnElMismoTurno(turnosActuales, turnoNuevo)) {
+        if (controladorDeSemanas.isElMismoUsuarioEnElMismoTurno(turnosActuales, turnoNuevo)) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No se pudo guardar los datos del turno normal por que ya tienes un " + turnoNuevo.getTurno() + " asignado ese dia!"));
+                    .body(new MessageResponse("Error: No se pudo guardar los datos del turno por que ya tienes un " + turnoNuevo.getTurno() + " asignado ese dia!"));
+        }
+
+        // Controlo que no tenga un turno extra asignado ya en ese dia
+        if (!turnosExtras.isEmpty() && controladorDeSemanas.isTurnoExtraAsignadoEnEseDia(turnosExtras, turnoNuevo)){
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error: No se pudo guardar el turno extra por que ya tienes un turno extra asignado ese dia!"));
+        }
+
+        // Controlo que no tenga un turno normal asignado ya en ese dia
+        if (!turnosNormales.isEmpty() && controladorDeSemanas.isTurnoNormalAsignadoEnEseDia(turnosNormales, turnoNuevo)){
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error: No se pudo guardar el turno normal por que ya tienes un turno normal asignado ese dia!"));
         }
 
         int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActuales, turnoNuevo) + turnoNuevo.getCantHoras();
@@ -108,14 +123,21 @@ public class TurnosService implements ITurnosService{
         if (!(cantidadDeHorasQueQuedarian <= cantMaxHsDeJornadaSemanal)) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No se pudo guardar los datos del turno normal por que supera el limite de horas(48hs semanales)!"));
+                    .body(new MessageResponse("Error: No se pudo guardar los datos del turno por que supera el limite de horas(48hs semanales)!"));
+        }
+
+        // Controlo que la suma de todas las horas de ese dia mas el nuevo turno que se quiere ingresar no superen el limite permitido de 12
+        if (controladorDeSemanas.isMaxDeHorasDeJornadaLaboralSuperada(turnosActuales, turnoNuevo)) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error: No se pudo guardar los datos del turno por que supera el limite de horas diarias(12hs)!"));
         }
 
         // Controlo que no se guarde si ya hay dos turnos ocupados en ese dia
         if (!controladorDeSemanas.isTurnoOcupado(turnosActualesDeLosDemasUsuarios, turnoNuevo)) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No se pudo guardar los datos del turno normal por que los " + turnoNuevo.getTurno() + " de ese dia estan ocupados!"));
+                    .body(new MessageResponse("Error: No se pudo guardar los datos del turno por que los " + turnoNuevo.getTurno() + " de ese dia estan ocupados!"));
         }
 
         return ResponseEntity

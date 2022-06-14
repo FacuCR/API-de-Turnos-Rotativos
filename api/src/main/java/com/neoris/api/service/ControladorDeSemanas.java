@@ -1,5 +1,7 @@
 package com.neoris.api.service;
 
+import com.neoris.api.entity.TurnoExtra;
+import com.neoris.api.entity.TurnoNormal;
 import com.neoris.api.model.Turno;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,7 @@ import java.util.stream.Stream;
 public class ControladorDeSemanas implements IControladorDeSemanas{
     private static final Logger logger = LoggerFactory.getLogger(ControladorDeSemanas.class);
     private final ZoneId zoneId = ZoneId.of( "America/Buenos_Aires" );
+    private final int maxHorasDiarias = 12;
 
     @Override
     public int semanaDelAnio(Date fecha) {
@@ -102,10 +105,52 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
                     .filter(turno -> turno.getFecha().compareTo(turnoNuevo.getFecha()) == 0)
                     .filter(turno -> turno.getTurno().equals(turnoNuevo.getTurno()))
                     .count() > 0;
-            return  !result;
+            return  result;
         } catch(Exception e) {
             logger.error("Ocurrio un error al revisar si el turno esta completamente ocupado: {}", e);
             return true;
+        }
+    }
+
+    @Override // Chequear si se supera las horas de un dia de jornada
+    public boolean isMaxDeHorasDeJornadaLaboralSuperada(List<Turno> turnos, Turno turnoNuevo) {
+        try(Stream<Turno> turnoStream = turnos.stream()) {
+            boolean result = turnoStream
+                    .filter(turno -> turno.getFecha().compareTo(turnoNuevo.getFecha()) == 0) // Obtengo todos los turnos de ese dia
+                    .map(Turno::getCantHoras) // Lo mapeo para que me de solo las horas de esos turnos
+                    .mapToInt(Integer::intValue) // Convierto el stream en un strem int para operarlo
+                    .sum() + turnoNuevo.getCantHoras() > maxHorasDiarias; // Si la suma de todas las horas de ese dia mas el nuevo turno que se quiere ingresar
+                                                                          // supera el maximo de las horas diarias permitidas de una jornada devuelve true
+            return  result;
+        } catch(Exception e) {
+            logger.error("Ocurrio un error al revisar si supera el maximo de horas diarias: {}", e);
+            return true;
+        }
+    }
+
+    @Override
+    public boolean isTurnoExtraAsignadoEnEseDia(List<TurnoExtra> turnosExtras, Turno turnoExtra) {
+        try(Stream<TurnoExtra> turnosExtrasStream = turnosExtras.stream()) {
+            boolean result = turnosExtrasStream
+                    .filter(turno -> turno.getFecha().compareTo(turnoExtra.getFecha()) == 0)
+                    .count() > 0;
+            return result;
+        } catch (Exception e) {
+            logger.error("Ocurrio un error al revisar si ya tiene un turno extra asignado: {}", e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isTurnoNormalAsignadoEnEseDia(List<TurnoNormal> turnosNormales, Turno turnoNormal) {
+        try(Stream<TurnoNormal> turnosNormalesStream = turnosNormales.stream()) {
+            boolean result = turnosNormalesStream
+                    .filter(turno -> turno.getFecha().compareTo(turnoNormal.getFecha()) == 0)
+                    .count() > 0;
+            return result;
+        } catch (Exception e) {
+            logger.error("Ocurrio un error al revisar si ya tiene un turno normal asignado: {}", e);
+            return false;
         }
     }
 }

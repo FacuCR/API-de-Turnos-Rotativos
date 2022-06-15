@@ -4,14 +4,12 @@ import com.neoris.api.entity.JornadaLaboral;
 import com.neoris.api.entity.TurnoExtra;
 import com.neoris.api.entity.TurnoNormal;
 import com.neoris.api.model.Turno;
+import com.neoris.api.payload.request.DiaLibreRequest;
 import com.neoris.api.payload.request.TurnoExtraRequest;
 import com.neoris.api.payload.request.TurnoNormalRequest;
 import com.neoris.api.payload.response.MessageResponse;
 import com.neoris.api.repository.JornadaLaboralRepository;
-import com.neoris.api.service.IControladorDeSemanas;
-import com.neoris.api.service.ITurnoExtraService;
-import com.neoris.api.service.ITurnoNormalService;
-import com.neoris.api.service.ITurnosService;
+import com.neoris.api.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,50 +37,40 @@ public class JornadaLaboralController {
     private ITurnosService turnosService;
     @Autowired
     private JornadaLaboralRepository jornadaLaboralRepository;
+    @Autowired
+    private IDiaLibreService diaLibreService;
     private static final Logger logger = LoggerFactory.getLogger(JornadaLaboralController.class);
-    private final int cantMaxHsDeJornadaSemanal = 48;
+    private final int cantMinHsDeJornadaSemanal = 30;
 
     // ========== TURNOS NORMALES ========== //
 
     @PostMapping("/save/normal/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> saveTurnoNormal(@Valid @RequestBody TurnoNormalRequest turnoNormalRequest, @PathVariable("id") Long jornadaId) {
-        // Debo castear los turnos normales a turno ya que el service controlador de semanas solo
+        // Debo castear los turnos normales y extras a turno ya que el service ControladorDeSemanas solo
         // trabaja con el tipo Turno
 
-        // Obtengo todos los turnos de la jornada del usuario para castearlos a Turno
-        List<TurnoNormal> turnosActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
-        List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
-        List<Turno> castTurnosActuales = turnosService.casteoDeTurnosNormales(turnosActuales);
-        castTurnosActuales.addAll(turnosService.casteoDeTurnosExtras(turnosExtrasActuales));
+        // Obtengo todos los turnos normales del usuario
+        List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
 
-        // Obtengo los demas idJornada para obtener los turnos de los otros usuarios
-        // para posteriormente chequear que no hayan dos turnos ocupados por otros usuarios ese mismo dia
-        List<Long> todosLosIdsDeLasDemasJornadas = jornadaLaboralRepository.findAll().stream()
-                .map(JornadaLaboral::getIdJornada)
-                .filter(ids -> !(ids.equals(jornadaId)))
-                .collect(Collectors.toList());
-        List<TurnoNormal> turnosNormalesDeLosDemasUsuarios = new ArrayList<>();
-        List<TurnoExtra> turnosExtrasDeLosDemasUsuarios = new ArrayList<>();
-        for (Long idDeOtraJornada : todosLosIdsDeLasDemasJornadas) {
-            turnosNormalesDeLosDemasUsuarios.addAll(turnoNormalService.getAllTurnosNormales(idDeOtraJornada));
-            turnosExtrasDeLosDemasUsuarios.addAll(turnoExtraService.getAllTurnosExtras(idDeOtraJornada));
-        }
-        List<Turno> castTurnosActualesDeLosDemasUsuarios = turnosService.casteoDeTurnosNormales(turnosNormalesDeLosDemasUsuarios);
-        castTurnosActualesDeLosDemasUsuarios.addAll(turnosService.casteoDeTurnosNormales(turnosNormalesDeLosDemasUsuarios));
+        // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados al tipo Turno
+        List<Turno> turnosActualesDelUsuario = turnosService.getAllTurnosDelUsuario(jornadaId);
+
+        // Obtengo los turnos de los demas usuarios
+        List<Turno> turnosActualesDeLosDemasUsuarios = turnosService.getAllTurnosDeLosDemasUsuarios(jornadaId);
 
         // Casteo el turno normal nuevo a Turno
         Turno turnoNuevo = turnosService.casteoDeTurnoNormal(turnoNormalRequest);
 
         // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
-        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(castTurnosActuales, castTurnosActualesDeLosDemasUsuarios, turnoNuevo, new ArrayList<TurnoExtra>(), turnosActuales);
+        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo, new ArrayList<>(), turnosNormalesActuales);
         if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)){
             try {
-                int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(castTurnosActuales, turnoNuevo) + turnoNuevo.getCantHoras();
+                int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActualesDelUsuario, turnoNuevo) + turnoNuevo.getCantHoras();
                 TurnoNormal castTurnoNormal = turnosService.casteoDeRequestATurnoNormal(turnoNormalRequest);
                 turnoNormalService.saveTurnoNormal(jornadaId, castTurnoNormal);
                 String mensajeResponse = "Los datos del turno normal se guardaron con exito!";
-                if (cantidadDeHorasQueQuedarian < 30) {
+                if (cantidadDeHorasQueQuedarian < cantMinHsDeJornadaSemanal) {
                     mensajeResponse += " Aun necesita cargar mas hs para llegar a las 30hs minimas de esa semana";
                 }
                 return ResponseEntity
@@ -104,35 +92,26 @@ public class JornadaLaboralController {
     @PutMapping("/save/normal/{idJornada}/{idTurnoNormal}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> updateTurnoNormal(@Valid @RequestBody TurnoNormalRequest turnoNormalRequest, @PathVariable("idJornada") Long jornadaId, @PathVariable("idTurnoNormal") Long turnoNormalId) {
-        // Debo castear los turnos normales a turno ya que el service controlador de semanas solo
+        // Debo castear los turnos normales y extras a turno ya que el service ControladorDeSemanas solo
         // trabaja con el tipo Turno
 
-        // Obtengo todos los turnos para castearlos a Turno
-        List<TurnoNormal> turnosActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
-        List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
-        List<Turno> castTurnosActuales = turnosService.casteoDeTurnosNormales(turnosActuales);
-        castTurnosActuales.addAll(turnosService.casteoDeTurnosExtras(turnosExtrasActuales));
+        // Obtengo todos los turnos normales del usuario
+        List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
 
-        // Obtengo los demas idJornada para obtener los turnos de los otros usuarios
-        // para posteriormente chequear que no hayan dos turnos ocupados por otros usuarios ese mismo dia
-        List<Long> todosLosIdsDeLasDemasJornadas = jornadaLaboralRepository.findAll().stream()
-                .map(JornadaLaboral::getIdJornada)
-                .filter(ids -> !(ids.equals(jornadaId)))
-                .collect(Collectors.toList());
-        List<TurnoNormal> turnosDeLosDemasUsuarios = new ArrayList<>();
-        for (Long idDeOtraJornada : todosLosIdsDeLasDemasJornadas) {
-            turnosDeLosDemasUsuarios.addAll(turnoNormalService.getAllTurnosNormales(idDeOtraJornada));
-        }
-        List<Turno> castTurnosActualesDeLosDemasUsuarios = turnosService.casteoDeTurnosNormales(turnosDeLosDemasUsuarios);
+        // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados al tipo Turno
+        List<Turno> turnosActualesDelUsuario = turnosService.getAllTurnosDelUsuario(jornadaId);
+
+        // Obtengo los turnos de los demas usuarios
+        List<Turno> turnosActualesDeLosDemasUsuarios = turnosService.getAllTurnosDeLosDemasUsuarios(jornadaId);
 
         // Casteo el turno normal nuevo a Turno
         Turno turnoNuevo = turnosService.casteoDeTurnoNormal(turnoNormalRequest);
 
         // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
-        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(castTurnosActuales, castTurnosActualesDeLosDemasUsuarios, turnoNuevo, new ArrayList<TurnoExtra>(), turnosActuales);
+        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo, new ArrayList<>(), turnosNormalesActuales);
         if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)){
             try {
-                int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(castTurnosActuales, turnoNuevo) + turnoNuevo.getCantHoras();
+                int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActualesDelUsuario, turnoNuevo) + turnoNuevo.getCantHoras();
                 TurnoNormal castTurnoNormal = turnosService.casteoDeRequestATurnoNormal(turnoNormalRequest);
                 turnoNormalService.saveTurnoNormal(jornadaId, turnoNormalId, castTurnoNormal);
                 String mensajeResponse = "Los datos del turno normal se guardaron con exito!";
@@ -208,42 +187,30 @@ public class JornadaLaboralController {
     @PostMapping("/save/extra/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> saveTurnoExtra(@Valid @RequestBody TurnoExtraRequest turnoExtraRequest, @PathVariable("id") Long jornadaId) {
-        // Debo castear los turnos extras a turno ya que el service controlador de semanas solo
+        // Debo castear los turnos normales y extras a turno ya que el service ControladorDeSemanas solo
         // trabaja con el tipo Turno
 
-        // Obtengo todos los turnos de la jornada del usuario para castearlos a Turno
-        List<TurnoNormal> turnosActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
+        // Obtengo todos los turnos normales del usuario
         List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
-        List<Turno> castTurnosActuales = turnosService.casteoDeTurnosNormales(turnosActuales);
-        castTurnosActuales.addAll(turnosService.casteoDeTurnosExtras(turnosExtrasActuales));
 
-        // Obtengo los demas idJornada para obtener los turnos de los otros usuarios
-        // para posteriormente chequear que no hayan dos turnos ocupados por otros usuarios ese mismo dia
-        List<Long> todosLosIdsDeLasDemasJornadas = jornadaLaboralRepository.findAll().stream()
-                .map(JornadaLaboral::getIdJornada)
-                .filter(ids -> !(ids.equals(jornadaId)))
-                .collect(Collectors.toList());
-        List<TurnoNormal> turnosNormalesDeLosDemasUsuarios = new ArrayList<>();
-        List<TurnoExtra> turnosExtrasDeLosDemasUsuarios = new ArrayList<>();
-        for (Long idDeOtraJornada : todosLosIdsDeLasDemasJornadas) {
-            turnosNormalesDeLosDemasUsuarios.addAll(turnoNormalService.getAllTurnosNormales(idDeOtraJornada));
-            turnosExtrasDeLosDemasUsuarios.addAll(turnoExtraService.getAllTurnosExtras(idDeOtraJornada));
-        }
-        List<Turno> castTurnosActualesDeLosDemasUsuarios = turnosService.casteoDeTurnosNormales(turnosNormalesDeLosDemasUsuarios);
-        castTurnosActualesDeLosDemasUsuarios.addAll(turnosService.casteoDeTurnosNormales(turnosNormalesDeLosDemasUsuarios));
+        // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados al tipo Turno
+        List<Turno> turnosActualesDelUsuario = turnosService.getAllTurnosDelUsuario(jornadaId);
+
+        // Obtengo los turnos de los demas usuarios
+        List<Turno> turnosActualesDeLosDemasUsuarios = turnosService.getAllTurnosDeLosDemasUsuarios(jornadaId);
 
         // Casteo el turno normal nuevo a Turno
         Turno turnoNuevo = turnosService.casteoDeTurnoExtra(turnoExtraRequest);
 
         // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
-        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(castTurnosActuales, castTurnosActualesDeLosDemasUsuarios, turnoNuevo, turnosExtrasActuales, new ArrayList<TurnoNormal>());
+        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo, turnosExtrasActuales, new ArrayList<>());
         if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)){
             try {
-                int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(castTurnosActuales, turnoNuevo) + turnoNuevo.getCantHoras();
+                int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActualesDelUsuario, turnoNuevo) + turnoNuevo.getCantHoras();
                 TurnoExtra castTurnoExtra = turnosService.casteoDeRequestATurnoExtra(turnoExtraRequest);
                 turnoExtraService.saveTurnoExtra(jornadaId, castTurnoExtra);
                 String mensajeResponse = "Los datos del turno extra se guardaron con exito!";
-                if (cantidadDeHorasQueQuedarian < 30) {
+                if (cantidadDeHorasQueQuedarian < cantMinHsDeJornadaSemanal) {
                     mensajeResponse += " Aun necesita cargar mas hs para llegar a las 30hs minimas de esa semana";
                 }
                 return ResponseEntity
@@ -265,38 +232,26 @@ public class JornadaLaboralController {
     @PutMapping("/save/extra/{idJornada}/{idTurnoNormal}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> updateTurnoExtra(@Valid @RequestBody TurnoExtraRequest turnoExtraRequest, @PathVariable("idJornada") Long jornadaId, @PathVariable("idTurnoNormal") Long turnoExtraId) {
-        // Debo castear los turnos extras a turno ya que el service controlador de semanas solo
+        // Debo castear los turnos normales y extras a turno ya que el service ControladorDeSemanas solo
         // trabaja con el tipo Turno
 
-        // Obtengo todos los turnos de la jornada del usuario para castearlos a Turno
-        List<TurnoNormal> turnosActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
+        // Obtengo todos los turnos normales del usuario
         List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
-        List<Turno> castTurnosActuales = turnosService.casteoDeTurnosNormales(turnosActuales);
-        castTurnosActuales.addAll(turnosService.casteoDeTurnosExtras(turnosExtrasActuales));
 
-        // Obtengo los demas idJornada para obtener los turnos de los otros usuarios
-        // para posteriormente chequear que no hayan dos turnos ocupados por otros usuarios ese mismo dia
-        List<Long> todosLosIdsDeLasDemasJornadas = jornadaLaboralRepository.findAll().stream()
-                .map(JornadaLaboral::getIdJornada)
-                .filter(ids -> !(ids.equals(jornadaId)))
-                .collect(Collectors.toList());
-        List<TurnoNormal> turnosNormalesDeLosDemasUsuarios = new ArrayList<>();
-        List<TurnoExtra> turnosExtrasDeLosDemasUsuarios = new ArrayList<>();
-        for (Long idDeOtraJornada : todosLosIdsDeLasDemasJornadas) {
-            turnosNormalesDeLosDemasUsuarios.addAll(turnoNormalService.getAllTurnosNormales(idDeOtraJornada));
-            turnosExtrasDeLosDemasUsuarios.addAll(turnoExtraService.getAllTurnosExtras(idDeOtraJornada));
-        }
-        List<Turno> castTurnosActualesDeLosDemasUsuarios = turnosService.casteoDeTurnosNormales(turnosNormalesDeLosDemasUsuarios);
-        castTurnosActualesDeLosDemasUsuarios.addAll(turnosService.casteoDeTurnosNormales(turnosNormalesDeLosDemasUsuarios));
+        // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados al tipo Turno
+        List<Turno> turnosActualesDelUsuario = turnosService.getAllTurnosDelUsuario(jornadaId);
+
+        // Obtengo los turnos de los demas usuarios
+        List<Turno> turnosActualesDeLosDemasUsuarios = turnosService.getAllTurnosDeLosDemasUsuarios(jornadaId);
 
         // Casteo el turno normal nuevo a Turno
         Turno turnoNuevo = turnosService.casteoDeTurnoExtra(turnoExtraRequest);
 
         // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
-        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(castTurnosActuales, castTurnosActualesDeLosDemasUsuarios, turnoNuevo, turnosExtrasActuales, new ArrayList<TurnoNormal>());
+        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo, turnosExtrasActuales, new ArrayList<>());
         if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)){
             try {
-                int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(castTurnosActuales, turnoNuevo) + turnoNuevo.getCantHoras();
+                int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActualesDelUsuario, turnoNuevo) + turnoNuevo.getCantHoras();
                 TurnoExtra castTurnoExtra = turnosService.casteoDeRequestATurnoExtra(turnoExtraRequest);
                 turnoExtraService.saveTurnoExtra(jornadaId, turnoExtraId, castTurnoExtra);
                 String mensajeResponse = "Los datos del turno extra se guardaron con exito!";
@@ -362,4 +317,14 @@ public class JornadaLaboralController {
                     .body(new MessageResponse("Error: Ups ucurrio algo al intentar borrar el turno extra!"));
         }
     }
+
+    @PostMapping("/save/libre/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> saveDiaLibre(@Valid @RequestBody DiaLibreRequest DiaLibreRequest, @PathVariable("id") Long jornadaId) {
+        return ResponseEntity
+                .ok()
+                .body(new MessageResponse(""));
+    }
+
+
 }

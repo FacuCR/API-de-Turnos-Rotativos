@@ -18,4 +18,6 @@ public interface ITurnosService {
     Turno casteoDeTurnoExtra(TurnoExtraRequest turnoExtra);
     TurnoExtra casteoDeRequestATurnoExtra(TurnoExtraRequest TurnoExtraRequest);
     ResponseEntity<MessageResponse> controlarRequsitosDelTurno(List<Turno> turnosActuales, List<Turno> turnosNormalesActualesDeLosDemasUsuarios, Turno turnoNuevo, List<TurnoExtra> turnosExtras, List<TurnoNormal> turnosNormales);
+    List<Turno> getAllTurnosDelUsuario(Long jornadaId);
+    List<Turno> getAllTurnosDeLosDemasUsuarios(Long jornadaId);
 }

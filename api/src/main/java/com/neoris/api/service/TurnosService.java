@@ -1,11 +1,13 @@
 package com.neoris.api.service;
 
+import com.neoris.api.entity.JornadaLaboral;
 import com.neoris.api.entity.TurnoExtra;
 import com.neoris.api.entity.TurnoNormal;
 import com.neoris.api.model.Turno;
 import com.neoris.api.payload.request.TurnoExtraRequest;
 import com.neoris.api.payload.request.TurnoNormalRequest;
 import com.neoris.api.payload.response.MessageResponse;
+import com.neoris.api.repository.JornadaLaboralRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +18,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 @Service
+// Habia pensado en agregarle metodos a la clase Turno, pero como necesitaba inyectar otros servicios
+// opte por crear un service para todos los turnos en general
 public class TurnosService implements ITurnosService{
     @Autowired
     private ControladorDeSemanas controladorDeSemanas;
+    @Autowired
+    private ITurnoNormalService turnoNormalService;
+    @Autowired
+    private ITurnoExtraService turnoExtraService;
+    @Autowired
+    private JornadaLaboralRepository jornadaLaboralRepository;
     private final int cantMaxHsDeJornadaSemanal = 48;
 
     @Override
@@ -143,5 +154,34 @@ public class TurnosService implements ITurnosService{
         return ResponseEntity
                 .ok()
                 .body(new MessageResponse(("")));
+    }
+
+    @Override
+    // Obtengo todos los turnos de la jornada del usuario para castearlos a Turno
+    public List<Turno> getAllTurnosDelUsuario(Long jornadaId) {
+        List<TurnoNormal> turnosActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
+        List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
+        List<Turno> castTurnosActuales = casteoDeTurnosNormales(turnosActuales);
+        castTurnosActuales.addAll(casteoDeTurnosExtras(turnosExtrasActuales));
+        return castTurnosActuales;
+    }
+
+    @Override
+    // Obtengo los demas idJornada para obtener los turnos de los otros usuarios(sacando la jornada del usuario actual)
+    // para posteriormente chequear que no hayan dos turnos ocupados por otros usuarios ese mismo dia
+    public List<Turno> getAllTurnosDeLosDemasUsuarios(Long jornadaId) {
+        List<Long> todosLosIdsDeLasDemasJornadas = jornadaLaboralRepository.findAll().stream()
+                .map(JornadaLaboral::getIdJornada)
+                .filter(ids -> !(ids.equals(jornadaId)))
+                .collect(Collectors.toList());
+        List<TurnoNormal> turnosNormalesDeLosDemasUsuarios = new ArrayList<>();
+        List<TurnoExtra> turnosExtrasDeLosDemasUsuarios = new ArrayList<>();
+        for (Long idDeOtraJornada : todosLosIdsDeLasDemasJornadas) {
+            turnosNormalesDeLosDemasUsuarios.addAll(turnoNormalService.getAllTurnosNormales(idDeOtraJornada));
+            turnosExtrasDeLosDemasUsuarios.addAll(turnoExtraService.getAllTurnosExtras(idDeOtraJornada));
+        }
+        List<Turno> castTurnosActualesDeLosDemasUsuarios = casteoDeTurnosNormales(turnosNormalesDeLosDemasUsuarios);
+        castTurnosActualesDeLosDemasUsuarios.addAll(casteoDeTurnosExtras(turnosExtrasDeLosDemasUsuarios));
+        return castTurnosActualesDeLosDemasUsuarios;
     }
 }

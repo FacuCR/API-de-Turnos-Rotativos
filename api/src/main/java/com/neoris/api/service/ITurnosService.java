@@ -1,5 +1,6 @@
 package com.neoris.api.service;
 
+import com.neoris.api.entity.DiaLibre;
 import com.neoris.api.entity.TurnoExtra;
 import com.neoris.api.entity.TurnoNormal;
 import com.neoris.api.model.Turno;
@@ -20,4 +21,5 @@ public interface ITurnosService {
     ResponseEntity<MessageResponse> controlarRequsitosDelTurno(List<Turno> turnosActuales, List<Turno> turnosNormalesActualesDeLosDemasUsuarios, Turno turnoNuevo, List<TurnoExtra> turnosExtras, List<TurnoNormal> turnosNormales);
     List<Turno> getAllTurnosDelUsuario(Long jornadaId);
     List<Turno> getAllTurnosDeLosDemasUsuarios(Long jornadaId);
+    ResponseEntity<MessageResponse> controlarRequisitosDeDiaLibre(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo);
 }

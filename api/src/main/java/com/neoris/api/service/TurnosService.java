@@ -1,5 +1,6 @@
 package com.neoris.api.service;
 
+import com.neoris.api.entity.DiaLibre;
 import com.neoris.api.entity.JornadaLaboral;
 import com.neoris.api.entity.TurnoExtra;
 import com.neoris.api.entity.TurnoNormal;
@@ -33,6 +34,7 @@ public class TurnosService implements ITurnosService{
     @Autowired
     private JornadaLaboralRepository jornadaLaboralRepository;
     private final int cantMaxHsDeJornadaSemanal = 48;
+    private final SimpleDateFormat df = new SimpleDateFormat("d 'de' MMMM 'de' yyyy", Locale.forLanguageTag("es-ES"));
 
     @Override
     public List<Turno> casteoDeTurnosNormales(List<TurnoNormal> turnosNormales) {
@@ -102,7 +104,6 @@ public class TurnosService implements ITurnosService{
         // Controlo que la fecha no sea de antes de la fecha actual
         Date fechaActual = new Date();
         if (turnoNuevo.getFecha().before(fechaActual)){
-            SimpleDateFormat df = new SimpleDateFormat("d 'de' MMMM 'de' yyyy", Locale.forLanguageTag("es-ES"));
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse("Error: No puedes viajar en el tiempo bro, la fecha de hoy es " + df.format(fechaActual) + " ingresa una fecha valida!"));
@@ -183,5 +184,34 @@ public class TurnosService implements ITurnosService{
         List<Turno> castTurnosActualesDeLosDemasUsuarios = casteoDeTurnosNormales(turnosNormalesDeLosDemasUsuarios);
         castTurnosActualesDeLosDemasUsuarios.addAll(casteoDeTurnosExtras(turnosExtrasDeLosDemasUsuarios));
         return castTurnosActualesDeLosDemasUsuarios;
+    }
+
+    @Override
+    public ResponseEntity<MessageResponse> controlarRequisitosDeDiaLibre(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo) {
+        // Controlo que la fecha no sea de antes de la fecha actual
+        Date fechaActual = new Date();
+        if (diaLibreNuevo.getFecha().before(fechaActual)){
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error: No puedes viajar en el tiempo bro, la fecha de hoy es " + df.format(fechaActual) + " ingresa una fecha valida!"));
+        }
+
+        // Controlo que no tenga un dia libre asignado ya en ese dia
+        if (!diasLibres.isEmpty() && controladorDeSemanas.isElMismoUsuarioConElMismoDiaLibre(diasLibres, diaLibreNuevo)){
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error: No se pudo guardar el dia libre por que ya tienes un dia libre asignado en ese fecha!"));
+        }
+
+        // Controlo que en la semana el usuario no tenga mas de 2 días libres.
+        if (!diasLibres.isEmpty() && controladorDeSemanas.isElMismoUsuarioConDosDiasLibresEnLaMismaSemana(diasLibres, diaLibreNuevo)) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error: No se pudo guardar el dia libre por que ya tienes dos dias libres asignado en ese semana!"));
+        }
+
+        return ResponseEntity
+                .ok()
+                .body(new MessageResponse(("")));
     }
 }

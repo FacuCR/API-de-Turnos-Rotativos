@@ -1,5 +1,6 @@
 package com.neoris.api.service;
 
+import com.neoris.api.entity.DiaLibre;
 import com.neoris.api.entity.TurnoExtra;
 import com.neoris.api.entity.TurnoNormal;
 import com.neoris.api.model.Turno;
@@ -20,4 +21,6 @@ public interface IControladorDeSemanas {
     boolean isMaxDeHorasDeJornadaLaboralSuperada(List<Turno> turnos, Turno turnoNuevo);
     boolean isTurnoExtraAsignadoEnEseDia(List<TurnoExtra> turnosExtras, Turno turnoExtra);
     boolean isTurnoNormalAsignadoEnEseDia(List<TurnoNormal> turnosNormales, Turno turnoNormal);
+    boolean isElMismoUsuarioConElMismoDiaLibre(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo);
+    boolean isElMismoUsuarioConDosDiasLibresEnLaMismaSemana(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo);
 }

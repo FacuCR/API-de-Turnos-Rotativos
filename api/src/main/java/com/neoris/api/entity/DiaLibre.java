@@ -17,7 +17,7 @@ import java.util.Date;
 public class DiaLibre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idTurnoNormal;
+    private Long idDiaLibre;
     private Date fecha;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "jornada_id", nullable = false)

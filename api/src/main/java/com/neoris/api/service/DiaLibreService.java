@@ -50,7 +50,7 @@ public class DiaLibreService implements IDiaLibreService{
     public boolean updateDiaLibre(Long jornadaId, Long diaLibreId, DiaLibre diaLibre) {
         try {
             diaLibre.setJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
-            diaLibre.setIdTurnoNormal(diaLibreId);
+            diaLibre.setIdDiaLibre(diaLibreId);
             diaLibreRepository.save(diaLibre);
             return true;
         } catch (Exception e) {

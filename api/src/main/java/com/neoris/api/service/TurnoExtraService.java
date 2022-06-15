@@ -38,7 +38,7 @@ public class TurnoExtraService implements ITurnoExtraService{
     public boolean saveTurnoExtra(Long jornadaId, Long turnoExtraId, TurnoExtra turnoExtra) {
         try {
             turnoExtra.setJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
-            turnoExtra.setIdTurnoNormal(turnoExtraId);
+            turnoExtra.setIdTurnoExtra(turnoExtraId);
             turnoExtraRepository.save(turnoExtra);
             return true;
         } catch (Exception e) {

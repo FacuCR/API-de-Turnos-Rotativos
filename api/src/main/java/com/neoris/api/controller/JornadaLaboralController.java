@@ -1,5 +1,6 @@
 package com.neoris.api.controller;
 
+import com.neoris.api.entity.DiaLibre;
 import com.neoris.api.entity.JornadaLaboral;
 import com.neoris.api.entity.TurnoExtra;
 import com.neoris.api.entity.TurnoNormal;
@@ -19,9 +20,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -190,7 +194,7 @@ public class JornadaLaboralController {
         // Debo castear los turnos normales y extras a turno ya que el service ControladorDeSemanas solo
         // trabaja con el tipo Turno
 
-        // Obtengo todos los turnos normales del usuario
+        // Obtengo todos los turnos extras del usuario
         List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
 
         // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados al tipo Turno
@@ -235,7 +239,7 @@ public class JornadaLaboralController {
         // Debo castear los turnos normales y extras a turno ya que el service ControladorDeSemanas solo
         // trabaja con el tipo Turno
 
-        // Obtengo todos los turnos normales del usuario
+        // Obtengo todos los turnos extras del usuario
         List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
 
         // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados al tipo Turno
@@ -320,10 +324,62 @@ public class JornadaLaboralController {
 
     @PostMapping("/save/libre/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> saveDiaLibre(@Valid @RequestBody DiaLibreRequest DiaLibreRequest, @PathVariable("id") Long jornadaId) {
-        return ResponseEntity
-                .ok()
-                .body(new MessageResponse(""));
+    public ResponseEntity<MessageResponse> saveDiaLibre(@Valid @RequestBody DiaLibreRequest diaLibreRequest, @PathVariable("id") Long jornadaId) {
+        // Obtengo todos los turnos(Normales y extras) por separado de la jornada del usuario
+        List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
+        List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
+
+        // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados a Turno
+        List<DiaLibre> diasLibresActualesDelUsuario = diaLibreService.getAllDiasLibres(jornadaId);
+
+        // Casteo el request a DiaLibre
+        DiaLibre diaLibreNuevo = new DiaLibre();
+        diaLibreNuevo.setFecha(diaLibreRequest.getFecha());
+
+        ResponseEntity<MessageResponse> controlarRequisitosDeDiaLibre = turnosService.controlarRequisitosDeDiaLibre(diasLibresActualesDelUsuario, diaLibreNuevo);
+        if (controlarRequisitosDeDiaLibre.getStatusCode().equals(HttpStatus.OK)) {
+            try {
+                // Busco si hay un turno normal y/o extra ese dia para borrarlo
+                String mensajeDeSeBorroAlgunTurno = "";
+                Stream<TurnoNormal> turnosNormalesActualesStream = turnosNormalesActuales.stream();
+                boolean isTurnoEnEseDia = turnosNormalesActualesStream.filter(turno -> turno.getFecha().compareTo(diaLibreRequest.getFecha()) == 0).findAny().isPresent();
+                if (isTurnoEnEseDia) {
+                    Long idTurnoNormalDeEseDia = turnosNormalesActualesStream
+                            .filter(turno -> turno.getFecha().compareTo(diaLibreRequest.getFecha()) == 0)
+                            .map(TurnoNormal::getIdTurnoNormal)
+                            .findFirst().orElse(null);
+                    turnoNormalService.deleteTurnoNormal(idTurnoNormalDeEseDia);
+                    mensajeDeSeBorroAlgunTurno = " y los turnos de ese dia se borraron";
+                }
+                turnosNormalesActualesStream.close();
+
+                Stream<TurnoExtra> turnosExtrasActualesStream = turnosExtrasActuales.stream();
+                isTurnoEnEseDia = turnosExtrasActualesStream.filter(turno -> turno.getFecha().compareTo(diaLibreRequest.getFecha()) == 0).findAny().isPresent();
+                if (isTurnoEnEseDia) {
+                    Long idTurnoExtraDeEseDia = turnosExtrasActuales.stream()
+                            .filter(turno -> turno.getFecha().compareTo(diaLibreRequest.getFecha()) == 0)
+                            .map(TurnoExtra::getIdTurnoExtra)
+                            .findFirst().orElse(null);
+                    turnoExtraService.deleteTurnoExtra(idTurnoExtraDeEseDia);
+                    mensajeDeSeBorroAlgunTurno = " y los turnos de ese dia se borraron";
+                }
+
+                // Guardo el DiaLibre
+                diaLibreService.saveDiaLibre(jornadaId, diaLibreNuevo);
+
+                SimpleDateFormat df = new SimpleDateFormat("d 'de' MMMM 'de' yyyy", Locale.forLanguageTag("es-ES"));
+                return ResponseEntity
+                        .ok()
+                        .body(new MessageResponse("El dia libre se asigno para la fecha: " + df.format(diaLibreNuevo.getFecha()) + " correctamente" + mensajeDeSeBorroAlgunTurno));
+            } catch (Exception e) {
+                logger.error("Error: No se pudo asignar el dia libre! {}", e);
+                return ResponseEntity
+                        .status(HttpStatus.EXPECTATION_FAILED)
+                        .body(new MessageResponse("Error: Ups ucurrio algo al intentar asignar el dia libre!"));
+            }
+        } else {
+            return  controlarRequisitosDeDiaLibre;
+        }
     }
 
 

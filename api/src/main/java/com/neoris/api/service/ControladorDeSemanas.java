@@ -1,5 +1,6 @@
 package com.neoris.api.service;
 
+import com.neoris.api.entity.DiaLibre;
 import com.neoris.api.entity.TurnoExtra;
 import com.neoris.api.entity.TurnoNormal;
 import com.neoris.api.model.Turno;
@@ -18,7 +19,7 @@ import java.util.stream.Stream;
 @Service
 public class ControladorDeSemanas implements IControladorDeSemanas{
     private static final Logger logger = LoggerFactory.getLogger(ControladorDeSemanas.class);
-    private final ZoneId zoneId = ZoneId.of( "America/Buenos_Aires" );
+    private final ZoneId zoneId = ZoneId.of("America/Buenos_Aires" );
     private final int maxHorasDiarias = 12;
 
     @Override
@@ -30,7 +31,7 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
     @Override
     public int anioDeUnaFecha(Date fecha) {
         ZonedDateTime fechaElegida = ZonedDateTime.of(convertToLocalDateTimeViaSqlTimestamp(fecha), zoneId);
-        return fechaElegida.get ( IsoFields.WEEK_BASED_YEAR );
+        return fechaElegida.get (IsoFields.WEEK_BASED_YEAR );
     }
 
     @Override
@@ -76,7 +77,7 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
             // Si en la fecha nueva la lista de es semana tiene dos o mas (osea dos o mas dias libres en este caso)
             // el metodo retornara un false que luego usare para filtrar y no permitir al usuario
             // que agregue un dia libre mas en esa fecha
-            return semanasDelMismoAnio.size() < 2;
+            return !(semanasDelMismoAnio.size() < 2);
         } catch(Exception e) {
             logger.error("Ocurrio un error al comparar las fechas: {}", e);
             return  false;
@@ -104,7 +105,7 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
             boolean result = turnoStream
                     .filter(turno -> turno.getFecha().compareTo(turnoNuevo.getFecha()) == 0)
                     .filter(turno -> turno.getTurno().equals(turnoNuevo.getTurno()))
-                    .count() > 0;
+                    .findAny().isPresent();
             return  result;
         } catch(Exception e) {
             logger.error("Ocurrio un error al revisar si el turno esta completamente ocupado: {}", e);
@@ -133,7 +134,7 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
         try(Stream<TurnoExtra> turnosExtrasStream = turnosExtras.stream()) {
             boolean result = turnosExtrasStream
                     .filter(turno -> turno.getFecha().compareTo(turnoExtra.getFecha()) == 0)
-                    .count() > 0;
+                    .findAny().isPresent();
             return result;
         } catch (Exception e) {
             logger.error("Ocurrio un error al revisar si ya tiene un turno extra asignado: {}", e);
@@ -151,6 +152,30 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
         } catch (Exception e) {
             logger.error("Ocurrio un error al revisar si ya tiene un turno normal asignado: {}", e);
             return false;
+        }
+    }
+
+    @Override
+    public boolean isElMismoUsuarioConElMismoDiaLibre(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo) {
+        try(Stream<DiaLibre> diaslibresStream = diasLibres.stream()) {
+            boolean result = diaslibresStream
+                    .filter(diaLibre -> diaLibre.getFecha().compareTo(diaLibreNuevo.getFecha()) == 0)
+                    .findAny().isPresent();
+            return  result;
+        } catch(Exception e) {
+            logger.error("Ocurrio un error al revisar si el dia libre esta ocupado: {}", e);
+            return true;
+        }
+    }
+
+    @Override
+    public boolean isElMismoUsuarioConDosDiasLibresEnLaMismaSemana(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo) {
+        try(Stream<DiaLibre> diasLibresStream = diasLibres.stream()) {
+            List<Date> fechasDiasLibres = diasLibresStream.map(DiaLibre::getFecha).collect(Collectors.toList());
+            return dosVecesEnLaMismaSemana(fechasDiasLibres, diaLibreNuevo.getFecha());
+        } catch(Exception e) {
+            logger.error("Ocurrio un error al revisar si ya tiene dos dias libres esa semana: {}", e);
+            return  true;
         }
     }
 }

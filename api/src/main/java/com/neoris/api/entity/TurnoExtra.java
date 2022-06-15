@@ -18,7 +18,7 @@ import java.util.Date;
 public class TurnoExtra {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idTurnoNormal;
+    private Long idTurnoExtra;
     private Date fecha;
     @Enumerated(EnumType.STRING)
     private ETurno turno;

@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface IEmpleadoService {
     List<Empleado> getAllEmpleados();
-    boolean saveEmpleado(Empleado empleado, Long idUsuario);
+    void saveEmpleado(Empleado empleado, Long idUsuario);
     Empleado getEmpleadoById(Long id);
 }

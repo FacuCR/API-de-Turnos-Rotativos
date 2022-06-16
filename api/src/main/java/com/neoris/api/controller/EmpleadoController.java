@@ -23,7 +23,7 @@ public class EmpleadoController {
     private static final Logger logger = LoggerFactory.getLogger(EmpleadoController.class);
 
     @PostMapping("/save/{id}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> saveEmpleado(@Valid @RequestBody Empleado empleado, @PathVariable("id") Long idUsuario) {
         try {
             empleadoService.saveEmpleado(empleado, idUsuario);

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -220,6 +221,11 @@ public class TurnosService implements ITurnosService{
     }
 
     @Override
+    @Transactional // Como realizo varias operaciones sobre distintas tablas de la BD ya que en caso de error tengo
+    // que hacer un rollback y no guardar la informacion en ninguna de las tablas afectadas y en caso de que sea
+    // exitoso entonces debe hacer un commit de toda la transaccion guardando toda la informacion en todas las tablas
+    // afectadas
+
     // Busco si hay un turno normal y/o extra ese dia para borrarlo
     public String deleteAllTurnosDelDiaLibreElegido(DiaLibre diaLibreNuevo, List<TurnoNormal> turnosNormalesActuales, List<TurnoExtra> turnosExtrasActuales) {
         String mensajeDeSeBorroAlgunTurno = "";

@@ -9,6 +9,8 @@ import com.neoris.api.payload.request.TurnoExtraRequest;
 import com.neoris.api.payload.request.TurnoNormalRequest;
 import com.neoris.api.payload.response.MessageResponse;
 import com.neoris.api.repository.JornadaLaboralRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 // Habia pensado en agregarle metodos a la clase Turno, pero como necesitaba inyectar otros servicios
@@ -33,6 +36,7 @@ public class TurnosService implements ITurnosService{
     private ITurnoExtraService turnoExtraService;
     @Autowired
     private JornadaLaboralRepository jornadaLaboralRepository;
+    private static final Logger logger = LoggerFactory.getLogger(TurnosService.class);
     private final int cantMaxHsDeJornadaSemanal = 48;
     private final SimpleDateFormat df = new SimpleDateFormat("d 'de' MMMM 'de' yyyy", Locale.forLanguageTag("es-ES"));
 
@@ -213,5 +217,41 @@ public class TurnosService implements ITurnosService{
         return ResponseEntity
                 .ok()
                 .body(new MessageResponse(("")));
+    }
+
+    @Override
+    // Busco si hay un turno normal y/o extra ese dia para borrarlo
+    public String deleteAllTurnosDelDiaLibreElegido(DiaLibre diaLibreNuevo, List<TurnoNormal> turnosNormalesActuales, List<TurnoExtra> turnosExtrasActuales) {
+        String mensajeDeSeBorroAlgunTurno = "";
+        try {
+            Stream<TurnoNormal> turnosNormalesActualesStream = turnosNormalesActuales.stream();
+            boolean isTurnoEnEseDia = turnosNormalesActualesStream.filter(turno -> turno.getFecha().compareTo(diaLibreNuevo.getFecha()) == 0).findAny().isPresent();
+            if (isTurnoEnEseDia) {
+                Long idTurnoNormalDeEseDia = turnosNormalesActualesStream
+                        .filter(turno -> turno.getFecha().compareTo(diaLibreNuevo.getFecha()) == 0)
+                        .map(TurnoNormal::getIdTurnoNormal)
+                        .findFirst().orElse(null);
+                turnoNormalService.deleteTurnoNormal(idTurnoNormalDeEseDia);
+                mensajeDeSeBorroAlgunTurno = " y los turnos de ese dia se borraron";
+            }
+            turnosNormalesActualesStream.close();
+
+            Stream<TurnoExtra> turnosExtrasActualesStream = turnosExtrasActuales.stream();
+            isTurnoEnEseDia = turnosExtrasActualesStream.filter(turno -> turno.getFecha().compareTo(diaLibreNuevo.getFecha()) == 0).findAny().isPresent();
+            if (isTurnoEnEseDia) {
+                Long idTurnoExtraDeEseDia = turnosExtrasActuales.stream()
+                        .filter(turno -> turno.getFecha().compareTo(diaLibreNuevo.getFecha()) == 0)
+                        .map(TurnoExtra::getIdTurnoExtra)
+                        .findFirst().orElse(null);
+                turnoExtraService.deleteTurnoExtra(idTurnoExtraDeEseDia);
+                mensajeDeSeBorroAlgunTurno = " y los turnos de ese dia se borraron";
+            }
+            turnosExtrasActualesStream.close();
+
+            return mensajeDeSeBorroAlgunTurno;
+        } catch(Exception e) {
+            logger.error("Ocurrio un error al borrar los turnos del dia libre que se quiere asignar: {}", e);
+            return mensajeDeSeBorroAlgunTurno;
+        }
     }
 }

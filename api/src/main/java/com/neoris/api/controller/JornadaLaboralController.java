@@ -45,6 +45,7 @@ public class JornadaLaboralController {
     private IDiaLibreService diaLibreService;
     private static final Logger logger = LoggerFactory.getLogger(JornadaLaboralController.class);
     private final int cantMinHsDeJornadaSemanal = 30;
+    private final SimpleDateFormat df = new SimpleDateFormat("d 'de' MMMM 'de' yyyy", Locale.forLanguageTag("es-ES"));
 
     // ========== TURNOS NORMALES ========== //
 
@@ -181,7 +182,6 @@ public class JornadaLaboralController {
                     .body(new MessageResponse("Error: Ups ucurrio algo al intentar borrar el turno normal!"));
         }
     }
-
 
 
 
@@ -322,6 +322,10 @@ public class JornadaLaboralController {
         }
     }
 
+
+    // ========== DIAS LIBRES ========== //
+
+
     @PostMapping("/save/libre/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> saveDiaLibre(@Valid @RequestBody DiaLibreRequest diaLibreRequest, @PathVariable("id") Long jornadaId) {
@@ -340,34 +344,48 @@ public class JornadaLaboralController {
         if (controlarRequisitosDeDiaLibre.getStatusCode().equals(HttpStatus.OK)) {
             try {
                 // Busco si hay un turno normal y/o extra ese dia para borrarlo
-                String mensajeDeSeBorroAlgunTurno = "";
-                Stream<TurnoNormal> turnosNormalesActualesStream = turnosNormalesActuales.stream();
-                boolean isTurnoEnEseDia = turnosNormalesActualesStream.filter(turno -> turno.getFecha().compareTo(diaLibreRequest.getFecha()) == 0).findAny().isPresent();
-                if (isTurnoEnEseDia) {
-                    Long idTurnoNormalDeEseDia = turnosNormalesActualesStream
-                            .filter(turno -> turno.getFecha().compareTo(diaLibreRequest.getFecha()) == 0)
-                            .map(TurnoNormal::getIdTurnoNormal)
-                            .findFirst().orElse(null);
-                    turnoNormalService.deleteTurnoNormal(idTurnoNormalDeEseDia);
-                    mensajeDeSeBorroAlgunTurno = " y los turnos de ese dia se borraron";
-                }
-                turnosNormalesActualesStream.close();
-
-                Stream<TurnoExtra> turnosExtrasActualesStream = turnosExtrasActuales.stream();
-                isTurnoEnEseDia = turnosExtrasActualesStream.filter(turno -> turno.getFecha().compareTo(diaLibreRequest.getFecha()) == 0).findAny().isPresent();
-                if (isTurnoEnEseDia) {
-                    Long idTurnoExtraDeEseDia = turnosExtrasActuales.stream()
-                            .filter(turno -> turno.getFecha().compareTo(diaLibreRequest.getFecha()) == 0)
-                            .map(TurnoExtra::getIdTurnoExtra)
-                            .findFirst().orElse(null);
-                    turnoExtraService.deleteTurnoExtra(idTurnoExtraDeEseDia);
-                    mensajeDeSeBorroAlgunTurno = " y los turnos de ese dia se borraron";
-                }
+                String mensajeDeSeBorroAlgunTurno = turnosService.deleteAllTurnosDelDiaLibreElegido(diaLibreNuevo, turnosNormalesActuales, turnosExtrasActuales);
 
                 // Guardo el DiaLibre
                 diaLibreService.saveDiaLibre(jornadaId, diaLibreNuevo);
 
-                SimpleDateFormat df = new SimpleDateFormat("d 'de' MMMM 'de' yyyy", Locale.forLanguageTag("es-ES"));
+                return ResponseEntity
+                        .ok()
+                        .body(new MessageResponse("El dia libre se asigno para la fecha: " + df.format(diaLibreNuevo.getFecha()) + " correctamente" + mensajeDeSeBorroAlgunTurno));
+            } catch (Exception e) {
+                logger.error("Error: No se pudo asignar el dia libre! {}", e);
+                return ResponseEntity
+                        .status(HttpStatus.EXPECTATION_FAILED)
+                        .body(new MessageResponse("Error: Ups ucurrio algo al intentar asignar el dia libre!"));
+            }
+        } else {
+            return  controlarRequisitosDeDiaLibre;
+        }
+    }
+
+    @PutMapping("/save/libre/{jornadaId}/{diaLibreId}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> saveDiaLibre(@Valid @RequestBody DiaLibreRequest diaLibreRequest, @PathVariable("jornadaId") Long jornadaId, @PathVariable("diaLibreId") Long diaLibreId) {
+        // Obtengo todos los turnos(Normales y extras) por separado de la jornada del usuario
+        List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
+        List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
+
+        // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados a Turno
+        List<DiaLibre> diasLibresActualesDelUsuario = diaLibreService.getAllDiasLibres(jornadaId);
+
+        // Casteo el request a DiaLibre
+        DiaLibre diaLibreNuevo = new DiaLibre();
+        diaLibreNuevo.setFecha(diaLibreRequest.getFecha());
+
+        ResponseEntity<MessageResponse> controlarRequisitosDeDiaLibre = turnosService.controlarRequisitosDeDiaLibre(diasLibresActualesDelUsuario, diaLibreNuevo);
+        if (controlarRequisitosDeDiaLibre.getStatusCode().equals(HttpStatus.OK)) {
+            try {
+                // Busco si hay un turno normal y/o extra ese dia para borrarlo
+                String mensajeDeSeBorroAlgunTurno = turnosService.deleteAllTurnosDelDiaLibreElegido(diaLibreNuevo, turnosNormalesActuales, turnosExtrasActuales);
+
+                // Guardo el DiaLibre
+                diaLibreService.updateDiaLibre(jornadaId,  diaLibreId, diaLibreNuevo);
+
                 return ResponseEntity
                         .ok()
                         .body(new MessageResponse("El dia libre se asigno para la fecha: " + df.format(diaLibreNuevo.getFecha()) + " correctamente" + mensajeDeSeBorroAlgunTurno));

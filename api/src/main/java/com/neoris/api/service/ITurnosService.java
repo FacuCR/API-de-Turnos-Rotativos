@@ -22,4 +22,5 @@ public interface ITurnosService {
     List<Turno> getAllTurnosDelUsuario(Long jornadaId);
     List<Turno> getAllTurnosDeLosDemasUsuarios(Long jornadaId);
     ResponseEntity<MessageResponse> controlarRequisitosDeDiaLibre(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo);
+    String deleteAllTurnosDelDiaLibreElegido(DiaLibre diaLibreNuevo, List<TurnoNormal> turnosNormalesActuales, List<TurnoExtra> turnosExtrasActuales);
 }

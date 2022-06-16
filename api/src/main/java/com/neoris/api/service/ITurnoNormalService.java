@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface ITurnoNormalService {
     List<TurnoNormal> getAllTurnosNormales(Long jornadaId);
     Optional<TurnoNormal> getTurnoById(Long turnoNormalId);
-    boolean saveTurnoNormal(Long jornadaId, Long turnoNormalId, TurnoNormal turnoNormal);
-    boolean saveTurnoNormal(Long jornadaId, TurnoNormal turnoNormal);
-    boolean deleteTurnoNormal(Long idTurnoNormal);
+    void saveTurnoNormal(Long jornadaId, Long turnoNormalId, TurnoNormal turnoNormal);
+    void saveTurnoNormal(Long jornadaId, TurnoNormal turnoNormal);
+    void deleteTurnoNormal(Long idTurnoNormal);
 }

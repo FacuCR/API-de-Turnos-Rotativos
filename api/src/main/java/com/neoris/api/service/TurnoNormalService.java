@@ -35,36 +35,22 @@ public class TurnoNormalService implements ITurnoNormalService{
     }
 
     @Override
-    public boolean saveTurnoNormal(Long jornadaId, Long turnoNormalId, TurnoNormal turnoNormal) {
-        try {
-            turnoNormal.setJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
-            turnoNormal.setIdTurnoNormal(turnoNormalId);
-            turnoNormalRepository.save(turnoNormal);
-             return true;
-        } catch (Exception e) {
-            logger.error("No se pudo guardar el turno normal: {}", e);
-            return false;
-        }
+    public void saveTurnoNormal(Long jornadaId, Long turnoNormalId, TurnoNormal turnoNormal) {
+        turnoNormal.setJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
+        turnoNormal.setIdTurnoNormal(turnoNormalId);
+        turnoNormalRepository.save(turnoNormal);
     }
 
     @Override
-    public boolean saveTurnoNormal(Long jornadaId, TurnoNormal turnoNormal) {
-        try {
-            turnoNormal.setJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
-            turnoNormalRepository.save(turnoNormal);
-            return true;
-        } catch (Exception e) {
-            logger.error("No se pudo guardar el turno normal: {}", e);
-            return false;
-        }
+    public void saveTurnoNormal(Long jornadaId, TurnoNormal turnoNormal) {
+        turnoNormal.setJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
+        turnoNormalRepository.save(turnoNormal);
     }
 
     @Override
-    public boolean deleteTurnoNormal(Long idTurnoNormal) {
+    public void deleteTurnoNormal(Long idTurnoNormal) {
         if (turnoNormalRepository.existsById(idTurnoNormal)) {
             turnoNormalRepository.deleteById(idTurnoNormal);
-            return true;
         }
-        return false;
     }
 }

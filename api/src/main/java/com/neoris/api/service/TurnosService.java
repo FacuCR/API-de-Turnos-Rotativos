@@ -107,11 +107,11 @@ public class TurnosService implements ITurnosService{
     // Elegi controlar los requisitos desde un metodo para no duplicar tanto codigo ya  que lo utilizaba varias veces
     public ResponseEntity<MessageResponse> controlarRequsitosDelTurno(List<Turno> turnosActuales, List<Turno> turnosActualesDeLosDemasUsuarios, Turno turnoNuevo, List<TurnoExtra> turnosExtras, List<TurnoNormal> turnosNormales) {
         // Controlo que la fecha no sea de antes de la fecha actual
-        Date fechaActual = new Date();
-        if (turnoNuevo.getFecha().before(fechaActual)){
+        // Date fechaActual = new Date();
+        if (turnoNuevo.getFecha().before(new Date())){
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No puedes viajar en el tiempo bro, la fecha de hoy es " + df.format(fechaActual) + " ingresa una fecha valida!"));
+                    .body(new MessageResponse("Error: No puedes viajar en el tiempo bro, la fecha de hoy es " + df.format(new Date()) + " ingresa una fecha valida!"));
         }
 
         // Controlo que no se guarda en la misma jornada laboral el mismo turno
@@ -231,32 +231,23 @@ public class TurnosService implements ITurnosService{
         String mensajeDeSeBorroAlgunTurno = "";
         try {
             Stream<TurnoNormal> turnosNormalesActualesStream = turnosNormalesActuales.stream();
-            boolean isTurnoEnEseDia = turnosNormalesActualesStream.filter(turno -> turno.getFecha().compareTo(diaLibreNuevo.getFecha()) == 0).findAny().isPresent();
-            if (isTurnoEnEseDia) {
-                Long idTurnoNormalDeEseDia = turnosNormalesActualesStream
-                        .filter(turno -> turno.getFecha().compareTo(diaLibreNuevo.getFecha()) == 0)
-                        .map(TurnoNormal::getIdTurnoNormal)
-                        .findFirst().orElse(null);
-                turnoNormalService.deleteTurnoNormal(idTurnoNormalDeEseDia);
-                mensajeDeSeBorroAlgunTurno = " y los turnos de ese dia se borraron";
-            }
-            turnosNormalesActualesStream.close();
+            Long idTurnoNormalDeEseDia = turnosNormalesActualesStream
+                    .filter(turno -> turno.getFecha().compareTo(diaLibreNuevo.getFecha()) == 0)
+                    .map(TurnoNormal::getIdTurnoNormal)
+                    .findFirst().get();
+            turnoNormalService.deleteTurnoNormal(idTurnoNormalDeEseDia);
 
             Stream<TurnoExtra> turnosExtrasActualesStream = turnosExtrasActuales.stream();
-            isTurnoEnEseDia = turnosExtrasActualesStream.filter(turno -> turno.getFecha().compareTo(diaLibreNuevo.getFecha()) == 0).findAny().isPresent();
-            if (isTurnoEnEseDia) {
-                Long idTurnoExtraDeEseDia = turnosExtrasActuales.stream()
-                        .filter(turno -> turno.getFecha().compareTo(diaLibreNuevo.getFecha()) == 0)
-                        .map(TurnoExtra::getIdTurnoExtra)
-                        .findFirst().orElse(null);
-                turnoExtraService.deleteTurnoExtra(idTurnoExtraDeEseDia);
-                mensajeDeSeBorroAlgunTurno = " y los turnos de ese dia se borraron";
-            }
-            turnosExtrasActualesStream.close();
+            Long idTurnoExtraDeEseDia = turnosExtrasActuales.stream()
+                    .filter(turno -> turno.getFecha().compareTo(diaLibreNuevo.getFecha()) == 0)
+                    .map(TurnoExtra::getIdTurnoExtra)
+                    .findFirst().get();
+            turnoExtraService.deleteTurnoExtra(idTurnoExtraDeEseDia);
+            mensajeDeSeBorroAlgunTurno = " y los turnos de ese dia se borraron";
 
-            return mensajeDeSeBorroAlgunTurno;
         } catch(Exception e) {
             logger.error("Ocurrio un error al borrar los turnos del dia libre que se quiere asignar: {}", e);
+        } finally {
             return mensajeDeSeBorroAlgunTurno;
         }
     }

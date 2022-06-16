@@ -302,14 +302,10 @@ public class JornadaLaboralController {
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> deleteTurnoExtra(@PathVariable("id") Long idTurnoExtra){
         try {
-            if(turnoExtraService.deleteTurnoExtra(idTurnoExtra))
-                return ResponseEntity
-                        .ok()
-                        .body(new MessageResponse("El turno se elimino correctamente!"));
-            else
-                return ResponseEntity
-                        .status(HttpStatus.NOT_MODIFIED)
-                        .body(new MessageResponse("Error: Ups ocurrio algo al intentar borrar el turno extra!"));
+            turnoExtraService.deleteTurnoExtra(idTurnoExtra);
+            return ResponseEntity
+                    .ok()
+                    .body(new MessageResponse("El turno se elimino correctamente!"));
         } catch (Exception e) {
             logger.error("Error: No se pudo borrar el turno normal! {}", e);
             return ResponseEntity

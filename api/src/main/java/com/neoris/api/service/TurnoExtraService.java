@@ -3,8 +3,6 @@ package com.neoris.api.service;
 import com.neoris.api.entity.TurnoExtra;
 import com.neoris.api.repository.JornadaLaboralRepository;
 import com.neoris.api.repository.TurnoExtraRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,16 +15,10 @@ public class TurnoExtraService implements ITurnoExtraService{
     private TurnoExtraRepository turnoExtraRepository;
     @Autowired
     private JornadaLaboralRepository jornadaLaboralRepository;
-    private static final Logger logger = LoggerFactory.getLogger(TurnoNormalService.class);
 
     @Override
     public List<TurnoExtra> getAllTurnosExtras(Long jornadaId) {
-        try {
-            return turnoExtraRepository.findAllByJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
-        } catch (Exception e) {
-            logger.error("No se pudo acceder a los turnos extras de este usuario: {}", e);
-            return null;
-        }
+        return turnoExtraRepository.findAllByJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
     }
 
     @Override
@@ -35,36 +27,22 @@ public class TurnoExtraService implements ITurnoExtraService{
     }
 
     @Override
-    public boolean saveTurnoExtra(Long jornadaId, Long turnoExtraId, TurnoExtra turnoExtra) {
-        try {
-            turnoExtra.setJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
-            turnoExtra.setIdTurnoExtra(turnoExtraId);
-            turnoExtraRepository.save(turnoExtra);
-            return true;
-        } catch (Exception e) {
-            logger.error("No se pudo guardar el turno extra: {}", e);
-            return false;
-        }
+    public void saveTurnoExtra(Long jornadaId, Long turnoExtraId, TurnoExtra turnoExtra) {
+        turnoExtra.setJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
+        turnoExtra.setIdTurnoExtra(turnoExtraId);
+        turnoExtraRepository.save(turnoExtra);
     }
 
     @Override
-    public boolean saveTurnoExtra(Long jornadaId, TurnoExtra turnoExtra) {
-        try {
-            turnoExtra.setJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
-            turnoExtraRepository.save(turnoExtra);
-            return true;
-        } catch (Exception e) {
-            logger.error("No se pudo guardar el turno extra: {}", e);
-            return false;
-        }
+    public void saveTurnoExtra(Long jornadaId, TurnoExtra turnoExtra) {
+        turnoExtra.setJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
+        turnoExtraRepository.save(turnoExtra);
     }
 
     @Override
-    public boolean deleteTurnoExtra(Long idTurnoExtra) {
+    public void deleteTurnoExtra(Long idTurnoExtra) {
         if (turnoExtraRepository.existsById(idTurnoExtra)) {
             turnoExtraRepository.deleteById(idTurnoExtra);
-            return true;
         }
-        return false;
     }
 }

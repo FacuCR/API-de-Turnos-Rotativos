@@ -104,8 +104,36 @@ public class TurnosService implements ITurnosService{
     }
 
     @Override
+    public ResponseEntity<MessageResponse> controlarRequisitosDelTurnoNormal(List<TurnoNormal> turnosNormales, Turno turnoNuevo) {
+        // Controlo que no tenga un turno normal asignado ya en ese dia
+        if (!turnosNormales.isEmpty() && controladorDeSemanas.isTurnoNormalAsignadoEnEseDia(turnosNormales, turnoNuevo)){
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error: No se pudo guardar el turno normal por que ya tienes un turno normal asignado ese dia!"));
+        }
+
+        return ResponseEntity
+                .ok()
+                .body(new MessageResponse(("")));
+    }
+
+    @Override
+    public ResponseEntity<MessageResponse> controlarRequisitosDelTurnoExtra(List<TurnoExtra> turnosExtras, Turno turnoNuevo) {
+        // Controlo que no tenga un turno extra asignado ya en ese dia
+        if (!turnosExtras.isEmpty() && controladorDeSemanas.isTurnoExtraAsignadoEnEseDia(turnosExtras, turnoNuevo)){
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error: No se pudo guardar el turno extra por que ya tienes un turno extra asignado ese dia!"));
+        }
+
+        return ResponseEntity
+                .ok()
+                .body(new MessageResponse(("")));
+    }
+
+    @Override
     // Elegi controlar los requisitos desde un metodo para no duplicar tanto codigo ya  que lo utilizaba varias veces
-    public ResponseEntity<MessageResponse> controlarRequsitosDelTurno(List<Turno> turnosActuales, List<Turno> turnosActualesDeLosDemasUsuarios, Turno turnoNuevo, List<TurnoExtra> turnosExtras, List<TurnoNormal> turnosNormales) {
+    public ResponseEntity<MessageResponse> controlarRequsitosDelTurno(List<Turno> turnosActuales, List<Turno> turnosActualesDeLosDemasUsuarios, Turno turnoNuevo) {
         // Controlo que la fecha no sea de antes de la fecha actual
         // Date fechaActual = new Date();
         if (turnoNuevo.getFecha().before(new Date())){
@@ -119,20 +147,6 @@ public class TurnosService implements ITurnosService{
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse("Error: No se pudo guardar los datos del turno por que ya tienes un " + turnoNuevo.getTurno() + " asignado ese dia!"));
-        }
-
-        // Controlo que no tenga un turno extra asignado ya en ese dia
-        if (!turnosExtras.isEmpty() && controladorDeSemanas.isTurnoExtraAsignadoEnEseDia(turnosExtras, turnoNuevo)){
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No se pudo guardar el turno extra por que ya tienes un turno extra asignado ese dia!"));
-        }
-
-        // Controlo que no tenga un turno normal asignado ya en ese dia
-        if (!turnosNormales.isEmpty() && controladorDeSemanas.isTurnoNormalAsignadoEnEseDia(turnosNormales, turnoNuevo)){
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No se pudo guardar el turno normal por que ya tienes un turno normal asignado ese dia!"));
         }
 
         int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActuales, turnoNuevo) + turnoNuevo.getCantHoras();

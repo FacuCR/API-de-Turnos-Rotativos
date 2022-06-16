@@ -68,7 +68,7 @@ public class JornadaLaboralController {
         Turno turnoNuevo = turnosService.casteoDeTurnoNormal(turnoNormalRequest);
 
         // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
-        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo);
+        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo, jornadaId);
         if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)){
             controlarRequisitosDelTurno = turnosService.controlarRequisitosDelTurnoNormal(turnosNormalesActuales, turnoNuevo);
             if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)) {
@@ -118,7 +118,7 @@ public class JornadaLaboralController {
         Turno turnoNuevo = turnosService.casteoDeTurnoNormal(turnoNormalRequest);
 
         // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
-        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo);
+        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo, jornadaId);
         if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)){
             controlarRequisitosDelTurno = turnosService.controlarRequisitosDelTurnoNormal(turnosNormalesActuales, turnoNuevo);
             if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)) {
@@ -213,7 +213,7 @@ public class JornadaLaboralController {
         Turno turnoNuevo = turnosService.casteoDeTurnoExtra(turnoExtraRequest);
 
         // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
-        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo);
+        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo, jornadaId);
         if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)){
             controlarRequisitosDelTurno = turnosService.controlarRequisitosDelTurnoExtra(turnosExtrasActuales, turnoNuevo);
             if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)) {
@@ -263,7 +263,7 @@ public class JornadaLaboralController {
         Turno turnoNuevo = turnosService.casteoDeTurnoExtra(turnoExtraRequest);
 
         // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
-        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo);
+        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo, jornadaId);
         if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)){
             controlarRequisitosDelTurno = turnosService.controlarRequisitosDelTurnoExtra(turnosExtrasActuales, turnoNuevo);
             if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)) {

@@ -4,6 +4,7 @@ import com.neoris.api.entity.DiaLibre;
 import com.neoris.api.entity.TurnoExtra;
 import com.neoris.api.entity.TurnoNormal;
 import com.neoris.api.model.Turno;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,6 +23,8 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
     // el ZoneId de Buenos Aires:
     private final ZoneId zoneId = ZoneId.of("America/Buenos_Aires" );
     private final int maxHorasDiarias = 12;
+    @Autowired
+    private IDiaLibreService diaLibreService;
 
     @Override
     // Obtengo el numero de la semana del año
@@ -162,5 +165,13 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
         Stream<DiaLibre> diasLibresStream = diasLibres.stream();
         List<Date> fechasDiasLibres = diasLibresStream.map(DiaLibre::getFecha).collect(Collectors.toList());
         return dosVecesEnLaMismaSemana(fechasDiasLibres, diaLibreNuevo.getFecha());
+    }
+
+    @Override
+    // Comprobar si hay un dia libre que coincide con la fecha, lo uso para mandarle la fecha del turno a agregar
+    // y revisar si hay un dia libre en esa fecha
+    public boolean isDiaLibre(Date fecha, Long jornadaId) {
+        Stream<DiaLibre> todosLosDiasLibres = diaLibreService.getAllDiasLibres(jornadaId).stream();
+        return todosLosDiasLibres.filter(dia -> dia.getFecha().compareTo(fecha) == 0).findAny().isPresent();
     }
 }

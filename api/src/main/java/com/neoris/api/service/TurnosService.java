@@ -133,13 +133,19 @@ public class TurnosService implements ITurnosService{
 
     @Override
     // Elegi controlar los requisitos desde un metodo para no duplicar tanto codigo ya  que lo utilizaba varias veces
-    public ResponseEntity<MessageResponse> controlarRequsitosDelTurno(List<Turno> turnosActuales, List<Turno> turnosActualesDeLosDemasUsuarios, Turno turnoNuevo) {
+    public ResponseEntity<MessageResponse> controlarRequsitosDelTurno(List<Turno> turnosActuales, List<Turno> turnosActualesDeLosDemasUsuarios, Turno turnoNuevo, Long jornadaId) {
         // Controlo que la fecha no sea de antes de la fecha actual
         // Date fechaActual = new Date();
         if (turnoNuevo.getFecha().before(new Date())){
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse("Error: No puedes viajar en el tiempo bro, la fecha de hoy es " + df.format(new Date()) + " ingresa una fecha valida!"));
+        }
+
+        if (controladorDeSemanas.isDiaLibre(turnoNuevo.getFecha(), jornadaId)) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error: No se pudo guardar los datos del turno por que hay un dia libre asignado el " + df.format(turnoNuevo.getFecha()) + "!"));
         }
 
         // Controlo que no se guarda en la misma jornada laboral el mismo turno

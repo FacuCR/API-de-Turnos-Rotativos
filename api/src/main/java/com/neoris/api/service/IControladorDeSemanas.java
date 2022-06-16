@@ -23,4 +23,5 @@ public interface IControladorDeSemanas {
     boolean isTurnoNormalAsignadoEnEseDia(List<TurnoNormal> turnosNormales, Turno turnoNormal);
     boolean isElMismoUsuarioConElMismoDiaLibre(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo);
     boolean isElMismoUsuarioConDosDiasLibresEnLaMismaSemana(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo);
+    boolean isDiaLibre(Date fecha, Long jornadaId);
 }

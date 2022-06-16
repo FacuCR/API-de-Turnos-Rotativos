@@ -3,8 +3,6 @@ package com.neoris.api.service;
 import com.neoris.api.entity.Empleado;
 import com.neoris.api.entity.Usuario;
 import com.neoris.api.repository.UsuarioRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,22 +16,14 @@ import java.util.stream.Stream;
 public class EmpleadoService implements IEmpleadoService{
     @Autowired
     private UsuarioRepository usuarioRepository;
-    private static final Logger logger = LoggerFactory.getLogger(EmpleadoService.class);
 
     @Override
     public List<Empleado> getAllEmpleados() {
-        List<Empleado> empleados = null;
-
-        try(Stream<Usuario> usuarioStream = usuarioRepository.findAll().stream()) {
-            empleados = usuarioStream
-                    .filter(user -> !Objects.isNull(user.getEmpleado()))
-                    .map(user -> new Empleado(user.getEmpleado().getNombre(), user.getEmpleado().getApellido()))
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            logger.error("No se pudo acceder a los empleados: {}", e);
-        }
-
-        return empleados;
+        Stream<Usuario> usuarioStream = usuarioRepository.findAll().stream();
+        return usuarioStream
+                .filter(user -> !Objects.isNull(user.getEmpleado())) // Cuando se crea el usuario sus nombres estan vacios y por eso los filtro
+                .map(user -> new Empleado(user.getEmpleado().getNombre(), user.getEmpleado().getApellido())) // Lo mapeo a tipo Empleado
+                .collect(Collectors.toList());
     }
 
     @Override

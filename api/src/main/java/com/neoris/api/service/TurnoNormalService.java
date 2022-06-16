@@ -1,6 +1,7 @@
 package com.neoris.api.service;
 
 import com.neoris.api.entity.TurnoNormal;
+import com.neoris.api.exception.TurnoException;
 import com.neoris.api.repository.JornadaLaboralRepository;
 import com.neoris.api.repository.TurnoNormalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,22 +28,32 @@ public class TurnoNormalService implements ITurnoNormalService{
     }
 
     @Override
-    public void saveTurnoNormal(Long jornadaId, Long turnoNormalId, TurnoNormal turnoNormal) {
-        turnoNormal.setJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
-        turnoNormal.setIdTurnoNormal(turnoNormalId);
-        turnoNormalRepository.save(turnoNormal);
+    public void saveTurnoNormal(Long jornadaId, Long turnoNormalId, TurnoNormal turnoNormal) throws TurnoException {
+        if (jornadaLaboralRepository.existsById(jornadaId)) {
+            turnoNormal.setJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
+            turnoNormal.setIdTurnoNormal(turnoNormalId);
+            turnoNormalRepository.save(turnoNormal);
+        } else {
+            throw new TurnoException("El id del usuario no se encontro por lo tanto no se pudo guardar el turno normal");
+        }
     }
 
     @Override
-    public void saveTurnoNormal(Long jornadaId, TurnoNormal turnoNormal) {
-        turnoNormal.setJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
-        turnoNormalRepository.save(turnoNormal);
+    public void saveTurnoNormal(Long jornadaId, TurnoNormal turnoNormal) throws TurnoException {
+        if (jornadaLaboralRepository.existsById(jornadaId)) {
+            turnoNormal.setJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
+            turnoNormalRepository.save(turnoNormal);
+        } else {
+            throw new TurnoException("El id del usuario no se encontro por lo tanto no se pudo guardar el turno normal");
+        }
     }
 
     @Override
-    public void deleteTurnoNormal(Long idTurnoNormal) {
+    public void deleteTurnoNormal(Long idTurnoNormal) throws TurnoException {
         if (turnoNormalRepository.existsById(idTurnoNormal)) {
             turnoNormalRepository.deleteById(idTurnoNormal);
+        } else {
+            throw new TurnoException("El id del usuario no se encontro por lo tanto no se pudo borrar el turno normal");
         }
     }
 }

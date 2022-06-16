@@ -1,7 +1,7 @@
 package com.neoris.api.security;
 
-import com.neoris.api.security.jwt.AuthEntryPointJwt;
-import com.neoris.api.security.jwt.AuthTokenFilter;
+import com.neoris.api.security.services.jwt.AuthEntryPointJwt;
+import com.neoris.api.security.services.jwt.AuthTokenFilter;
 import com.neoris.api.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -52,6 +52,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.cors().and().csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                // Los end points que se permiten sin autorizacion
+                // Luego les doy sseguridad con la anotacion @PreAuthorize
                 .authorizeRequests().antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
                 .antMatchers("/api/test/**").permitAll()

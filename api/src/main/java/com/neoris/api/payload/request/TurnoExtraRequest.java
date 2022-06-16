@@ -14,7 +14,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class TurnoExtraRequest {
-    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="dd/MM/yyyy")
+    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="dd/MM/yyyy", timezone = "America/Buenos_Aires")
     private Date fecha;
     @Enumerated(EnumType.STRING)
     private ETurno turno;

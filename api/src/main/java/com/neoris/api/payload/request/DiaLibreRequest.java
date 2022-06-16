@@ -9,6 +9,6 @@ import java.util.Date;
 @Getter
 @Setter
 public class DiaLibreRequest {
-    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="dd/MM/yyyy")
+    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="dd/MM/yyyy", timezone = "America/Buenos_Aires")
     private Date fecha;
 }

@@ -19,31 +19,45 @@ import java.util.stream.Stream;
 @Service
 public class ControladorDeSemanas implements IControladorDeSemanas{
     private static final Logger logger = LoggerFactory.getLogger(ControladorDeSemanas.class);
+    // ZonedDateTime se utiliza cuando queremos trabajar con fechas y tiempo pero agrega el factor de las zonas horarias,
+    // para esto utiliza un ZoneId el cual es un identificador para diferentes zonas, el siguiente código obtiene
+    // el ZoneId de Buenos Aires:
     private final ZoneId zoneId = ZoneId.of("America/Buenos_Aires" );
     private final int maxHorasDiarias = 12;
 
     @Override
+    // Obtengo el numero de la semana del año
+    // por ej: 04/01/2022 es la Semana 1 del año
+    // 04/04/2022 seria la Semana 14 del año
     public int semanaDelAnio(Date fecha) {
         ZonedDateTime fechaElegida = ZonedDateTime.of(convertToLocalDateTimeViaSqlTimestamp(fecha), zoneId);
         return fechaElegida.get (IsoFields.WEEK_OF_WEEK_BASED_YEAR );
     }
 
     @Override
+    // Obtengo el año de una fecha
+    // por ej: 04/01/2022 devolveria 2022
+    // 04/04/2016 devolveria 2016
     public int anioDeUnaFecha(Date fecha) {
         ZonedDateTime fechaElegida = ZonedDateTime.of(convertToLocalDateTimeViaSqlTimestamp(fecha), zoneId);
         return fechaElegida.get (IsoFields.WEEK_BASED_YEAR );
     }
 
     @Override
+    // Calculo la cantidad de horas totales en la semana del turno que se quiere agregar
     public int cantDehorasSemana(List<Turno> turnos, Turno turnoNuevo) {
         try(Stream<Turno> turnosDeLaSemanaStream = turnos.stream()) {
             // Obtengo todas las horas que sean de la semana del turno nuevo
-            List<Integer> horasDeEsaSemana = turnosDeLaSemanaStream
+            int horasDeEsaSemana = turnosDeLaSemanaStream
+                    // Obtengo los turnos que esten en la semana del nuevo turno
                     .filter(turno -> semanaDelAnio(turno.getFecha()) == semanaDelAnio(turnoNuevo.getFecha()))
+                    // Lo mapeo por que solo me interesan las horas de esa semana
                     .map(Turno::getCantHoras)
-                    .collect(Collectors.toList());
+                    // Mapeo el stream a int para poder usar la funcion sum
+                    .mapToInt(Integer::intValue)
+                    .sum();
             // Sumo todas las horas de esa semana y las retorno
-            return horasDeEsaSemana.stream().mapToInt(Integer::intValue).sum();
+            return horasDeEsaSemana;
         } catch(Exception e) {
             logger.error("Ocurrio un error al calcular las horas semanales: {}", e);
             return  -1;
@@ -51,18 +65,22 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
     }
 
     @Override
+    // Calculo la cantidad de horas entre una fecha y otra
     public int cantDeHoras(Date fechaI, Date fechaF) {
         long segundos = (fechaF.getTime() - fechaI.getTime()) / 1000;
         return (int) segundos / 3600;
     }
 
     @Override
+    // Convertir un Date a LocalDate
     public LocalDateTime convertToLocalDateTimeViaSqlTimestamp(Date fechaAConvertir) {
         return new java.sql.Timestamp(
                 fechaAConvertir.getTime()).toLocalDateTime();
     }
 
     @Override
+    // Comprobar si hay dos fechas en esa semana
+    // uso este metodo para saber si hay dos dias libres en esa semana
     public boolean dosVecesEnLaMismaSemana(List<Date> fechas, Date fechaNueva) {
         // Obtengo todas las fechas del mismo año de la fecha nueva
         try(Stream<Date> fechasStream = fechas.stream()) {
@@ -85,6 +103,7 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
     }
 
     @Override
+    // Metodo para saber si ya hay dos turnos en ese mismo dia
     public boolean isTurnoOcupado(List<Turno> turnos, Turno turnoNuevo) {
        try(Stream<Turno> turnoStream = turnos.stream()) {
            int cantMaxDeTurnos = 2;
@@ -100,6 +119,7 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
     }
 
     @Override
+    // Comprobar si es el mismo usuario quieriendo guardar en el mismo turno
     public boolean isElMismoUsuarioEnElMismoTurno(List<Turno> turnos, Turno turnoNuevo) {
         try(Stream<Turno> turnoStream = turnos.stream()) {
             boolean result = turnoStream
@@ -130,6 +150,7 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
     }
 
     @Override
+    // Comprobar si ya hay un turno extra del usuario en esa fecha
     public boolean isTurnoExtraAsignadoEnEseDia(List<TurnoExtra> turnosExtras, Turno turnoExtra) {
         try(Stream<TurnoExtra> turnosExtrasStream = turnosExtras.stream()) {
             boolean result = turnosExtrasStream
@@ -143,6 +164,7 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
     }
 
     @Override
+    // Comprobar si ya hay un turno normal del usuario en esa fecha
     public boolean isTurnoNormalAsignadoEnEseDia(List<TurnoNormal> turnosNormales, Turno turnoNormal) {
         try(Stream<TurnoNormal> turnosNormalesStream = turnosNormales.stream()) {
             boolean result = turnosNormalesStream
@@ -156,6 +178,7 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
     }
 
     @Override
+    // Comprobar si el usuario ya tiene una fecha libre asignada en ese dia
     public boolean isElMismoUsuarioConElMismoDiaLibre(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo) {
         try(Stream<DiaLibre> diaslibresStream = diasLibres.stream()) {
             boolean result = diaslibresStream
@@ -169,6 +192,7 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
     }
 
     @Override
+    // Comprobar si en esa semana el usuario ya tiene dos dias libres asignados
     public boolean isElMismoUsuarioConDosDiasLibresEnLaMismaSemana(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo) {
         try(Stream<DiaLibre> diasLibresStream = diasLibres.stream()) {
             List<Date> fechasDiasLibres = diasLibresStream.map(DiaLibre::getFecha).collect(Collectors.toList());

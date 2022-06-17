@@ -120,7 +120,7 @@ public class TurnosService implements ITurnosService{
 
     @Override
     // Elegi controlar los requisitos desde un metodo para no duplicar tanto codigo ya  que lo utilizaba varias veces
-    public void controlarRequsitosDelTurno(List<Turno> turnosActuales, List<Turno> turnosActualesDeLosDemasUsuarios, Turno turnoNuevo, Long jornadaId) throws FechaAnteriorException, TurnoEnDiaLibreException, MismoTurnoException, MaxHsJornadaSemanalException, MaxHsJornadaDiariaException, MaxTurnosDiariosException {
+    public void controlarRequsitosDelTurno(List<Turno> turnosActuales, List<Turno> turnosActualesDeLosDemasUsuarios, Turno turnoNuevo, Long jornadaId) throws FechaAnteriorException, TurnoEnDiaLibreException, MismoTurnoException, MaxHsJornadaSemanalException, MaxHsJornadaDiariaException, MaxTurnosDiariosException, FechaDeVacacionesException {
         // Controlo que la fecha no sea de antes de la fecha actual
         // Date fechaActual = new Date();
         if (turnoNuevo.getFecha().before(new Date())){
@@ -130,6 +130,11 @@ public class TurnosService implements ITurnosService{
         // No se puede guardar el turno en un dia libre
         if (controladorDeSemanas.isDiaLibre(turnoNuevo.getFecha(), jornadaId)) {
             throw new TurnoEnDiaLibreException(turnoNuevo.getFecha());
+        }
+
+        // No se puede guardar un turno en fecha de vacaciones
+        if (controladorDeSemanas.isAlgunaFechaDeVacaciones(turnoNuevo, jornadaId)) {
+            throw new FechaDeVacacionesException();
         }
 
         // Controlo que no se guarda en la misma jornada laboral el mismo turno mas que nada para no asignar
@@ -249,7 +254,12 @@ public class TurnosService implements ITurnosService{
             Stream<TurnoNormal> turnosNormalesActualesStream = turnosNormalesActuales.stream();
             List<Long> idsTurnosNormalesABorrar = turnosNormalesActualesStream
                     // Filtro todos los turnos que tengan la fecha entre la fecha de inicio y final de las vacaciones nuevas
-                    .filter(turno -> vacacionesNuevas.getFechaFinal().after(turno.getFecha()) && vacacionesNuevas.getFechaInicio().before(turno.getFecha()))
+                    .filter(turno ->
+                            turno.getFecha().after(vacacionesNuevas.getFechaInicio())
+                                    && turno.getFecha().before(vacacionesNuevas.getFechaFinal())
+                                    || turno.getFecha().compareTo(vacacionesNuevas.getFechaInicio()) == 0 // y los que son iguales a la fecha de inicio
+                                    || turno.getFecha().compareTo(vacacionesNuevas.getFechaFinal()) == 0 // o final tambien
+                            )
                     .map(TurnoNormal::getIdTurnoNormal)
                     .collect(Collectors.toList());
             for (Long idTurnoNormal : idsTurnosNormalesABorrar) {
@@ -259,7 +269,13 @@ public class TurnosService implements ITurnosService{
             // Borro los turnos extras entre esas fechas
             Stream<TurnoExtra> turnosExtrasActualesStream = turnosExtrasActuales.stream();
             List<Long> idsTurnosExtrasDeEseDia = turnosExtrasActualesStream
-                    .filter(turno -> vacacionesNuevas.getFechaFinal().after(turno.getFecha()) && vacacionesNuevas.getFechaInicio().before(turno.getFecha()))
+                    // Las fechas que estan entre el inicio y el final de las vacaciones
+                    .filter(turno ->
+                            turno.getFecha().after(vacacionesNuevas.getFechaInicio())
+                                    && turno.getFecha().before(vacacionesNuevas.getFechaFinal())
+                                    || turno.getFecha().compareTo(vacacionesNuevas.getFechaInicio()) == 0 // y los que son iguales a la fecha de inicio
+                                    || turno.getFecha().compareTo(vacacionesNuevas.getFechaFinal()) == 0 // o final tambien
+                    )
                     .map(TurnoExtra::getIdTurnoExtra)
                     .collect(Collectors.toList());
             for (Long idTurnoExtra : idsTurnosExtrasDeEseDia) {

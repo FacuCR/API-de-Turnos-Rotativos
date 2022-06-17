@@ -20,7 +20,7 @@ public interface ITurnosService {
     List<Turno> casteoDeTurnosExtras(List<TurnoExtra> turnoExtraes);
     Turno casteoDeTurnoExtra(TurnoExtraRequest turnoExtra);
     TurnoExtra casteoDeRequestATurnoExtra(TurnoExtraRequest TurnoExtraRequest);
-    void controlarRequsitosDelTurno(List<Turno> turnosActuales, List<Turno> turnosNormalesActualesDeLosDemasUsuarios, Turno turnoNuevo, Long jornadaId) throws FechaAnteriorException, TurnoEnDiaLibreException, MismoTurnoException, MaxHsJornadaSemanalException, MaxHsJornadaDiariaException, MaxTurnosDiariosException;
+    void controlarRequsitosDelTurno(List<Turno> turnosActuales, List<Turno> turnosNormalesActualesDeLosDemasUsuarios, Turno turnoNuevo, Long jornadaId) throws FechaAnteriorException, TurnoEnDiaLibreException, MismoTurnoException, MaxHsJornadaSemanalException, MaxHsJornadaDiariaException, MaxTurnosDiariosException, FechaDeVacacionesException;
     void controlarRequisitosDelTurnoNormal(List<TurnoNormal> turnosNormales, Turno turnoNuevo) throws YaHayUnTurnoException;
     void controlarRequisitosDelTurnoExtra(List<TurnoExtra> turnosExtras, Turno turnoNuevo) throws YaHayUnTurnoException;
     List<Turno> getAllTurnosDelUsuario(Long jornadaId);

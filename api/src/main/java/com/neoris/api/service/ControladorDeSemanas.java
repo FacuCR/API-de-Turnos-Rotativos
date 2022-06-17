@@ -26,6 +26,8 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
     private final int maxHorasDiarias = 12;
     @Autowired
     private IDiaLibreService diaLibreService;
+    @Autowired
+    private IVacacionesService vacacionesService;
 
     @Override
     // Obtengo el numero de la semana del año
@@ -180,6 +182,22 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
     public boolean isAlgunAnioCoincidente(List<Vacaciones> todasLasVacacionesActuales, Vacaciones nuevasVacaciones) {
         return todasLasVacacionesActuales.stream()
                 .filter(vacacion -> anioDeUnaFecha(vacacion.getFechaInicio()) == anioDeUnaFecha(nuevasVacaciones.getFechaInicio()))
+                .findAny().isPresent();
+    }
+
+    @Override
+    // Controlar si el turno nuevo se quiere guardar entre las fechas de vacaciones
+    public boolean isAlgunaFechaDeVacaciones(Turno turnoNuevo, Long jornadaId) {
+        List<Vacaciones> todasLasVacacionesDelUsuario = vacacionesService.getAllVacaciones(jornadaId);
+        return !todasLasVacacionesDelUsuario.isEmpty() &&
+                todasLasVacacionesDelUsuario.stream()
+                // Si se cumple que el turno esta entre el inicio y el final de alguna de las vacaciones
+                .filter(vacacion ->
+                        turnoNuevo.getFecha().after(vacacion.getFechaInicio())
+                                && turnoNuevo.getFecha().before(vacacion.getFechaFinal())
+                                || turnoNuevo.getFecha().compareTo(vacacion.getFechaInicio()) == 0 // y los que son iguales a la fecha de inicio
+                                || turnoNuevo.getFecha().compareTo(vacacion.getFechaFinal()) == 0 // o final tambien
+                )
                 .findAny().isPresent();
     }
 }

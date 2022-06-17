@@ -26,4 +26,5 @@ public interface IControladorDeSemanas {
     boolean isElMismoUsuarioConDosDiasLibresEnLaMismaSemana(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo);
     boolean isDiaLibre(Date fecha, Long jornadaId);
     boolean isAlgunAnioCoincidente(List<Vacaciones> todasLasVacacionesActuales, Vacaciones nuevasVacaciones);
+    boolean isAlgunaFechaDeVacaciones(Turno turnoNuevo, Long jornadaId);
 }

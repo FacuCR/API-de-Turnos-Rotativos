@@ -1,10 +1,7 @@
 package com.neoris.api.service;
 
 import com.neoris.api.entity.*;
-import com.neoris.api.exception.DemasiadosDiasLibresException;
-import com.neoris.api.exception.DiaLibreAsignadoException;
-import com.neoris.api.exception.FechaAnteriorException;
-import com.neoris.api.exception.VacacionesException;
+import com.neoris.api.exception.*;
 import com.neoris.api.model.Turno;
 import com.neoris.api.payload.request.TurnoExtraRequest;
 import com.neoris.api.payload.request.TurnoNormalRequest;
@@ -105,82 +102,60 @@ public class TurnosService implements ITurnosService{
     }
 
     @Override
-    public ResponseEntity<MessageResponse> controlarRequisitosDelTurnoNormal(List<TurnoNormal> turnosNormales, Turno turnoNuevo) {
+    public void controlarRequisitosDelTurnoNormal(List<TurnoNormal> turnosNormales, Turno turnoNuevo) throws YaHayUnTurnoException {
         // Controlo que no tenga un turno normal asignado ya en ese dia
         if (!turnosNormales.isEmpty() && controladorDeSemanas.isTurnoNormalAsignadoEnEseDia(turnosNormales, turnoNuevo)){
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No se pudo guardar el turno normal por que ya tienes un turno normal asignado ese dia!"));
+            throw new YaHayUnTurnoException(turnoNuevo.getFecha(), "normal");
         }
-
-        return ResponseEntity
-                .ok()
-                .body(new MessageResponse(("")));
     }
 
     @Override
-    public ResponseEntity<MessageResponse> controlarRequisitosDelTurnoExtra(List<TurnoExtra> turnosExtras, Turno turnoNuevo) {
+    public void controlarRequisitosDelTurnoExtra(List<TurnoExtra> turnosExtras, Turno turnoNuevo) throws YaHayUnTurnoException {
         // Controlo que no tenga un turno extra asignado ya en ese dia
         if (!turnosExtras.isEmpty()  && controladorDeSemanas.isTurnoExtraAsignadoEnEseDia(turnosExtras, turnoNuevo)){
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No se pudo guardar el turno extra por que ya tienes un turno extra asignado ese dia!"));
+            throw new YaHayUnTurnoException(turnoNuevo.getFecha(), "extra");
         }
 
-        return ResponseEntity
-                .ok()
-                .body(new MessageResponse(("")));
     }
 
     @Override
     // Elegi controlar los requisitos desde un metodo para no duplicar tanto codigo ya  que lo utilizaba varias veces
-    public ResponseEntity<MessageResponse> controlarRequsitosDelTurno(List<Turno> turnosActuales, List<Turno> turnosActualesDeLosDemasUsuarios, Turno turnoNuevo, Long jornadaId) {
+    public void controlarRequsitosDelTurno(List<Turno> turnosActuales, List<Turno> turnosActualesDeLosDemasUsuarios, Turno turnoNuevo, Long jornadaId) throws FechaAnteriorException, TurnoEnDiaLibreException, MismoTurnoException, MaxHsJornadaSemanalException, MaxHsJornadaDiariaException, MaxTurnosDiariosException {
         // Controlo que la fecha no sea de antes de la fecha actual
         // Date fechaActual = new Date();
         if (turnoNuevo.getFecha().before(new Date())){
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No puedes viajar en el tiempo bro, la fecha de hoy es " + df.format(new Date()) + " ingresa una fecha valida!"));
+            throw new FechaAnteriorException(turnoNuevo.getFecha());
         }
 
+        // No se puede guardar el turno en un dia libre
         if (controladorDeSemanas.isDiaLibre(turnoNuevo.getFecha(), jornadaId)) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No se pudo guardar los datos del turno por que hay un dia libre asignado el " + df.format(turnoNuevo.getFecha()) + "!"));
+            throw new TurnoEnDiaLibreException(turnoNuevo.getFecha());
         }
 
-        // Controlo que no se guarda en la misma jornada laboral el mismo turno
+        // Controlo que no se guarda en la misma jornada laboral el mismo turno mas que nada para no asignar
+        // un turno extra y un turno normal en el mismo momento
+        // Osea, no dejar que sea posible por ejemplo guardar un turno normal a la noche y turno extra a la noche
+        // se tiene que guardar el turno extra en otro momento
         if (controladorDeSemanas.isElMismoUsuarioEnElMismoTurno(turnosActuales, turnoNuevo)) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No se pudo guardar los datos del turno por que ya tienes un " + turnoNuevo.getTurno() + " asignado ese dia!"));
+            throw new MismoTurnoException(turnoNuevo.getTurno(), turnoNuevo.getFecha());
         }
 
         int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActuales, turnoNuevo) + turnoNuevo.getCantHoras();
         // Controlo que la suma de la jornada laboral de esa semana mas el nuevo turno no supere las 48hs
         if (!(cantidadDeHorasQueQuedarian <= cantMaxHsDeJornadaSemanal)) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No se pudo guardar los datos del turno por que supera el limite de horas(48hs semanales)!"));
+            throw new MaxHsJornadaSemanalException();
         }
 
         // Controlo que la suma de todas las horas de ese dia mas el nuevo turno que se quiere ingresar no superen el limite permitido de 12
         if (controladorDeSemanas.isMaxDeHorasDeJornadaLaboralSuperada(turnosActuales, turnoNuevo)) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No se pudo guardar los datos del turno por que supera el limite de horas diarias(12hs)!"));
+            throw new MaxHsJornadaDiariaException();
         }
 
         // Controlo que no se guarde si ya hay dos turnos ocupados en ese dia
         if (!controladorDeSemanas.isTurnoOcupado(turnosActualesDeLosDemasUsuarios, turnoNuevo)) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No se pudo guardar los datos del turno por que los " + turnoNuevo.getTurno() + " de ese dia estan ocupados!"));
+            throw new MaxTurnosDiariosException(turnoNuevo.getTurno());
         }
 
-        return ResponseEntity
-                .ok()
-                .body(new MessageResponse(("")));
     }
 
     @Override

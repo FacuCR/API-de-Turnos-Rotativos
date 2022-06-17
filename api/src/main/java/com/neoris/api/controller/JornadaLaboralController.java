@@ -52,48 +52,41 @@ public class JornadaLaboralController {
     @PostMapping("/save/normal/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> saveTurnoNormal(@Valid @RequestBody TurnoNormalRequest turnoNormalRequest, @PathVariable("id") Long jornadaId) {
-        // Debo castear los turnos normales y extras a turno ya que el service ControladorDeSemanas solo
-        // trabaja con el tipo Turno
+        try {
+            // Debo castear los turnos normales y extras a turno ya que el service ControladorDeSemanas solo
+            // trabaja con el tipo Turno
 
-        // Obtengo todos los turnos normales del usuario
-        List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
+            // Obtengo todos los turnos normales del usuario
+            List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
 
-        // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados al tipo Turno
-        List<Turno> turnosActualesDelUsuario = turnosService.getAllTurnosDelUsuario(jornadaId);
+            // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados al tipo Turno
+            List<Turno> turnosActualesDelUsuario = turnosService.getAllTurnosDelUsuario(jornadaId);
 
-        // Obtengo los turnos de los demas usuarios
-        List<Turno> turnosActualesDeLosDemasUsuarios = turnosService.getAllTurnosDeLosDemasUsuarios(jornadaId);
+            // Obtengo los turnos de los demas usuarios
+            List<Turno> turnosActualesDeLosDemasUsuarios = turnosService.getAllTurnosDeLosDemasUsuarios(jornadaId);
 
-        // Casteo el turno normal nuevo a Turno
-        Turno turnoNuevo = turnosService.casteoDeTurnoNormal(turnoNormalRequest);
+            // Casteo el turno normal nuevo a Turno
+            Turno turnoNuevo = turnosService.casteoDeTurnoNormal(turnoNormalRequest);
 
-        // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
-        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo, jornadaId);
-        if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)){
-            controlarRequisitosDelTurno = turnosService.controlarRequisitosDelTurnoNormal(turnosNormalesActuales, turnoNuevo);
-            if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)) {
-                try {
-                    int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActualesDelUsuario, turnoNuevo) + turnoNuevo.getCantHoras();
-                    TurnoNormal castTurnoNormal = turnosService.casteoDeRequestATurnoNormal(turnoNormalRequest);
-                    turnoNormalService.saveTurnoNormal(jornadaId, castTurnoNormal);
-                    String mensajeResponse = "Los datos del turno normal se guardaron con exito!";
-                    if (cantidadDeHorasQueQuedarian < cantMinHsDeJornadaSemanal) {
-                        mensajeResponse += " Aun necesita cargar mas hs para llegar a las 30hs minimas de esa semana";
-                    }
-                    return ResponseEntity
-                            .ok()
-                            .body(new MessageResponse(mensajeResponse));
-                } catch (Exception e) {
-                    logger.error("Error: No se pudo guardar los datos del turno normal! {}", e);
-                    return ResponseEntity
-                            .status(HttpStatus.EXPECTATION_FAILED)
-                            .body(new MessageResponse("Error: Ups ocurrio algo al intentar guardar los datos del turno normal!"));
-                }
-            } else {
-                return  controlarRequisitosDelTurno;
+            // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
+            turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo, jornadaId);
+            turnosService.controlarRequisitosDelTurnoNormal(turnosNormalesActuales, turnoNuevo);
+
+            int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActualesDelUsuario, turnoNuevo) + turnoNuevo.getCantHoras();
+            TurnoNormal castTurnoNormal = turnosService.casteoDeRequestATurnoNormal(turnoNormalRequest);
+            turnoNormalService.saveTurnoNormal(jornadaId, castTurnoNormal);
+            String mensajeResponse = "Los datos del turno normal se guardaron con exito!";
+            if (cantidadDeHorasQueQuedarian < cantMinHsDeJornadaSemanal) {
+                mensajeResponse += " Aun necesita cargar mas hs para llegar a las 30hs minimas de esa semana";
             }
-        } else {
-            return  controlarRequisitosDelTurno;
+            return ResponseEntity
+                    .ok()
+                    .body(new MessageResponse(mensajeResponse));
+        } catch (Exception e) {
+            logger.error("Error: No se pudo guardar los datos del turno normal! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar guardar los datos del turno normal!" + e.getMessage()));
         }
 
 
@@ -102,48 +95,41 @@ public class JornadaLaboralController {
     @PutMapping("/save/normal/{idJornada}/{idTurnoNormal}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> updateTurnoNormal(@Valid @RequestBody TurnoNormalRequest turnoNormalRequest, @PathVariable("idJornada") Long jornadaId, @PathVariable("idTurnoNormal") Long turnoNormalId) {
-        // Debo castear los turnos normales y extras a turno ya que el service ControladorDeSemanas solo
-        // trabaja con el tipo Turno
+        try {
+            // Debo castear los turnos normales y extras a turno ya que el service ControladorDeSemanas solo
+            // trabaja con el tipo Turno
 
-        // Obtengo todos los turnos normales del usuario
-        List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
+            // Obtengo todos los turnos normales del usuario
+            List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
 
-        // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados al tipo Turno
-        List<Turno> turnosActualesDelUsuario = turnosService.getAllTurnosDelUsuario(jornadaId);
+            // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados al tipo Turno
+            List<Turno> turnosActualesDelUsuario = turnosService.getAllTurnosDelUsuario(jornadaId);
 
-        // Obtengo los turnos de los demas usuarios
-        List<Turno> turnosActualesDeLosDemasUsuarios = turnosService.getAllTurnosDeLosDemasUsuarios(jornadaId);
+            // Obtengo los turnos de los demas usuarios
+            List<Turno> turnosActualesDeLosDemasUsuarios = turnosService.getAllTurnosDeLosDemasUsuarios(jornadaId);
 
-        // Casteo el turno normal nuevo a Turno
-        Turno turnoNuevo = turnosService.casteoDeTurnoNormal(turnoNormalRequest);
+            // Casteo el turno normal nuevo a Turno
+            Turno turnoNuevo = turnosService.casteoDeTurnoNormal(turnoNormalRequest);
 
-        // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
-        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo, jornadaId);
-        if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)){
-            controlarRequisitosDelTurno = turnosService.controlarRequisitosDelTurnoNormal(turnosNormalesActuales, turnoNuevo);
-            if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)) {
-                try {
-                    int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActualesDelUsuario, turnoNuevo) + turnoNuevo.getCantHoras();
-                    TurnoNormal castTurnoNormal = turnosService.casteoDeRequestATurnoNormal(turnoNormalRequest);
-                    turnoNormalService.saveTurnoNormal(jornadaId, turnoNormalId, castTurnoNormal);
-                    String mensajeResponse = "Los datos del turno normal se guardaron con exito!";
-                    if (cantidadDeHorasQueQuedarian < 30) {
-                        mensajeResponse += " Aun necesita cargar mas hs para llegar a las 30hs minimas de esa semana";
-                    }
-                    return ResponseEntity
-                            .ok()
-                            .body(new MessageResponse(mensajeResponse));
-                } catch (Exception e) {
-                    logger.error("Error: No se pudo guardar los datos del turno normal! {}", e);
-                    return ResponseEntity
-                            .status(HttpStatus.EXPECTATION_FAILED)
-                            .body(new MessageResponse("Error: Ups ocurrio algo al intentar guardar los datos del turno normal!"));
-                }
-            } else {
-                return  controlarRequisitosDelTurno;
+            // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
+            turnosService.controlarRequisitosDelTurnoNormal(turnosNormalesActuales, turnoNuevo);
+            turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo, jornadaId);
+
+            int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActualesDelUsuario, turnoNuevo) + turnoNuevo.getCantHoras();
+            TurnoNormal castTurnoNormal = turnosService.casteoDeRequestATurnoNormal(turnoNormalRequest);
+            turnoNormalService.saveTurnoNormal(jornadaId, turnoNormalId, castTurnoNormal);
+            String mensajeResponse = "Los datos del turno normal se guardaron con exito!";
+            if (cantidadDeHorasQueQuedarian < 30) {
+                mensajeResponse += " Aun necesita cargar mas hs para llegar a las 30hs minimas de esa semana";
             }
-        } else {
-            return  controlarRequisitosDelTurno;
+            return ResponseEntity
+                    .ok()
+                    .body(new MessageResponse(mensajeResponse));
+        } catch (JornadaException e) {
+            logger.error("Error: No se pudo guardar los datos del turno normal! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar actualizar los datos del turno normal!, Error: " + e.getMessage()));
         }
     }
 
@@ -197,48 +183,41 @@ public class JornadaLaboralController {
     @PostMapping("/save/extra/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> saveTurnoExtra(@Valid @RequestBody TurnoExtraRequest turnoExtraRequest, @PathVariable("id") Long jornadaId) {
-        // Debo castear los turnos normales y extras a turno ya que el service ControladorDeSemanas solo
-        // trabaja con el tipo Turno
+        try {
+            // Debo castear los turnos normales y extras a turno ya que el service ControladorDeSemanas solo
+            // trabaja con el tipo Turno
 
-        // Obtengo todos los turnos extras del usuario
-        List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
+            // Obtengo todos los turnos extras del usuario
+            List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
 
-        // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados al tipo Turno
-        List<Turno> turnosActualesDelUsuario = turnosService.getAllTurnosDelUsuario(jornadaId);
+            // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados al tipo Turno
+            List<Turno> turnosActualesDelUsuario = turnosService.getAllTurnosDelUsuario(jornadaId);
 
-        // Obtengo los turnos de los demas usuarios
-        List<Turno> turnosActualesDeLosDemasUsuarios = turnosService.getAllTurnosDeLosDemasUsuarios(jornadaId);
+            // Obtengo los turnos de los demas usuarios
+            List<Turno> turnosActualesDeLosDemasUsuarios = turnosService.getAllTurnosDeLosDemasUsuarios(jornadaId);
 
-        // Casteo el turno normal nuevo a Turno
-        Turno turnoNuevo = turnosService.casteoDeTurnoExtra(turnoExtraRequest);
+            // Casteo el turno normal nuevo a Turno
+            Turno turnoNuevo = turnosService.casteoDeTurnoExtra(turnoExtraRequest);
 
-        // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
-        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo, jornadaId);
-        if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)){
-            controlarRequisitosDelTurno = turnosService.controlarRequisitosDelTurnoExtra(turnosExtrasActuales, turnoNuevo);
-            if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)) {
-                try {
-                    int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActualesDelUsuario, turnoNuevo) + turnoNuevo.getCantHoras();
-                    TurnoExtra castTurnoExtra = turnosService.casteoDeRequestATurnoExtra(turnoExtraRequest);
-                    turnoExtraService.saveTurnoExtra(jornadaId, castTurnoExtra);
-                    String mensajeResponse = "Los datos del turno extra se guardaron con exito!";
-                    if (cantidadDeHorasQueQuedarian < cantMinHsDeJornadaSemanal) {
-                        mensajeResponse += " Aun necesita cargar mas hs para llegar a las 30hs minimas de esa semana";
-                    }
-                    return ResponseEntity
-                            .ok()
-                            .body(new MessageResponse(mensajeResponse));
-                } catch (Exception e) {
-                    logger.error("Error: No se pudo guardar los datos del turno extra! {}", e);
-                    return ResponseEntity
-                            .status(HttpStatus.EXPECTATION_FAILED)
-                            .body(new MessageResponse("Error: Ups ocurrio algo al intentar guardar los datos del turno extra!"));
-                }
-            } else {
-                return  controlarRequisitosDelTurno;
+            // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
+            turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo, jornadaId);
+            turnosService.controlarRequisitosDelTurnoExtra(turnosExtrasActuales, turnoNuevo);
+
+            int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActualesDelUsuario, turnoNuevo) + turnoNuevo.getCantHoras();
+            TurnoExtra castTurnoExtra = turnosService.casteoDeRequestATurnoExtra(turnoExtraRequest);
+            turnoExtraService.saveTurnoExtra(jornadaId, castTurnoExtra);
+            String mensajeResponse = "Los datos del turno extra se guardaron con exito!";
+            if (cantidadDeHorasQueQuedarian < cantMinHsDeJornadaSemanal) {
+                mensajeResponse += " Aun necesita cargar mas hs para llegar a las 30hs minimas de esa semana";
             }
-        } else {
-            return  controlarRequisitosDelTurno;
+            return ResponseEntity
+                    .ok()
+                    .body(new MessageResponse(mensajeResponse));
+        } catch (Exception e) {
+            logger.error("Error: No se pudo guardar los datos del turno extra! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar guardar los datos del turno extra!, Error: " + e.getMessage()));
         }
 
 
@@ -247,48 +226,42 @@ public class JornadaLaboralController {
     @PutMapping("/save/extra/{idJornada}/{idTurnoNormal}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> updateTurnoExtra(@Valid @RequestBody TurnoExtraRequest turnoExtraRequest, @PathVariable("idJornada") Long jornadaId, @PathVariable("idTurnoNormal") Long turnoExtraId) {
-        // Debo castear los turnos normales y extras a turno ya que el service ControladorDeSemanas solo
-        // trabaja con el tipo Turno
+        try {
+            // Debo castear los turnos normales y extras a turno ya que el service ControladorDeSemanas solo
+            // trabaja con el tipo Turno
 
-        // Obtengo todos los turnos extras del usuario
-        List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
+            // Obtengo todos los turnos extras del usuario
+            List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
 
-        // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados al tipo Turno
-        List<Turno> turnosActualesDelUsuario = turnosService.getAllTurnosDelUsuario(jornadaId);
+            // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados al tipo Turno
+            List<Turno> turnosActualesDelUsuario = turnosService.getAllTurnosDelUsuario(jornadaId);
 
-        // Obtengo los turnos de los demas usuarios
-        List<Turno> turnosActualesDeLosDemasUsuarios = turnosService.getAllTurnosDeLosDemasUsuarios(jornadaId);
+            // Obtengo los turnos de los demas usuarios
+            List<Turno> turnosActualesDeLosDemasUsuarios = turnosService.getAllTurnosDeLosDemasUsuarios(jornadaId);
 
-        // Casteo el turno normal nuevo a Turno
-        Turno turnoNuevo = turnosService.casteoDeTurnoExtra(turnoExtraRequest);
+            // Casteo el turno normal nuevo a Turno
+            Turno turnoNuevo = turnosService.casteoDeTurnoExtra(turnoExtraRequest);
 
-        // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
-        ResponseEntity<MessageResponse> controlarRequisitosDelTurno = turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo, jornadaId);
-        if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)){
-            controlarRequisitosDelTurno = turnosService.controlarRequisitosDelTurnoExtra(turnosExtrasActuales, turnoNuevo);
-            if (controlarRequisitosDelTurno.getStatusCode().equals(HttpStatus.OK)) {
-                try {
-                    int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActualesDelUsuario, turnoNuevo) + turnoNuevo.getCantHoras();
-                    TurnoExtra castTurnoExtra = turnosService.casteoDeRequestATurnoExtra(turnoExtraRequest);
-                    turnoExtraService.saveTurnoExtra(jornadaId, turnoExtraId, castTurnoExtra);
-                    String mensajeResponse = "Los datos del turno extra se guardaron con exito!";
-                    if (cantidadDeHorasQueQuedarian < 30) {
-                        mensajeResponse += " Aun necesita cargar mas hs para llegar a las 30hs minimas de esa semana";
-                    }
-                    return ResponseEntity
-                            .ok()
-                            .body(new MessageResponse(mensajeResponse));
-                } catch (Exception e) {
-                    logger.error("Error: No se pudo guardar los datos del turno extra! {}", e);
-                    return ResponseEntity
-                            .status(HttpStatus.EXPECTATION_FAILED)
-                            .body(new MessageResponse("Error: Ups ocurrio algo al intentar guardar los datos del turno extra!"));
-                }
-            } else {
-                return  controlarRequisitosDelTurno;
+            // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
+
+            turnosService.controlarRequisitosDelTurnoExtra(turnosExtrasActuales, turnoNuevo);
+            turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNuevo, jornadaId);
+
+            int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActualesDelUsuario, turnoNuevo) + turnoNuevo.getCantHoras();
+            TurnoExtra castTurnoExtra = turnosService.casteoDeRequestATurnoExtra(turnoExtraRequest);
+            turnoExtraService.saveTurnoExtra(jornadaId, turnoExtraId, castTurnoExtra);
+            String mensajeResponse = "Los datos del turno extra se guardaron con exito!";
+            if (cantidadDeHorasQueQuedarian < 30) {
+                mensajeResponse += " Aun necesita cargar mas hs para llegar a las 30hs minimas de esa semana";
             }
-        } else {
-            return  controlarRequisitosDelTurno;
+            return ResponseEntity
+                    .ok()
+                    .body(new MessageResponse(mensajeResponse));
+        } catch (JornadaException e) {
+            logger.error("Error: No se pudo guardar los datos del turno extra! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar actualizar los datos del turno extra!, Error: " + e.getMessage()));
         }
     }
 
@@ -365,7 +338,7 @@ public class JornadaLaboralController {
             return ResponseEntity
                     .ok()
                     .body(new MessageResponse("El dia libre se asigno para la fecha: " + df.format(diaLibreNuevo.getFecha()) + " correctamente" + mensajeDeSeBorroAlgunTurno));
-        } catch (Exception e) {
+        } catch (JornadaException e) {
             logger.error("Error: No se pudo asignar el dia libre! {}", e);
             return ResponseEntity
                     .status(HttpStatus.EXPECTATION_FAILED)
@@ -400,7 +373,7 @@ public class JornadaLaboralController {
             return ResponseEntity
                     .ok()
                     .body(new MessageResponse("El dia libre se asigno para la fecha: " + df.format(diaLibreNuevo.getFecha()) + " correctamente" + mensajeDeSeBorroAlgunTurno));
-        } catch (Exception e) {
+        } catch (JornadaException e) {
             logger.error("Error: No se pudo asignar el dia libre! {}", e);
             return ResponseEntity
                     .status(HttpStatus.EXPECTATION_FAILED)

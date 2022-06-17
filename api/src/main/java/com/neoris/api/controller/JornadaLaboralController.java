@@ -5,11 +5,9 @@ import com.neoris.api.entity.TurnoExtra;
 import com.neoris.api.entity.TurnoNormal;
 import com.neoris.api.entity.Vacaciones;
 import com.neoris.api.exception.JornadaException;
+import com.neoris.api.exception.MaxHsJornadaDiariaException;
 import com.neoris.api.model.Turno;
-import com.neoris.api.payload.request.DiaLibreRequest;
-import com.neoris.api.payload.request.TurnoExtraRequest;
-import com.neoris.api.payload.request.TurnoNormalRequest;
-import com.neoris.api.payload.request.VacacionesRequest;
+import com.neoris.api.payload.request.*;
 import com.neoris.api.payload.response.MessageResponse;
 import com.neoris.api.service.*;
 import org.slf4j.Logger;
@@ -18,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -570,6 +569,79 @@ public class JornadaLaboralController {
     }
 
 
+    // ========== COMBINACION DE TURNOS ========== //
 
+
+    @PostMapping("/save/combinacion/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @Transactional
+    public ResponseEntity<MessageResponse> saveCombinacionDeTurnos(@Valid @RequestBody CombinacionDeTurnosRequest combinacionDeTurnosRequest, @PathVariable("id") Long jornadaId) {
+        try {
+            if (combinacionDeTurnosRequest.getCantHorasNormal() + combinacionDeTurnosRequest.getCantHorasExtra() > 12) {
+                throw new MaxHsJornadaDiariaException();
+            }
+            // Asigno la combinacion apropiadamente a cada tipo de turno
+            TurnoNormalRequest turnoNormalRequest = new TurnoNormalRequest();
+            turnoNormalRequest.setFecha(combinacionDeTurnosRequest.getFecha());
+            turnoNormalRequest.setTurno(combinacionDeTurnosRequest.getTurnoNormal());
+            turnoNormalRequest.setCantHoras(combinacionDeTurnosRequest.getCantHorasNormal());
+
+            TurnoExtraRequest turnoExtraRequest = new TurnoExtraRequest();
+            turnoExtraRequest.setFecha(combinacionDeTurnosRequest.getFecha());
+            turnoExtraRequest.setTurno(combinacionDeTurnosRequest.getTurnoExtra());
+            turnoExtraRequest.setCantHoras(combinacionDeTurnosRequest.getCantHorasExtra());
+
+            // Debo castear los turnos normales y extras a turno ya que el service ControladorDeSemanas solo
+            // trabaja con el tipo Turno
+
+            // Obtengo todos los turnos normales del usuario
+            List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
+
+            // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados al tipo Turno
+            List<Turno> turnosActualesDelUsuario = turnosService.getAllTurnosDelUsuario(jornadaId);
+
+            // Obtengo los turnos de los demas usuarios
+            List<Turno> turnosActualesDeLosDemasUsuarios = turnosService.getAllTurnosDeLosDemasUsuarios(jornadaId);
+
+            // Casteo el turno normal nuevo a Turno
+            Turno turnoNormalNuevo = turnosService.casteoDeTurnoNormal(turnoNormalRequest);
+
+            // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
+            turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNormalNuevo, jornadaId);
+            turnosService.controlarRequisitosDelTurnoNormal(turnosNormalesActuales, turnoNormalNuevo);
+
+            TurnoNormal castTurnoNormal = turnosService.casteoDeRequestATurnoNormal(turnoNormalRequest);
+            turnoNormalService.saveTurnoNormal(jornadaId, castTurnoNormal);
+
+            // Obtengo todos los turnos extras del usuario
+            List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
+
+            // Casteo el turno normal nuevo a Turno
+            Turno turnoExtraNuevo = turnosService.casteoDeTurnoExtra(turnoExtraRequest);
+
+            // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
+            turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoExtraNuevo, jornadaId);
+            turnosService.controlarRequisitosDelTurnoExtra(turnosExtrasActuales, turnoExtraNuevo);
+
+            int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActualesDelUsuario, turnoExtraNuevo) + turnoExtraNuevo.getCantHoras();
+            TurnoExtra castTurnoExtra = turnosService.casteoDeRequestATurnoExtra(turnoExtraRequest);
+            turnoExtraService.saveTurnoExtra(jornadaId, castTurnoExtra);
+            String mensajeResponse = "Los datos de los turnos se guardaron con exito!";
+            if (cantidadDeHorasQueQuedarian < cantMinHsDeJornadaSemanal) {
+                mensajeResponse += " Aun necesita cargar mas hs para llegar a las 30hs minimas de esa semana";
+            }
+
+            return ResponseEntity
+                    .ok()
+                    .body(new MessageResponse(mensajeResponse));
+        } catch (JornadaException e) {
+            logger.error("Error: No se pudo guardar los datos de los turnos! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar guardar los datos de los turnos! " + e.getMessage()));
+        }
+
+
+    }
 
 }

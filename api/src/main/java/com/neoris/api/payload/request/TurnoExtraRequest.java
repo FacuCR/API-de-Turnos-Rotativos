@@ -21,5 +21,4 @@ public class TurnoExtraRequest {
     @Min(2)
     @Max(6)
     private int cantHoras;
-    private boolean isTurnoExtra;
 }

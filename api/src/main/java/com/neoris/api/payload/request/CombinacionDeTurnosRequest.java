@@ -13,12 +13,18 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class TurnoNormalRequest {
+// La request de la combinacion de turnos tendra la misma fecha pero distintos turnos y cantidad de horas
+public class CombinacionDeTurnosRequest {
     @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="dd/MM/yyyy", timezone = "America/Buenos_Aires")
     private Date fecha;
     @Enumerated(EnumType.STRING)
-    private ETurno turno;
+    private ETurno turnoNormal;
+    @Enumerated(EnumType.STRING)
+    private ETurno turnoExtra;
     @Min(6)
     @Max(8)
-    private int cantHoras;
+    private int cantHorasNormal;
+    @Min(2)
+    @Max(6)
+    private int cantHorasExtra;
 }

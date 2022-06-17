@@ -1,15 +1,15 @@
 package com.neoris.api.controller;
 
 import com.neoris.api.entity.DiaLibre;
-import com.neoris.api.entity.JornadaLaboral;
 import com.neoris.api.entity.TurnoExtra;
 import com.neoris.api.entity.TurnoNormal;
+import com.neoris.api.entity.Vacaciones;
 import com.neoris.api.model.Turno;
 import com.neoris.api.payload.request.DiaLibreRequest;
 import com.neoris.api.payload.request.TurnoExtraRequest;
 import com.neoris.api.payload.request.TurnoNormalRequest;
+import com.neoris.api.payload.request.VacacionesRequest;
 import com.neoris.api.payload.response.MessageResponse;
-import com.neoris.api.repository.JornadaLaboralRepository;
 import com.neoris.api.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,16 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -44,6 +40,8 @@ public class JornadaLaboralController {
     private IJornadaLaboralService jornadaLaboralService;
     @Autowired
     private IDiaLibreService diaLibreService;
+    @Autowired
+    private IVacacionesService vacacionesService;
     private static final Logger logger = LoggerFactory.getLogger(JornadaLaboralController.class);
     private final int cantMinHsDeJornadaSemanal = 30;
     private final SimpleDateFormat df = new SimpleDateFormat("d 'de' MMMM 'de' yyyy", Locale.forLanguageTag("es-ES"));
@@ -489,6 +487,30 @@ public class JornadaLaboralController {
                     .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener la antiguedad del empleado!"));
         }
     }
+
+
+
+    // ========== VACACIONES ========== //
+
+
+    @PostMapping("/save/vacaciones/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> saveVacaciones(@PathVariable("id") Long jornadaId, @Valid @RequestBody VacacionesRequest vacacionesRequest) {
+        try {
+            Vacaciones nuevasVacaciones = new Vacaciones();
+            nuevasVacaciones.setFechaInicio(vacacionesRequest.getFecha(), jornadaLaboralService.getAntiguedadByJornadaId(jornadaId));
+            vacacionesService.saveVacaciones(jornadaId, nuevasVacaciones);
+            return ResponseEntity
+                    .ok()
+                    .body(new MessageResponse("Las vacaciones se asignaron con exito inicio: " + df.format(nuevasVacaciones.getFechaInicio()) + " y final: " + df.format(nuevasVacaciones.getFechaFinal())));
+        } catch(Exception e) {
+            logger.error("Error: No se guardar las vacaciones del empleado! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener la antiguedad del empleado!"));
+        }
+    }
+
 
 
 

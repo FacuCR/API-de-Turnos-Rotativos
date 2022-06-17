@@ -18,16 +18,16 @@ public class Vacaciones {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter @Setter private Long idVacaciones;
     @Getter private Date fechaInicio;
-    @Getter @Setter private Date fechaFinal;
+    @Getter private Date fechaFinal;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "jornada_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
-    private JornadaLaboral jornadaId;
+    @Getter @Setter private JornadaLaboral jornadaId;
 
     public void setFechaInicio(Date fechaInicio, int antiguedad) {
         this.fechaInicio = fechaInicio;
-        setFechaFinal(agregarDias(fechaInicio, diasDeVacacionesCorrespondientes(antiguedad)));
+        this.fechaFinal = agregarDias(fechaInicio, diasDeVacacionesCorrespondientes(antiguedad));
     }
 
     // Metodo que le agrega dias a una fecha

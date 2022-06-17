@@ -50,6 +50,8 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
         Stream<Turno> turnosDeLaSemanaStream = turnos.stream();
         // Obtengo todas las horas que sean de la semana del turno nuevo
         int horasDeEsaSemana = turnosDeLaSemanaStream
+                // Filtro los turnos del mismo año
+                .filter(turno -> anioDeUnaFecha(turno.getFecha()) == anioDeUnaFecha(turnoNuevo.getFecha()))
                 // Obtengo los turnos que esten en la semana del nuevo turno
                 .filter(turno -> semanaDelAnio(turno.getFecha()) == semanaDelAnio(turnoNuevo.getFecha()))
                 // Lo mapeo por que solo me interesan las horas de esa semana
@@ -79,13 +81,11 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
     // Comprobar si hay dos fechas en esa semana
     // uso este metodo para saber si hay dos dias libres en esa semana
     public boolean dosVecesEnLaMismaSemana(List<Date> fechas, Date fechaNueva) {
-        // Obtengo todas las fechas del mismo año de la fecha nueva
         Stream<Date> fechasStream = fechas.stream();
-        Stream<Date> fechasDelMismoAnio = fechasStream
-                .filter(fecha -> anioDeUnaFecha(fecha) == anioDeUnaFecha(fechaNueva));
-
-        // Obtengo todas las fechas que esten en la misma semana de la fecha nueva
-        List<Date> semanasDelMismoAnio = fechasDelMismoAnio
+        List<Date> semanasDelMismoAnio = fechasStream
+                // Obtengo todas las fechas del mismo año de la fecha nueva
+                .filter(fecha -> anioDeUnaFecha(fecha) == anioDeUnaFecha(fechaNueva))
+                // Obtengo todas las fechas que esten en la misma semana de la fecha nueva
                 .filter(fecha -> semanaDelAnio(fecha) == semanaDelAnio(fechaNueva))
                 .collect(Collectors.toList());
 

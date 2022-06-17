@@ -1,4 +1,4 @@
-package com.neoris.api.security.jwt;
+package com.neoris.api.security.services.jwt;
 
 import com.neoris.api.security.services.UserDetailsServiceImpl;
 import org.slf4j.Logger;

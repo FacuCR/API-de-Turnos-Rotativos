@@ -1,4 +1,4 @@
-package com.neoris.api.security.jwt;
+package com.neoris.api.security.services.jwt;
 
 import com.neoris.api.security.services.UserDetailsImpl;
 import io.jsonwebtoken.*;

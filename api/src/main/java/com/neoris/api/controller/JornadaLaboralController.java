@@ -6,6 +6,7 @@ import com.neoris.api.entity.TurnoNormal;
 import com.neoris.api.entity.Vacaciones;
 import com.neoris.api.exception.JornadaException;
 import com.neoris.api.exception.MaxHsJornadaDiariaException;
+import com.neoris.api.exception.MaxHsJornadaSemanalException;
 import com.neoris.api.model.Turno;
 import com.neoris.api.payload.request.*;
 import com.neoris.api.payload.response.MessageResponse;
@@ -575,11 +576,14 @@ public class JornadaLaboralController {
     @PostMapping("/save/combinacion/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @Transactional
+    // Decidi no implementar un controlador para los errores de combinacion ya que lo uso
+    // solo una vez
     public ResponseEntity<MessageResponse> saveCombinacionDeTurnos(@Valid @RequestBody CombinacionDeTurnosRequest combinacionDeTurnosRequest, @PathVariable("id") Long jornadaId) {
         try {
             if (combinacionDeTurnosRequest.getCantHorasNormal() + combinacionDeTurnosRequest.getCantHorasExtra() > 12) {
                 throw new MaxHsJornadaDiariaException();
             }
+
             // Asigno la combinacion apropiadamente a cada tipo de turno
             TurnoNormalRequest turnoNormalRequest = new TurnoNormalRequest();
             turnoNormalRequest.setFecha(combinacionDeTurnosRequest.getFecha());
@@ -606,6 +610,11 @@ public class JornadaLaboralController {
             // Casteo el turno normal nuevo a Turno
             Turno turnoNormalNuevo = turnosService.casteoDeTurnoNormal(turnoNormalRequest);
 
+            int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActualesDelUsuario, turnoNormalNuevo) + combinacionDeTurnosRequest.getCantHorasNormal() + combinacionDeTurnosRequest.getCantHorasExtra();
+            if (cantidadDeHorasQueQuedarian > 48) {
+                throw new MaxHsJornadaSemanalException();
+            }
+
             // Controlo los requisitos para guardar el turno desde la clase TurnoService por que sino me quedaba mucho codigo duplicado
             turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoNormalNuevo, jornadaId);
             turnosService.controlarRequisitosDelTurnoNormal(turnosNormalesActuales, turnoNormalNuevo);
@@ -623,7 +632,6 @@ public class JornadaLaboralController {
             turnosService.controlarRequsitosDelTurno(turnosActualesDelUsuario, turnosActualesDeLosDemasUsuarios, turnoExtraNuevo, jornadaId);
             turnosService.controlarRequisitosDelTurnoExtra(turnosExtrasActuales, turnoExtraNuevo);
 
-            int cantidadDeHorasQueQuedarian = controladorDeSemanas.cantDehorasSemana(turnosActualesDelUsuario, turnoExtraNuevo) + turnoExtraNuevo.getCantHoras();
             TurnoExtra castTurnoExtra = turnosService.casteoDeRequestATurnoExtra(turnoExtraRequest);
             turnoExtraService.saveTurnoExtra(jornadaId, castTurnoExtra);
             String mensajeResponse = "Los datos de los turnos se guardaron con exito!";

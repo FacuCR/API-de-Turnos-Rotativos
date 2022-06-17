@@ -577,7 +577,7 @@ public class JornadaLaboralController {
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @Transactional
     // Decidi no implementar un controlador para los errores de combinacion ya que lo uso
-    // solo una vez
+    // solo una vez y lanzar los throws directamente
     public ResponseEntity<MessageResponse> saveCombinacionDeTurnos(@Valid @RequestBody CombinacionDeTurnosRequest combinacionDeTurnosRequest, @PathVariable("id") Long jornadaId) {
         try {
             if (combinacionDeTurnosRequest.getCantHorasNormal() + combinacionDeTurnosRequest.getCantHorasExtra() > 12) {

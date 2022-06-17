@@ -1,0 +1,1088 @@
+{
+	"info": {
+		"_postman_id": "66bb5235-3ff7-4fc1-941e-037ccf0275f7",
+		"name": "Turnos Jornada Laboral",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21287200"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Crear usuario",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTY1NTQ5NTU5NCwiZXhwIjoxNjU1NDk5MTk0fQ.5MycTJgdtBIHa5aSPcJtC5YdpWeQGNJPjGodNfL1xrk92rGLWlwNJ1JEHnWlrTMSLVLpk3Cic7K5F565WBpCKg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\" : \"user\",\r\n    \"password\" : \"123456\",\r\n    \"role\" : [\"user\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"description": "Se pueden asignar un rol o dos roles al mismo tiempo\n\nStartFragment\n\n\\[\"user\"\\] o \\[\"user\", \"admin\"\\]"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\" : \"admin\",\r\n    \"password\" : \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/signin",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"signin"
+							]
+						},
+						"description": "Se necesita el accessToken para poder usar los end-points que requieren Autorización"
+					},
+					"response": []
+				}
+			],
+			"description": "Login y creacion de cuenta con JWT"
+		},
+		{
+			"name": "Test Accesos",
+			"item": [
+				{
+					"name": "Publico",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/test/all",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"test",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Usuarios",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiaWF0IjoxNjU0OTM0OTA0LCJleHAiOjE2NTQ5Mzg1MDR9.TiygPhRgVH6mfBjkQNFZmOk7mIYUGDMdoNKYrS9-5aMeaU7G3RmkuOj2Wx-IqP_pSD6Agd0snb40_qaCBY60lw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/test/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"test",
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTY1NDkzNTE5MiwiZXhwIjoxNjU0OTM4NzkyfQ.1Fd44lxM6gjy_SQuKr3pfiT2hYmiG_3sls4JbYyVf60rH3h9YVt9pfhAsqGS9z56CPvKBojL8VlSO2u1iXCeMA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/test/admin",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"test",
+								"admin"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Tests para probar el alcance de los roles"
+		},
+		{
+			"name": "Empleados",
+			"item": [
+				{
+					"name": "Guardar Datos del Empleado",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiaWF0IjoxNjU1NDA4Nzk2LCJleHAiOjE2NTU0MTIzOTZ9.7w3jPPJEkLX9vX7UNGzUNplWpwzhoCDWjxXRYCujDEfmbY04gJdGhnGP9Dq9V7dNTNo83ksEUMPDw1ddR7TqKw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\" : \"Andres\",\r\n    \"apellido\" : \"Messi\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/empleados/save/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"empleados",
+								"save",
+								"2"
+							]
+						},
+						"description": "El id que se usa es el del usuario que se quiere modificar"
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Todos los Empleados",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/empleados/get",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"empleados",
+								"get"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener un Empleado",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/empleados/get/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"empleados",
+								"get",
+								"2"
+							]
+						},
+						"description": "El id que se usa es el del usuario que se quiere obtener"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Jornada Laboral",
+			"item": [
+				{
+					"name": "Turno Normal",
+					"item": [
+						{
+							"name": "Guardar un Turno Normal",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTY1NTQ5NTU5NCwiZXhwIjoxNjU1NDk5MTk0fQ.5MycTJgdtBIHa5aSPcJtC5YdpWeQGNJPjGodNfL1xrk92rGLWlwNJ1JEHnWlrTMSLVLpk3Cic7K5F565WBpCKg",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"fecha\" : \"17/07/2022\",\r\n    \"turno\" : \"TURNO_NOCHE\",\r\n    \"cantHoras\" : 8\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/save/normal/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"save",
+										"normal",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el de la jornada que se quiere modificar"
+							},
+							"response": []
+						},
+						{
+							"name": "Obtener un Turno Normal",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/get/normal/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"get",
+										"normal",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el del turno normal que se quiere obtener"
+							},
+							"response": []
+						},
+						{
+							"name": "Obtener Todos los Turnos Normales del Usuario",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/get/normal/all/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"get",
+										"normal",
+										"all",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el de la jornada del cual se quiere obtener todos los turnos normales"
+							},
+							"response": []
+						},
+						{
+							"name": "Actualizar un Turno Normal",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiaWF0IjoxNjU1MTQzNjgxLCJleHAiOjE2NTUxNDcyODF9.AYW6Ifjcs3vWRl2jJ_RP56t7EAzVF2snfm5hTiUXf4V2xyxH9GIQNvsN0jRR-wT3kUm4xMLrZtDuE7WZsKDH1w",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"fecha\" : \"03/07/2022\",\r\n    \"turno\" : \"TURNO_TARDE\",\r\n    \"cantHoras\" : 7\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/save/normal/1/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"save",
+										"normal",
+										"1",
+										"1"
+									]
+								},
+								"description": "El primer id que se usa es el de la jornada y el segundo del turno normal que se quiere modificar"
+							},
+							"response": []
+						},
+						{
+							"name": "Borrar un Turno Normal",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiaWF0IjoxNjU1MTU2MjEwLCJleHAiOjE2NTUxNTk4MTB9.6-2viiVdtz-J_4A0gsgdR2HhbM4JNxmKnk1qUzdUddop6SdkPFo2XGX6QKejRwaHAVSBaJQH9I0YGXU4DWEdgA",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/delete/normal/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"delete",
+										"normal",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el del turno normal que se quiere borrar"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Turno Extra",
+					"item": [
+						{
+							"name": "Guardar un Turno Extra",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTY1NTQ5MTE3MywiZXhwIjoxNjU1NDk0NzczfQ.Xt41YHRXCpfiWCNuzIFnm3vpzWcGz7F9DpxUm7CSJlGUpojFKvJbvwT3cjNcAWx2zwHmDdRVc_vV3rGYaVkFzw",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"fecha\" : \"02/07/2022\",\r\n    \"turno\" : \"TURNO_TARDE\",\r\n    \"cantHoras\" : 4\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/save/extra/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"save",
+										"extra",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el de la jornada que se quiere modificar"
+							},
+							"response": []
+						},
+						{
+							"name": "Obtener Todos los Turnos Extras del Usuario ",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/get/extra/all/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"get",
+										"extra",
+										"all",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el de la jornada del cual se quiere obtener todos los turnos extras"
+							},
+							"response": []
+						},
+						{
+							"name": "Obtener un Turno Extra",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/get/extra/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"get",
+										"extra",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el del turno extra que se quiere obtener"
+							},
+							"response": []
+						},
+						{
+							"name": "Actualizar un Turno Extra",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTY1NTQ5MTE3MywiZXhwIjoxNjU1NDk0NzczfQ.Xt41YHRXCpfiWCNuzIFnm3vpzWcGz7F9DpxUm7CSJlGUpojFKvJbvwT3cjNcAWx2zwHmDdRVc_vV3rGYaVkFzw",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"fecha\" : \"04/07/2022\",\r\n    \"turno\" : \"TURNO_TARDE\",\r\n    \"cantHoras\" : 4\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/save/extra/1/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"save",
+										"extra",
+										"1",
+										"1"
+									]
+								},
+								"description": "El primer id que se usa es el de la jornada y el segundo es el turno extra que se quiere modificar"
+							},
+							"response": []
+						},
+						{
+							"name": "Borrar un Turno Extra",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTY1NTQxNzg4NCwiZXhwIjoxNjU1NDIxNDg0fQ.JDAiJEeLIeKB2A4FK_2ctfjLaCuUT9Wuh8FLd2a3c200ubeey8ZY47CkcFh-5k2cgR2OgSCMR5k0C_JbctP9NA",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/delete/extra/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"delete",
+										"extra",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el del turno extra que se quiere borrar"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Dia Libre",
+					"item": [
+						{
+							"name": "Guardar un Dia Libre",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTY1NTQ5MTE3MywiZXhwIjoxNjU1NDk0NzczfQ.Xt41YHRXCpfiWCNuzIFnm3vpzWcGz7F9DpxUm7CSJlGUpojFKvJbvwT3cjNcAWx2zwHmDdRVc_vV3rGYaVkFzw",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"fecha\" : \"02/07/2022\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/save/libre/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"save",
+										"libre",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el de la jornada que se quiere modificar"
+							},
+							"response": []
+						},
+						{
+							"name": "Actualizar Dia Libre",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTY1NTQyNTUyOCwiZXhwIjoxNjU1NDI5MTI4fQ.5DheQumCBY3ZKhH9Az7sL7mdybhCuxslH338z_Zz4AjrnfJGV0J1yPTIjRcZDZ3lc6FopggYWHqJjE-7n3tW_w",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"fecha\" : \"20/06/2022\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/save/libre/1/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"save",
+										"libre",
+										"1",
+										"1"
+									]
+								},
+								"description": "El primer id que se usa es el de la jornada y el segundo del dia libre que se quiere modificar"
+							},
+							"response": []
+						},
+						{
+							"name": "Obtener todos Los Días Libres del Usuario",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/get/libre/all/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"get",
+										"libre",
+										"all",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el de la jornada del cual se quiere obtener todos los dias libre"
+							},
+							"response": []
+						},
+						{
+							"name": "Obtener un Día Libre",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/get/libre/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"get",
+										"libre",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el del dia libre que se quiere obtener"
+							},
+							"response": []
+						},
+						{
+							"name": "Borrar un Dia Libre",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTY1NTQyNTUyOCwiZXhwIjoxNjU1NDI5MTI4fQ.5DheQumCBY3ZKhH9Az7sL7mdybhCuxslH338z_Zz4AjrnfJGV0J1yPTIjRcZDZ3lc6FopggYWHqJjE-7n3tW_w",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/delete/libre/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"delete",
+										"libre",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el del dia libre que se quiere borrar"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Antiguedad",
+					"item": [
+						{
+							"name": "Obtener la Antiguedad del Usuario",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/get/antiguedad/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"get",
+										"antiguedad",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el de la jornada que se quiere obtener"
+							},
+							"response": []
+						},
+						{
+							"name": "Asignar Antiguedad del Usuario",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTY1NTQzNTQ0NywiZXhwIjoxNjU1NDM5MDQ3fQ.cNmL6OlHTjah1L9DbG1Fuf-1i_rgrLDkFtQhHOy8QFwOtYibRDmYTzl2vGRRrkfnGvvybT2hMZBCfZBCbobZCQ",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/save/antiguedad/1/3",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"save",
+										"antiguedad",
+										"1",
+										"3"
+									]
+								},
+								"description": "El primer id que se usa es el de la jornada que se quiere modificar el segundo numero del path variable no es un id es un int que se asignara a la antiguedad"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Vacaciones",
+					"item": [
+						{
+							"name": "Guardar una Vacacion",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTY1NTQ5MTE3MywiZXhwIjoxNjU1NDk0NzczfQ.Xt41YHRXCpfiWCNuzIFnm3vpzWcGz7F9DpxUm7CSJlGUpojFKvJbvwT3cjNcAWx2zwHmDdRVc_vV3rGYaVkFzw",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"fecha\" : \"03/07/2022\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/save/vacaciones/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"save",
+										"vacaciones",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el de la jornada que se quiere modificar"
+							},
+							"response": []
+						},
+						{
+							"name": "Actualizar una Vacacion",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTY1NTQzOTA2MywiZXhwIjoxNjU1NDQyNjYzfQ.SNQcMorE8lqa4EkNXoyExGFwN4O3AO-j-6nZV-D69Zru6Z-cNDpNgL1eCceSmdRfepWyYaXxWb_cRvWW_jJzdw",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"fecha\" : \"25/06/2022\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/save/vacaciones/1/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"save",
+										"vacaciones",
+										"1",
+										"1"
+									]
+								},
+								"description": "El primer id que se usa es el de la jornada y el segundo id es de las vacaciones que se quiere modificar"
+							},
+							"response": []
+						},
+						{
+							"name": "Obtener una Vacacion",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/get/vacaciones/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"get",
+										"vacaciones",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el de las vacaciones que se quiere obtener"
+							},
+							"response": []
+						},
+						{
+							"name": "Obtener Todas las Vacaciones de un Usuario",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/get/vacaciones/all/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"get",
+										"vacaciones",
+										"all",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el de la jornada del cual se quiere obtener todas sus vacaciones"
+							},
+							"response": []
+						},
+						{
+							"name": "Borrar una Vacacion",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTY1NTQzOTA2MywiZXhwIjoxNjU1NDQyNjYzfQ.SNQcMorE8lqa4EkNXoyExGFwN4O3AO-j-6nZV-D69Zru6Z-cNDpNgL1eCceSmdRfepWyYaXxWb_cRvWW_jJzdw",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/delete/vacaciones/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"delete",
+										"vacaciones",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el de las vacaciones que se quiere borrar"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Combinacion",
+					"item": [
+						{
+							"name": "Guardar una Combinacion de Turnos",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTY1NTQ5NTU5NCwiZXhwIjoxNjU1NDk5MTk0fQ.5MycTJgdtBIHa5aSPcJtC5YdpWeQGNJPjGodNfL1xrk92rGLWlwNJ1JEHnWlrTMSLVLpk3Cic7K5F565WBpCKg",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"fecha\" : \"24/07/2022\",\r\n    \"turnoNormal\" : \"TURNO_NOCHE\",\r\n    \"turnoExtra\" : \"TURNO_TARDE\",\r\n    \"cantHorasNormal\" : 8,\r\n    \"cantHorasExtra\" : 2\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/jornada/save/combinacion/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"jornada",
+										"save",
+										"combinacion",
+										"1"
+									]
+								},
+								"description": "El id que se usa es el de la jornada que se quiere modificar"
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	]
+}

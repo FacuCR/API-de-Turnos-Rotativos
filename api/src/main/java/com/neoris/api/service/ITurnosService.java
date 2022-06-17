@@ -4,6 +4,8 @@ import com.neoris.api.entity.DiaLibre;
 import com.neoris.api.entity.TurnoExtra;
 import com.neoris.api.entity.TurnoNormal;
 import com.neoris.api.entity.Vacaciones;
+import com.neoris.api.exception.DemasiadosDiasLibresException;
+import com.neoris.api.exception.DiaLibreAsignadoException;
 import com.neoris.api.exception.FechaAnteriorException;
 import com.neoris.api.exception.VacacionesException;
 import com.neoris.api.model.Turno;
@@ -26,7 +28,7 @@ public interface ITurnosService {
     ResponseEntity<MessageResponse> controlarRequisitosDelTurnoExtra(List<TurnoExtra> turnosExtras, Turno turnoNuevo);
     List<Turno> getAllTurnosDelUsuario(Long jornadaId);
     List<Turno> getAllTurnosDeLosDemasUsuarios(Long jornadaId);
-    ResponseEntity<MessageResponse> controlarRequisitosDeDiaLibre(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo);
+    void controlarRequisitosDeDiaLibre(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo) throws FechaAnteriorException, DiaLibreAsignadoException, DemasiadosDiasLibresException;
     String deleteAllTurnosDelDiaLibreElegido(DiaLibre diaLibreNuevo, List<TurnoNormal> turnosNormalesActuales, List<TurnoExtra> turnosExtrasActuales);
     String deleteAllTurnosOcupadosPorLaVacacionElegida(Vacaciones vacacionesNuevas, List<TurnoNormal> turnosNormalesActuales, List<TurnoExtra> turnosExtrasActuales);
     void controlarRequisitosDeVacaciones(List<Vacaciones> todasLasVacaciones, Vacaciones nuevasVacaciones) throws FechaAnteriorException, VacacionesException;

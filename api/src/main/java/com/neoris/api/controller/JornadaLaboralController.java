@@ -341,74 +341,70 @@ public class JornadaLaboralController {
     @PostMapping("/save/libre/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> saveDiaLibre(@Valid @RequestBody DiaLibreRequest diaLibreRequest, @PathVariable("id") Long jornadaId) {
-        // Obtengo todos los turnos(Normales y extras) por separado de la jornada del usuario
-        List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
-        List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
+        try {
+            // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados a Turno
+            List<DiaLibre> diasLibresActualesDelUsuario = diaLibreService.getAllDiasLibres(jornadaId);
 
-        // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados a Turno
-        List<DiaLibre> diasLibresActualesDelUsuario = diaLibreService.getAllDiasLibres(jornadaId);
+            // Casteo el request a DiaLibre
+            DiaLibre diaLibreNuevo = new DiaLibre();
+            diaLibreNuevo.setFecha(diaLibreRequest.getFecha());
 
-        // Casteo el request a DiaLibre
-        DiaLibre diaLibreNuevo = new DiaLibre();
-        diaLibreNuevo.setFecha(diaLibreRequest.getFecha());
+            // Controlo las excepciones de los dias libres
+            turnosService.controlarRequisitosDeDiaLibre(diasLibresActualesDelUsuario, diaLibreNuevo);
 
-        ResponseEntity<MessageResponse> controlarRequisitosDeDiaLibre = turnosService.controlarRequisitosDeDiaLibre(diasLibresActualesDelUsuario, diaLibreNuevo);
-        if (controlarRequisitosDeDiaLibre.getStatusCode().equals(HttpStatus.OK)) {
-            try {
-                // Busco si hay un turno normal y/o extra ese dia para borrarlo
-                String mensajeDeSeBorroAlgunTurno = turnosService.deleteAllTurnosDelDiaLibreElegido(diaLibreNuevo, turnosNormalesActuales, turnosExtrasActuales);
+            // Obtengo todos los turnos(Normales y extras) por separado de la jornada del usuario
+            List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
+            List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
 
-                // Guardo el DiaLibre
-                diaLibreService.saveDiaLibre(jornadaId, diaLibreNuevo);
+            // Busco si hay un turno normal y/o extra ese dia para borrarlo
+            String mensajeDeSeBorroAlgunTurno = turnosService.deleteAllTurnosDelDiaLibreElegido(diaLibreNuevo, turnosNormalesActuales, turnosExtrasActuales);
 
-                return ResponseEntity
-                        .ok()
-                        .body(new MessageResponse("El dia libre se asigno para la fecha: " + df.format(diaLibreNuevo.getFecha()) + " correctamente" + mensajeDeSeBorroAlgunTurno));
-            } catch (Exception e) {
-                logger.error("Error: No se pudo asignar el dia libre! {}", e);
-                return ResponseEntity
-                        .status(HttpStatus.EXPECTATION_FAILED)
-                        .body(new MessageResponse("Error: Ups ucurrio algo al intentar asignar el dia libre!"));
-            }
-        } else {
-            return  controlarRequisitosDeDiaLibre;
+            // Guardo el DiaLibre
+            diaLibreService.saveDiaLibre(jornadaId, diaLibreNuevo);
+
+            return ResponseEntity
+                    .ok()
+                    .body(new MessageResponse("El dia libre se asigno para la fecha: " + df.format(diaLibreNuevo.getFecha()) + " correctamente" + mensajeDeSeBorroAlgunTurno));
+        } catch (Exception e) {
+            logger.error("Error: No se pudo asignar el dia libre! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new MessageResponse("Ups ocurrio algo al intentar guardar el dia libre!, Error: " + e.getMessage()));
         }
     }
 
     @PutMapping("/save/libre/{jornadaId}/{diaLibreId}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> updateDiaLibre(@Valid @RequestBody DiaLibreRequest diaLibreRequest, @PathVariable("jornadaId") Long jornadaId, @PathVariable("diaLibreId") Long diaLibreId) {
-        // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados a Turno
-        List<DiaLibre> diasLibresActualesDelUsuario = diaLibreService.getAllDiasLibres(jornadaId);
+        try {
+            // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados a Turno
+            List<DiaLibre> diasLibresActualesDelUsuario = diaLibreService.getAllDiasLibres(jornadaId);
 
-        // Casteo el request a DiaLibre
-        DiaLibre diaLibreNuevo = new DiaLibre();
-        diaLibreNuevo.setFecha(diaLibreRequest.getFecha());
+            // Casteo el request a DiaLibre
+            DiaLibre diaLibreNuevo = new DiaLibre();
+            diaLibreNuevo.setFecha(diaLibreRequest.getFecha());
 
-        ResponseEntity<MessageResponse> controlarRequisitosDeDiaLibre = turnosService.controlarRequisitosDeDiaLibre(diasLibresActualesDelUsuario, diaLibreNuevo);
-        if (controlarRequisitosDeDiaLibre.getStatusCode().equals(HttpStatus.OK)) {
-            try {
-                // Obtengo todos los turnos(Normales y extras) por separado de la jornada del usuario
-                List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
-                List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
+            // Controlo las excepciones de los dias libres
+            turnosService.controlarRequisitosDeDiaLibre(diasLibresActualesDelUsuario, diaLibreNuevo);
 
-                // Busco si hay un turno normal y/o extra ese dia para borrarlo
-                String mensajeDeSeBorroAlgunTurno = turnosService.deleteAllTurnosDelDiaLibreElegido(diaLibreNuevo, turnosNormalesActuales, turnosExtrasActuales);
+            // Obtengo todos los turnos(Normales y extras) por separado de la jornada del usuario
+            List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
+            List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
 
-                // Guardo el DiaLibre
-                diaLibreService.updateDiaLibre(jornadaId,  diaLibreId, diaLibreNuevo);
+            // Busco si hay un turno normal y/o extra ese dia para borrarlo
+            String mensajeDeSeBorroAlgunTurno = turnosService.deleteAllTurnosDelDiaLibreElegido(diaLibreNuevo, turnosNormalesActuales, turnosExtrasActuales);
 
-                return ResponseEntity
-                        .ok()
-                        .body(new MessageResponse("El dia libre se asigno para la fecha: " + df.format(diaLibreNuevo.getFecha()) + " correctamente" + mensajeDeSeBorroAlgunTurno));
-            } catch (Exception e) {
-                logger.error("Error: No se pudo asignar el dia libre! {}", e);
-                return ResponseEntity
-                        .status(HttpStatus.EXPECTATION_FAILED)
-                        .body(new MessageResponse("Error: Ups ucurrio algo al intentar asignar el dia libre!"));
-            }
-        } else {
-            return  controlarRequisitosDeDiaLibre;
+            // Guardo el DiaLibre
+            diaLibreService.updateDiaLibre(jornadaId,  diaLibreId, diaLibreNuevo);
+
+            return ResponseEntity
+                    .ok()
+                    .body(new MessageResponse("El dia libre se asigno para la fecha: " + df.format(diaLibreNuevo.getFecha()) + " correctamente" + mensajeDeSeBorroAlgunTurno));
+        } catch (Exception e) {
+            logger.error("Error: No se pudo asignar el dia libre! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new MessageResponse("Ups ocurrio algo al intentar actualizar el dia libre!, Error: " + e.getMessage()));
         }
     }
 
@@ -421,7 +417,7 @@ public class JornadaLaboralController {
             logger.error("Error: No se pudo obtener los días libres del empleado! {}", e);
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener los turnos extras del empleado!"));
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener los días libres del empleado!"));
         }
     }
 
@@ -447,7 +443,7 @@ public class JornadaLaboralController {
                     .ok()
                     .body(new MessageResponse("El dia libre se elimino correctamente!"));
         } catch (Exception e) {
-            logger.error("Error: No se pudo borrar el turno normal! {}", e);
+            logger.error("Error: No se pudo borrar el día libre! {}", e);
             return ResponseEntity
                     .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new MessageResponse("Error: Ups ucurrio algo al intentar borrar el dia libre!"));

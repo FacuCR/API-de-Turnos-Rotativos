@@ -1,6 +1,8 @@
 package com.neoris.api.service;
 
 import com.neoris.api.entity.*;
+import com.neoris.api.exception.DemasiadosDiasLibresException;
+import com.neoris.api.exception.DiaLibreAsignadoException;
 import com.neoris.api.exception.FechaAnteriorException;
 import com.neoris.api.exception.VacacionesException;
 import com.neoris.api.model.Turno;
@@ -211,32 +213,23 @@ public class TurnosService implements ITurnosService{
     }
 
     @Override
-    public ResponseEntity<MessageResponse> controlarRequisitosDeDiaLibre(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo) {
+    public void controlarRequisitosDeDiaLibre(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo) throws FechaAnteriorException, DiaLibreAsignadoException, DemasiadosDiasLibresException {
         // Controlo que la fecha no sea de antes de la fecha actual
         Date fechaActual = new Date();
         if (diaLibreNuevo.getFecha().before(fechaActual)){
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No puedes viajar en el tiempo bro, la fecha de hoy es " + df.format(fechaActual) + " ingresa una fecha valida!"));
+            throw new FechaAnteriorException(diaLibreNuevo.getFecha());
         }
 
         // Controlo que no tenga un dia libre asignado ya en ese dia
         if (!diasLibres.isEmpty() && controladorDeSemanas.isElMismoUsuarioConElMismoDiaLibre(diasLibres, diaLibreNuevo)){
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No se pudo guardar el dia libre por que ya tienes un dia libre asignado en ese fecha!"));
+            throw new DiaLibreAsignadoException(diaLibreNuevo.getFecha());
         }
 
         // Controlo que en la semana el usuario no tenga mas de 2 días libres.
         if (!diasLibres.isEmpty() && controladorDeSemanas.isElMismoUsuarioConDosDiasLibresEnLaMismaSemana(diasLibres, diaLibreNuevo)) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No se pudo guardar el dia libre por que ya tienes dos dias libres asignado en ese semana!"));
+            throw new DemasiadosDiasLibresException();
         }
 
-        return ResponseEntity
-                .ok()
-                .body(new MessageResponse(("")));
     }
 
     @Override

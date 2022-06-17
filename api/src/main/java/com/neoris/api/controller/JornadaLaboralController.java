@@ -377,10 +377,6 @@ public class JornadaLaboralController {
     @PutMapping("/save/libre/{jornadaId}/{diaLibreId}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> updateDiaLibre(@Valid @RequestBody DiaLibreRequest diaLibreRequest, @PathVariable("jornadaId") Long jornadaId, @PathVariable("diaLibreId") Long diaLibreId) {
-        // Obtengo todos los turnos(Normales y extras) por separado de la jornada del usuario
-        List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
-        List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
-
         // Obtengo todos los turnos(Normales y extras) de la jornada del usuario casteados a Turno
         List<DiaLibre> diasLibresActualesDelUsuario = diaLibreService.getAllDiasLibres(jornadaId);
 
@@ -391,6 +387,10 @@ public class JornadaLaboralController {
         ResponseEntity<MessageResponse> controlarRequisitosDeDiaLibre = turnosService.controlarRequisitosDeDiaLibre(diasLibresActualesDelUsuario, diaLibreNuevo);
         if (controlarRequisitosDeDiaLibre.getStatusCode().equals(HttpStatus.OK)) {
             try {
+                // Obtengo todos los turnos(Normales y extras) por separado de la jornada del usuario
+                List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
+                List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
+
                 // Busco si hay un turno normal y/o extra ese dia para borrarlo
                 String mensajeDeSeBorroAlgunTurno = turnosService.deleteAllTurnosDelDiaLibreElegido(diaLibreNuevo, turnosNormalesActuales, turnosExtrasActuales);
 
@@ -414,8 +414,8 @@ public class JornadaLaboralController {
     @GetMapping("/get/libre/all/{id}")
     public ResponseEntity<?> getAllTurnosDiasLibres(@PathVariable("id") Long jornadaId){
         try {
-            List<DiaLibre> turnosExtras = diaLibreService.getAllDiasLibres(jornadaId);
-            return new ResponseEntity<>(turnosExtras, HttpStatus.OK);
+            List<DiaLibre> diasLibres = diaLibreService.getAllDiasLibres(jornadaId);
+            return new ResponseEntity<>(diasLibres, HttpStatus.OK);
         } catch(Exception e) {
             logger.error("Error: No se pudo obtener los días libres del empleado! {}", e);
             return ResponseEntity
@@ -496,18 +496,110 @@ public class JornadaLaboralController {
     @PostMapping("/save/vacaciones/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> saveVacaciones(@PathVariable("id") Long jornadaId, @Valid @RequestBody VacacionesRequest vacacionesRequest) {
+        Vacaciones nuevasVacaciones = new Vacaciones();
+        nuevasVacaciones.setFechaInicio(vacacionesRequest.getFecha(), jornadaLaboralService.getAntiguedadByJornadaId(jornadaId));
+
+        List<Vacaciones> todasLasVacacionesActuales = vacacionesService.getAllVacaciones(jornadaId);
+
+        ResponseEntity<MessageResponse> controlarRequisitosDeVacaciones = turnosService.controlarRequisitosDeVacaciones(todasLasVacacionesActuales, nuevasVacaciones);
+        if (controlarRequisitosDeVacaciones.getStatusCode().equals(HttpStatus.OK)) {
+            try {
+                // Obtengo todos los turnos(Normales y extras) por separado de la jornada del usuario
+                List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
+                List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
+
+                // Busco si hay un turnos normales y/o extras ese dia para borrarlos
+                String mensajeDeSeBorroAlgunTurno = turnosService.deleteAllTurnosOcupadosPorLaVacacionElegida(nuevasVacaciones, turnosNormalesActuales, turnosExtrasActuales);
+
+                vacacionesService.saveVacaciones(jornadaId, nuevasVacaciones);
+                return ResponseEntity
+                        .ok()
+                        .body(new MessageResponse("Las vacaciones se asignaron con exito inicio: " + df.format(nuevasVacaciones.getFechaInicio()) + " y final: " + df.format(nuevasVacaciones.getFechaFinal()) + mensajeDeSeBorroAlgunTurno));
+            } catch (Exception e) {
+                logger.error("Error: No se pudo guardar las vacaciones del empleado! {}", e);
+                return ResponseEntity
+                        .status(HttpStatus.EXPECTATION_FAILED)
+                        .body(new MessageResponse("Error: Ups ocurrio algo al intentar asignar las vacaciones del empleado!"));
+            }
+        } else {
+            return  controlarRequisitosDeVacaciones;
+        }
+    }
+
+    @PutMapping("/save/vacaciones/{jornadaId}/{vacacionesId}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> updateVacaciones(@PathVariable("jornadaId") Long jornadaId, @PathVariable("vacacionesId") Long vacacionesId, @Valid @RequestBody VacacionesRequest vacacionesRequest) {
+        Vacaciones nuevasVacaciones = new Vacaciones();
+        nuevasVacaciones.setFechaInicio(vacacionesRequest.getFecha(), jornadaLaboralService.getAntiguedadByJornadaId(jornadaId));
+        nuevasVacaciones.setIdVacaciones(vacacionesId);
+
+        List<Vacaciones> todasLasVacacionesActuales = vacacionesService.getAllVacaciones(jornadaId);
+
+        ResponseEntity<MessageResponse> controlarRequisitosDeVacaciones = turnosService.controlarRequisitosDeVacaciones(todasLasVacacionesActuales, nuevasVacaciones);
+        if (controlarRequisitosDeVacaciones.getStatusCode().equals(HttpStatus.OK)) {
+            try {
+                // Obtengo todos los turnos(Normales y extras) por separado de la jornada del usuario
+                List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
+                List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
+
+                // Busco si hay un turnos normales y/o extras ese dia para borrarlos
+                String mensajeDeSeBorroAlgunTurno = turnosService.deleteAllTurnosOcupadosPorLaVacacionElegida(nuevasVacaciones, turnosNormalesActuales, turnosExtrasActuales);
+
+                vacacionesService.updateVacaciones(jornadaId, vacacionesId, nuevasVacaciones);
+                return ResponseEntity
+                        .ok()
+                        .body(new MessageResponse("Las vacaciones se asignaron con exito inicio: " + df.format(nuevasVacaciones.getFechaInicio()) + " y final: " + df.format(nuevasVacaciones.getFechaFinal()) + mensajeDeSeBorroAlgunTurno));
+            } catch (Exception e) {
+                logger.error("Error: No se pudo guardar las vacaciones del empleado! {}", e);
+                return ResponseEntity
+                        .status(HttpStatus.EXPECTATION_FAILED)
+                        .body(new MessageResponse("Error: Ups ocurrio algo al intentar asignar las vacaciones del empleado!"));
+            }
+        } else {
+            return  controlarRequisitosDeVacaciones;
+        }
+    }
+
+    @GetMapping("/get/vacaciones/{id}")
+    public ResponseEntity<?> getVacaciones(@PathVariable("id") Long vacacionesId){
         try {
-            Vacaciones nuevasVacaciones = new Vacaciones();
-            nuevasVacaciones.setFechaInicio(vacacionesRequest.getFecha(), jornadaLaboralService.getAntiguedadByJornadaId(jornadaId));
-            vacacionesService.saveVacaciones(jornadaId, nuevasVacaciones);
+            Vacaciones vacaciones = vacacionesService.getVacacionesById(vacacionesId).get();
+            return new ResponseEntity<>(vacaciones, HttpStatus.OK);
+        } catch(Exception e) {
+            logger.error("Error: No se pudo obtener el turno extra del empleado! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener la antiguedad del empleado!"));
+        }
+    }
+
+    @GetMapping("/get/vacaciones/all/{id}")
+    public ResponseEntity<?> getAllVacaciones(@PathVariable("id") Long jornadaId){
+        try {
+            List<Vacaciones> vacaciones = vacacionesService.getAllVacaciones(jornadaId);
+            return new ResponseEntity<>(vacaciones, HttpStatus.OK);
+        } catch(Exception e) {
+            logger.error("Error: No se pudo obtener el turno extra del empleado! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener la antiguedad del empleado!"));
+        }
+    }
+
+
+    @DeleteMapping("/delete/vacaciones/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> deleteVacaciones(@PathVariable("id") Long vacacionesId){
+        try {
+            vacacionesService.deleteVacaciones(vacacionesId);
             return ResponseEntity
                     .ok()
-                    .body(new MessageResponse("Las vacaciones se asignaron con exito inicio: " + df.format(nuevasVacaciones.getFechaInicio()) + " y final: " + df.format(nuevasVacaciones.getFechaFinal())));
-        } catch(Exception e) {
-            logger.error("Error: No se guardar las vacaciones del empleado! {}", e);
+                    .body(new MessageResponse("Las vacaciones se eliminaron correctamente!"));
+        } catch (Exception e) {
+            logger.error("Error: No se pudo borrar el turno normal! {}", e);
             return ResponseEntity
                     .status(HttpStatus.EXPECTATION_FAILED)
-                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener la antiguedad del empleado!"));
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar borrar las vacaciones!"));
         }
     }
 

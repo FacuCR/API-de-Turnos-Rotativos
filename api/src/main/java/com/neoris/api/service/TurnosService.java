@@ -1,9 +1,6 @@
 package com.neoris.api.service;
 
-import com.neoris.api.entity.DiaLibre;
-import com.neoris.api.entity.JornadaLaboral;
-import com.neoris.api.entity.TurnoExtra;
-import com.neoris.api.entity.TurnoNormal;
+import com.neoris.api.entity.*;
 import com.neoris.api.model.Turno;
 import com.neoris.api.payload.request.TurnoExtraRequest;
 import com.neoris.api.payload.request.TurnoNormalRequest;
@@ -120,7 +117,7 @@ public class TurnosService implements ITurnosService{
     @Override
     public ResponseEntity<MessageResponse> controlarRequisitosDelTurnoExtra(List<TurnoExtra> turnosExtras, Turno turnoNuevo) {
         // Controlo que no tenga un turno extra asignado ya en ese dia
-        if (!turnosExtras.isEmpty() && controladorDeSemanas.isTurnoExtraAsignadoEnEseDia(turnosExtras, turnoNuevo)){
+        if (!turnosExtras.isEmpty()  && controladorDeSemanas.isTurnoExtraAsignadoEnEseDia(turnosExtras, turnoNuevo)){
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse("Error: No se pudo guardar el turno extra por que ya tienes un turno extra asignado ese dia!"));
@@ -250,14 +247,14 @@ public class TurnosService implements ITurnosService{
     public String deleteAllTurnosDelDiaLibreElegido(DiaLibre diaLibreNuevo, List<TurnoNormal> turnosNormalesActuales, List<TurnoExtra> turnosExtrasActuales) {
         String mensajeDeSeBorroAlgunTurno = "";
         try {
-            Stream<TurnoNormal> turnosNormalesActualesStream = turnosNormalesActuales.stream();
-            Long idTurnoNormalDeEseDia = turnosNormalesActualesStream
+            // Borro el turno normal de ese dia
+            Long idTurnoNormalDeEseDia = turnosNormalesActuales.stream()
                     .filter(turno -> turno.getFecha().compareTo(diaLibreNuevo.getFecha()) == 0)
                     .map(TurnoNormal::getIdTurnoNormal)
                     .findFirst().get();
             turnoNormalService.deleteTurnoNormal(idTurnoNormalDeEseDia);
 
-            Stream<TurnoExtra> turnosExtrasActualesStream = turnosExtrasActuales.stream();
+            // Borro el turno extra de ese dia
             Long idTurnoExtraDeEseDia = turnosExtrasActuales.stream()
                     .filter(turno -> turno.getFecha().compareTo(diaLibreNuevo.getFecha()) == 0)
                     .map(TurnoExtra::getIdTurnoExtra)
@@ -270,5 +267,63 @@ public class TurnosService implements ITurnosService{
         } finally {
             return mensajeDeSeBorroAlgunTurno;
         }
+    }
+
+    @Override
+    @Transactional
+    // Busco si hay turnos normales y/o extras entre la fecha de inicio y final de las vacaciones para borrarlo
+    public String deleteAllTurnosOcupadosPorLaVacacionElegida(Vacaciones vacacionesNuevas, List<TurnoNormal> turnosNormalesActuales, List<TurnoExtra> turnosExtrasActuales) {
+        String mensajeDeSeBorroAlgunTurno = "";
+        try {
+            // Borro los turnos normales entre esas fechas
+            Stream<TurnoNormal> turnosNormalesActualesStream = turnosNormalesActuales.stream();
+            List<Long> idsTurnosNormalesABorrar = turnosNormalesActualesStream
+                    // Filtro todos los turnos que tengan la fecha entre la fecha de inicio y final de las vacaciones nuevas
+                    .filter(turno -> vacacionesNuevas.getFechaFinal().after(turno.getFecha()) && vacacionesNuevas.getFechaInicio().before(turno.getFecha()))
+                    .map(TurnoNormal::getIdTurnoNormal)
+                    .collect(Collectors.toList());
+            for (Long idTurnoNormal : idsTurnosNormalesABorrar) {
+                turnoNormalService.deleteTurnoNormal(idTurnoNormal);
+            }
+
+            // Borro los turnos extras entre esas fechas
+            Stream<TurnoExtra> turnosExtrasActualesStream = turnosExtrasActuales.stream();
+            List<Long> idsTurnosExtrasDeEseDia = turnosExtrasActualesStream
+                    .filter(turno -> vacacionesNuevas.getFechaFinal().after(turno.getFecha()) && vacacionesNuevas.getFechaInicio().before(turno.getFecha()))
+                    .map(TurnoExtra::getIdTurnoExtra)
+                    .collect(Collectors.toList());
+            for (Long idTurnoExtra : idsTurnosExtrasDeEseDia) {
+                turnoExtraService.deleteTurnoExtra(idTurnoExtra);
+            }
+
+            mensajeDeSeBorroAlgunTurno = " y los turnos de esas fechas se borraron";
+
+        } catch(Exception e) {
+            logger.error("Ocurrio un error al borrar los turnos entre las fechas de las vacaciones que se quiere asignar: {}", e);
+        } finally {
+            return mensajeDeSeBorroAlgunTurno;
+        }
+    }
+
+    @Override
+    public ResponseEntity<MessageResponse> controlarRequisitosDeVacaciones(List<Vacaciones> todasLasVacaciones, Vacaciones nuevasVacaciones) {
+        // Controlo que la fecha no sea de antes de la fecha actual
+        Date fechaActual = new Date();
+        if (nuevasVacaciones.getFechaInicio().before(new Date())){
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error: No puedes viajar en el tiempo bro, la fecha de hoy es " + df.format(fechaActual) + " ingresa una fecha valida!"));
+        }
+
+        // Controlo que se guarde una vacacion por año
+        if(!todasLasVacaciones.isEmpty() && controladorDeSemanas.isAlgunAnioCoincidente(todasLasVacaciones, nuevasVacaciones)) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Error: Ya asignaste unas vacaciones en el año" + controladorDeSemanas.anioDeUnaFecha(nuevasVacaciones.getFechaInicio()) + "!"));
+        }
+
+        return ResponseEntity
+                .ok()
+                .body(new MessageResponse(("")));
     }
 }

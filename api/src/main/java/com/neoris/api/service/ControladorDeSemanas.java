@@ -3,6 +3,7 @@ package com.neoris.api.service;
 import com.neoris.api.entity.DiaLibre;
 import com.neoris.api.entity.TurnoExtra;
 import com.neoris.api.entity.TurnoNormal;
+import com.neoris.api.entity.Vacaciones;
 import com.neoris.api.model.Turno;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -173,5 +174,12 @@ public class ControladorDeSemanas implements IControladorDeSemanas{
     public boolean isDiaLibre(Date fecha, Long jornadaId) {
         Stream<DiaLibre> todosLosDiasLibres = diaLibreService.getAllDiasLibres(jornadaId).stream();
         return todosLosDiasLibres.filter(dia -> dia.getFecha().compareTo(fecha) == 0).findAny().isPresent();
+    }
+
+    @Override
+    public boolean isAlgunAnioCoincidente(List<Vacaciones> todasLasVacacionesActuales, Vacaciones nuevasVacaciones) {
+        return todasLasVacacionesActuales.stream()
+                .filter(vacacion -> anioDeUnaFecha(vacacion.getFechaInicio()) == anioDeUnaFecha(nuevasVacaciones.getFechaInicio()))
+                .findAny().isPresent();
     }
 }

@@ -3,6 +3,7 @@ package com.neoris.api.service;
 import com.neoris.api.entity.DiaLibre;
 import com.neoris.api.entity.TurnoExtra;
 import com.neoris.api.entity.TurnoNormal;
+import com.neoris.api.entity.Vacaciones;
 import com.neoris.api.model.Turno;
 
 import java.time.LocalDateTime;
@@ -24,4 +25,5 @@ public interface IControladorDeSemanas {
     boolean isElMismoUsuarioConElMismoDiaLibre(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo);
     boolean isElMismoUsuarioConDosDiasLibresEnLaMismaSemana(List<DiaLibre> diasLibres, DiaLibre diaLibreNuevo);
     boolean isDiaLibre(Date fecha, Long jornadaId);
+    boolean isAlgunAnioCoincidente(List<Vacaciones> todasLasVacacionesActuales, Vacaciones nuevasVacaciones);
 }

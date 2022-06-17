@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -40,7 +41,7 @@ public class JornadaLaboralController {
     @Autowired
     private ITurnosService turnosService;
     @Autowired
-    private JornadaLaboralRepository jornadaLaboralRepository;
+    private IJornadaLaboralService jornadaLaboralService;
     @Autowired
     private IDiaLibreService diaLibreService;
     private static final Logger logger = LoggerFactory.getLogger(JornadaLaboralController.class);
@@ -454,6 +455,40 @@ public class JornadaLaboralController {
         }
     }
 
+
+    // ========== ANTIGUEDAD ========== //
+
+
+    @GetMapping("/get/antiguedad/{id}")
+    public ResponseEntity<MessageResponse> getAntiguedad(@PathVariable("id") Long jornadaLaboralId){
+        try {
+            int antiguedad = jornadaLaboralService.getAntiguedadByJornadaId(jornadaLaboralId);
+            return ResponseEntity
+                    .ok()
+                    .body(new MessageResponse("La antiguedad del usuario es de " + antiguedad + " años."));
+        } catch(Exception e) {
+            logger.error("Error: No se pudo obtener el turno extra del empleado! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener la antiguedad del empleado!"));
+        }
+    }
+
+    @PostMapping("/save/antiguedad/{id}/{antiguedad}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> saveAntiguedad(@PathVariable("id") Long jornadaId, @PathVariable("antiguedad") int antiguedad) {
+        try {
+            jornadaLaboralService.saveAntiguedad(jornadaId, antiguedad);
+            return ResponseEntity
+                    .ok()
+                    .body(new MessageResponse("La antiguedad del usuario se establecio en " + antiguedad + " años."));
+        } catch(Exception e) {
+            logger.error("Error: No se pudo obtener el turno extra del empleado! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener la antiguedad del empleado!"));
+        }
+    }
 
 
 

@@ -377,7 +377,7 @@ public class JornadaLaboralController {
 
     @PutMapping("/save/libre/{jornadaId}/{diaLibreId}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<MessageResponse> saveDiaLibre(@Valid @RequestBody DiaLibreRequest diaLibreRequest, @PathVariable("jornadaId") Long jornadaId, @PathVariable("diaLibreId") Long diaLibreId) {
+    public ResponseEntity<MessageResponse> updateDiaLibre(@Valid @RequestBody DiaLibreRequest diaLibreRequest, @PathVariable("jornadaId") Long jornadaId, @PathVariable("diaLibreId") Long diaLibreId) {
         // Obtengo todos los turnos(Normales y extras) por separado de la jornada del usuario
         List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
         List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
@@ -411,6 +411,50 @@ public class JornadaLaboralController {
             return  controlarRequisitosDeDiaLibre;
         }
     }
+
+    @GetMapping("/get/libre/all/{id}")
+    public ResponseEntity<?> getAllTurnosDiasLibres(@PathVariable("id") Long jornadaId){
+        try {
+            List<DiaLibre> turnosExtras = diaLibreService.getAllDiasLibres(jornadaId);
+            return new ResponseEntity<>(turnosExtras, HttpStatus.OK);
+        } catch(Exception e) {
+            logger.error("Error: No se pudo obtener los días libres del empleado! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener los turnos extras del empleado!"));
+        }
+    }
+
+    @GetMapping("/get/libre/{id}")
+    public ResponseEntity<?> getDiaLibre(@PathVariable("id") Long diaLibreId){
+        try {
+            DiaLibre diaLibre = diaLibreService.getDiaLibreById(diaLibreId).get();
+            return new ResponseEntity<>(diaLibre, HttpStatus.OK);
+        } catch(Exception e) {
+            logger.error("Error: No se pudo obtener el dia libre del empleado! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener el dia libre del empleado!"));
+        }
+    }
+
+    @DeleteMapping("/delete/libre/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> deleteDiaLibre(@PathVariable("id") Long diaLibreId){
+        try {
+            diaLibreService.deleteDiaLibre(diaLibreId);
+            return ResponseEntity
+                    .ok()
+                    .body(new MessageResponse("El dia libre se elimino correctamente!"));
+        } catch (Exception e) {
+            logger.error("Error: No se pudo borrar el turno normal! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new MessageResponse("Error: Ups ucurrio algo al intentar borrar el dia libre!"));
+        }
+    }
+
+
 
 
 }

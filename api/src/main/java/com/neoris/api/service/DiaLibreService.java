@@ -1,10 +1,9 @@
 package com.neoris.api.service;
 
 import com.neoris.api.entity.DiaLibre;
+import com.neoris.api.exception.JornadaException;
 import com.neoris.api.repository.DiaLibreRepository;
 import com.neoris.api.repository.JornadaLaboralRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,16 +16,10 @@ public class DiaLibreService implements IDiaLibreService{
     private DiaLibreRepository diaLibreRepository;
     @Autowired
     private JornadaLaboralRepository jornadaLaboralRepository;
-    private static final Logger logger = LoggerFactory.getLogger(DiaLibreService.class);
 
     @Override
     public List<DiaLibre> getAllDiasLibres(Long jornadaId) {
-        try {
-            return diaLibreRepository.findAllByJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
-        } catch (Exception e) {
-            logger.error("No se pudo acceder a los dias libres de este usuario: {}", e);
-            return null;
-        }
+        return diaLibreRepository.findAllByJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
     }
 
     @Override
@@ -35,36 +28,33 @@ public class DiaLibreService implements IDiaLibreService{
     }
 
     @Override
-    public boolean saveDiaLibre(Long jornadaId, DiaLibre diaLibre) {
-        try {
+    public void saveDiaLibre(Long jornadaId, DiaLibre diaLibre) throws JornadaException {
+        if (jornadaLaboralRepository.existsById(jornadaId)) {
             diaLibre.setJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
             diaLibreRepository.save(diaLibre);
-            return true;
-        } catch (Exception e) {
-            logger.error("No se pudo guardar el dia libre: {}", e);
-            return false;
+        } else {
+            throw new JornadaException("El id del usuario no se encontro por lo tanto no se pudo guardar el día libre");
         }
+
     }
 
     @Override
-    public boolean updateDiaLibre(Long jornadaId, Long diaLibreId, DiaLibre diaLibre) {
-        try {
+    public void updateDiaLibre(Long jornadaId, Long diaLibreId, DiaLibre diaLibre) throws JornadaException {
+        if (jornadaLaboralRepository.existsById(jornadaId)) {
             diaLibre.setJornadaId(jornadaLaboralRepository.findById(jornadaId).get());
             diaLibre.setIdDiaLibre(diaLibreId);
             diaLibreRepository.save(diaLibre);
-            return true;
-        } catch (Exception e) {
-            logger.error("No se pudo guardar el dia libre: {}", e);
-            return false;
+        } else {
+            throw new JornadaException("El id del usuario no se encontro por lo tanto no se pudo guardar el día libre");
         }
     }
 
     @Override
-    public boolean deleteDiaLibre(Long diaLibreId) {
+    public void deleteDiaLibre(Long diaLibreId) throws JornadaException {
         if (diaLibreRepository.existsById(diaLibreId)) {
             diaLibreRepository.deleteById(diaLibreId);
-            return true;
+        } else {
+            throw new JornadaException("El id del día libre no se encontro por lo tanto no se pudo borrar el día libre que busca");
         }
-        return false;
     }
 }

@@ -4,6 +4,7 @@ import com.neoris.api.entity.DiaLibre;
 import com.neoris.api.entity.TurnoExtra;
 import com.neoris.api.entity.TurnoNormal;
 import com.neoris.api.entity.Vacaciones;
+import com.neoris.api.exception.JornadaException;
 import com.neoris.api.model.Turno;
 import com.neoris.api.payload.request.DiaLibreRequest;
 import com.neoris.api.payload.request.TurnoExtraRequest;
@@ -496,67 +497,63 @@ public class JornadaLaboralController {
     @PostMapping("/save/vacaciones/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> saveVacaciones(@PathVariable("id") Long jornadaId, @Valid @RequestBody VacacionesRequest vacacionesRequest) {
-        Vacaciones nuevasVacaciones = new Vacaciones();
-        nuevasVacaciones.setFechaInicio(vacacionesRequest.getFecha(), jornadaLaboralService.getAntiguedadByJornadaId(jornadaId));
+        try {
+            Vacaciones nuevasVacaciones = new Vacaciones();
+            nuevasVacaciones.setFechaInicio(vacacionesRequest.getFecha(), jornadaLaboralService.getAntiguedadByJornadaId(jornadaId));
 
-        List<Vacaciones> todasLasVacacionesActuales = vacacionesService.getAllVacaciones(jornadaId);
+            List<Vacaciones> todasLasVacacionesActuales = vacacionesService.getAllVacaciones(jornadaId);
 
-        ResponseEntity<MessageResponse> controlarRequisitosDeVacaciones = turnosService.controlarRequisitosDeVacaciones(todasLasVacacionesActuales, nuevasVacaciones);
-        if (controlarRequisitosDeVacaciones.getStatusCode().equals(HttpStatus.OK)) {
-            try {
-                // Obtengo todos los turnos(Normales y extras) por separado de la jornada del usuario
-                List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
-                List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
+            // Controlo las excepciones de las vacaciones
+            turnosService.controlarRequisitosDeVacaciones(todasLasVacacionesActuales, nuevasVacaciones);
 
-                // Busco si hay un turnos normales y/o extras ese dia para borrarlos
-                String mensajeDeSeBorroAlgunTurno = turnosService.deleteAllTurnosOcupadosPorLaVacacionElegida(nuevasVacaciones, turnosNormalesActuales, turnosExtrasActuales);
+            // Obtengo todos los turnos(Normales y extras) por separado de la jornada del usuario
+            List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
+            List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
 
-                vacacionesService.saveVacaciones(jornadaId, nuevasVacaciones);
-                return ResponseEntity
-                        .ok()
-                        .body(new MessageResponse("Las vacaciones se asignaron con exito inicio: " + df.format(nuevasVacaciones.getFechaInicio()) + " y final: " + df.format(nuevasVacaciones.getFechaFinal()) + mensajeDeSeBorroAlgunTurno));
-            } catch (Exception e) {
-                logger.error("Error: No se pudo guardar las vacaciones del empleado! {}", e);
-                return ResponseEntity
-                        .status(HttpStatus.EXPECTATION_FAILED)
-                        .body(new MessageResponse("Error: Ups ocurrio algo al intentar asignar las vacaciones del empleado!"));
-            }
-        } else {
-            return  controlarRequisitosDeVacaciones;
+            // Busco si hay un turnos normales y/o extras ese dia para borrarlos
+            String mensajeDeSeBorroAlgunTurno = turnosService.deleteAllTurnosOcupadosPorLaVacacionElegida(nuevasVacaciones, turnosNormalesActuales, turnosExtrasActuales);
+
+            vacacionesService.saveVacaciones(jornadaId, nuevasVacaciones);
+            return ResponseEntity
+                    .ok()
+                    .body(new MessageResponse("Las vacaciones se asignaron con exito inicio: " + df.format(nuevasVacaciones.getFechaInicio()) + " y final: " + df.format(nuevasVacaciones.getFechaFinal()) + mensajeDeSeBorroAlgunTurno));
+        } catch (JornadaException e) {
+            logger.error("Error: No se pudo guardar las vacaciones del empleado! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new MessageResponse("Ups ocurrio algo al intentar asignar las vacaciones del empleado!, Error: " + e.getMessage()));
         }
     }
 
     @PutMapping("/save/vacaciones/{jornadaId}/{vacacionesId}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> updateVacaciones(@PathVariable("jornadaId") Long jornadaId, @PathVariable("vacacionesId") Long vacacionesId, @Valid @RequestBody VacacionesRequest vacacionesRequest) {
-        Vacaciones nuevasVacaciones = new Vacaciones();
-        nuevasVacaciones.setFechaInicio(vacacionesRequest.getFecha(), jornadaLaboralService.getAntiguedadByJornadaId(jornadaId));
-        nuevasVacaciones.setIdVacaciones(vacacionesId);
+        try {
+            Vacaciones nuevasVacaciones = new Vacaciones();
+            nuevasVacaciones.setFechaInicio(vacacionesRequest.getFecha(), jornadaLaboralService.getAntiguedadByJornadaId(jornadaId));
+            nuevasVacaciones.setIdVacaciones(vacacionesId);
 
-        List<Vacaciones> todasLasVacacionesActuales = vacacionesService.getAllVacaciones(jornadaId);
+            List<Vacaciones> todasLasVacacionesActuales = vacacionesService.getAllVacaciones(jornadaId);
 
-        ResponseEntity<MessageResponse> controlarRequisitosDeVacaciones = turnosService.controlarRequisitosDeVacaciones(todasLasVacacionesActuales, nuevasVacaciones);
-        if (controlarRequisitosDeVacaciones.getStatusCode().equals(HttpStatus.OK)) {
-            try {
-                // Obtengo todos los turnos(Normales y extras) por separado de la jornada del usuario
-                List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
-                List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
+            // Controlo las excepciones de las vacaciones
+            turnosService.controlarRequisitosDeVacaciones(todasLasVacacionesActuales, nuevasVacaciones);
 
-                // Busco si hay un turnos normales y/o extras ese dia para borrarlos
-                String mensajeDeSeBorroAlgunTurno = turnosService.deleteAllTurnosOcupadosPorLaVacacionElegida(nuevasVacaciones, turnosNormalesActuales, turnosExtrasActuales);
+            // Obtengo todos los turnos(Normales y extras) por separado de la jornada del usuario
+            List<TurnoExtra> turnosExtrasActuales = turnoExtraService.getAllTurnosExtras(jornadaId);
+            List<TurnoNormal> turnosNormalesActuales = turnoNormalService.getAllTurnosNormales(jornadaId);
 
-                vacacionesService.updateVacaciones(jornadaId, vacacionesId, nuevasVacaciones);
-                return ResponseEntity
-                        .ok()
-                        .body(new MessageResponse("Las vacaciones se asignaron con exito inicio: " + df.format(nuevasVacaciones.getFechaInicio()) + " y final: " + df.format(nuevasVacaciones.getFechaFinal()) + mensajeDeSeBorroAlgunTurno));
-            } catch (Exception e) {
-                logger.error("Error: No se pudo guardar las vacaciones del empleado! {}", e);
-                return ResponseEntity
-                        .status(HttpStatus.EXPECTATION_FAILED)
-                        .body(new MessageResponse("Error: Ups ocurrio algo al intentar asignar las vacaciones del empleado!"));
-            }
-        } else {
-            return  controlarRequisitosDeVacaciones;
+            // Busco si hay un turnos normales y/o extras ese dia para borrarlos
+            String mensajeDeSeBorroAlgunTurno = turnosService.deleteAllTurnosOcupadosPorLaVacacionElegida(nuevasVacaciones, turnosNormalesActuales, turnosExtrasActuales);
+
+            vacacionesService.updateVacaciones(jornadaId, vacacionesId, nuevasVacaciones);
+            return ResponseEntity
+                    .ok()
+                    .body(new MessageResponse("Las vacaciones se asignaron con exito inicio: " + df.format(nuevasVacaciones.getFechaInicio()) + " y final: " + df.format(nuevasVacaciones.getFechaFinal()) + mensajeDeSeBorroAlgunTurno));
+        } catch (JornadaException e) {
+            logger.error("Error: No se pudo guardar las vacaciones del empleado! {}", e);
+            return ResponseEntity
+                    .status(HttpStatus.EXPECTATION_FAILED)
+                    .body(new MessageResponse("Ups ocurrio algo al intentar asignar las vacaciones del empleado!, Error: " + e.getMessage()));
         }
     }
 
@@ -566,10 +563,10 @@ public class JornadaLaboralController {
             Vacaciones vacaciones = vacacionesService.getVacacionesById(vacacionesId).get();
             return new ResponseEntity<>(vacaciones, HttpStatus.OK);
         } catch(Exception e) {
-            logger.error("Error: No se pudo obtener el turno extra del empleado! {}", e);
+            logger.error("Error: No se pudo obtener las vacaciones del empleado! {}", e);
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener la antiguedad del empleado!"));
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener las vacaciones del empleado!"));
         }
     }
 
@@ -579,10 +576,10 @@ public class JornadaLaboralController {
             List<Vacaciones> vacaciones = vacacionesService.getAllVacaciones(jornadaId);
             return new ResponseEntity<>(vacaciones, HttpStatus.OK);
         } catch(Exception e) {
-            logger.error("Error: No se pudo obtener el turno extra del empleado! {}", e);
+            logger.error("Error: No se pudo obtener todas las vacaciones del empleado! {}", e);
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener la antiguedad del empleado!"));
+                    .body(new MessageResponse("Error: Ups ocurrio algo al intentar obtener todas las vacaciones del empleado!"));
         }
     }
 

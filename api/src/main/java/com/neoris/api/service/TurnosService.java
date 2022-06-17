@@ -1,6 +1,8 @@
 package com.neoris.api.service;
 
 import com.neoris.api.entity.*;
+import com.neoris.api.exception.FechaAnteriorException;
+import com.neoris.api.exception.VacacionesException;
 import com.neoris.api.model.Turno;
 import com.neoris.api.payload.request.TurnoExtraRequest;
 import com.neoris.api.payload.request.TurnoNormalRequest;
@@ -306,24 +308,17 @@ public class TurnosService implements ITurnosService{
     }
 
     @Override
-    public ResponseEntity<MessageResponse> controlarRequisitosDeVacaciones(List<Vacaciones> todasLasVacaciones, Vacaciones nuevasVacaciones) {
+    public void controlarRequisitosDeVacaciones(List<Vacaciones> todasLasVacaciones, Vacaciones nuevasVacaciones) throws FechaAnteriorException, VacacionesException {
         // Controlo que la fecha no sea de antes de la fecha actual
         Date fechaActual = new Date();
-        if (nuevasVacaciones.getFechaInicio().before(new Date())){
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: No puedes viajar en el tiempo bro, la fecha de hoy es " + df.format(fechaActual) + " ingresa una fecha valida!"));
+        if (nuevasVacaciones.getFechaInicio().before(new Date())) {
+            throw new FechaAnteriorException(nuevasVacaciones.getFechaInicio());
         }
 
         // Controlo que se guarde una vacacion por año
-        if(!todasLasVacaciones.isEmpty() && controladorDeSemanas.isAlgunAnioCoincidente(todasLasVacaciones, nuevasVacaciones)) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Error: Ya asignaste unas vacaciones en el año" + controladorDeSemanas.anioDeUnaFecha(nuevasVacaciones.getFechaInicio()) + "!"));
+        if (!todasLasVacaciones.isEmpty() && controladorDeSemanas.isAlgunAnioCoincidente(todasLasVacaciones, nuevasVacaciones)) {
+            throw new VacacionesException(controladorDeSemanas.anioDeUnaFecha(nuevasVacaciones.getFechaInicio()));
         }
-
-        return ResponseEntity
-                .ok()
-                .body(new MessageResponse(("")));
     }
+
 }

@@ -1,7 +1,8 @@
-![AHORCADO](https://user-images.githubusercontent.com/48571169/171064328-8cbdf4c0-7b16-4e42-9bc8-9b562315d27e.png)
+![AHORCADO](https://learn.g2.com/hubfs/G2CM_FI044_Learn_Article_Images-Employee_Turnover_V1b.png)
 
 # 👩‍💻 API-de-Turnos-Rotativos
  Una API para el manejo de turnos rotativos
+ (Desde github se ve mejor el readme)
  - Link del Proyecto: [github.com/FacuCR/API-de-Turnos-Rotativos](https://github.com/FacuCR/API-de-Turnos-Rotativos)
 
 -----
@@ -69,6 +70,8 @@ sienta tan inutil :(
 
 ## 🛠️ Ejemplos de usos con Postman
 
-1. Inicio sesion con el admin
-2. Creo un usuario al cual se le asigna una jornada
-3. Uso esa jornada para guardarle un turno
+1. Inicio sesion con el admin![login](https://user-images.githubusercontent.com/48571169/174406936-08ba18d0-4258-4f7e-aee8-b0b0d6a7edf3.jpg)
+
+2. Creo un usuario al cual se le asigna una jornada![signup](https://user-images.githubusercontent.com/48571169/174406941-7cfef23b-33cf-4e8f-a773-1247e7c78e00.jpg)
+
+3. Uso esa jornada para guardarle un turno![crearTurno](https://user-images.githubusercontent.com/48571169/174406950-d81a48ef-fc92-4fed-9fe6-1c1eba3c5dc9.jpg)

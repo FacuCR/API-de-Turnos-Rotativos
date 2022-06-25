@@ -1,0 +1,78 @@
+<section
+  class="login d-flex justify-content-between align-items-center row row-cols-2"
+>
+  <div
+    class="login__hero col-md-8 d-none d-md-flex flex-column align-items-center justify-content-center"
+  >
+    <img
+      src="../../../../assets/img/Time management-cuate.png"
+      class="img-fluid login__hero__img"
+    />
+    <p class="texto--principal texto--principal--hero">
+      Planificador para rendir más en su trabajo
+    </p>
+    <p class="texto--secundario">
+      prepárate para que tu presencia tenga sentido
+    </p>
+  </div>
+
+  <div
+    class="login__form col-12 col-md-4 mw-100 d-flex flex-column align-items-center justify-content-center"
+  >
+    <h1 class="texto--principal">Bienvenido!</h1>
+    <p class="texto--secundario">Acceda a su cuenta</p>
+    <form
+      [formGroup]="form"
+      method="POST"
+      (ngSubmit)="onSubmit()"
+      class="d-flex flex-column"
+    >
+      <mat-form-field
+        [ngClass]="{ 'mat-form-field-invalid': isInvalido }"
+        appearance="outline"
+        color="accent"
+        class="mb-3"
+      >
+        <mat-label>Nombre de Usuario</mat-label>
+        <input
+          matInput
+          placeholder="ej: user123"
+          formControlName="usuario"
+          minlength="1"
+          maxlength="20"
+          required
+        />
+        <mat-error>{{ getMensajeDeError("usuario") }}</mat-error>
+        <mat-icon matPrefix class="my-icon me-3">account_circle</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field
+        [ngClass]="{ 'mat-form-field-invalid': isInvalido }"
+        appearance="outline"
+        color="accent"
+      >
+        <mat-label>Contraseña</mat-label>
+        <input
+          matInput
+          [type]="ocultar ? 'password' : 'text'"
+          formControlName="password"
+          minlength="6"
+          required
+        /><mat-error>{{ getMensajeDeError("password") }}</mat-error>
+        <mat-icon matPrefix class="my-icon me-3"
+          >keyboard_hide</mat-icon
+        ></mat-form-field
+      >
+
+      <button
+        type="submit"
+        mat-raised-button
+        class="btn-lg mat-elevation-z2"
+        color="accent"
+        [disabled]="!form.valid"
+      >
+        Enviar
+      </button>
+    </form>
+  </div>
+</section>

@@ -2,6 +2,7 @@
 
 # 👩‍💻 API-de-Turnos-Rotativos
  Una API para el manejo de turnos rotativos
+ (Desde github se ve mejor el readme)
  - Link del Proyecto: [github.com/FacuCR/API-de-Turnos-Rotativos](https://github.com/FacuCR/API-de-Turnos-Rotativos)
 
 -----

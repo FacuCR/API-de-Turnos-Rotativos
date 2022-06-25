@@ -50,6 +50,7 @@ export class LoginComponent implements OnInit {
         }
         this.tokenStorage.saveToken(data.accessToken);
         this.tokenStorage.saveUser(data);
+        this.loginError = '';
       },
       error: (e: HttpErrorResponse) => {
         this.loginError = e.error.message;

@@ -1,8 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { LoginComponent } from './login/login.component';
 import { RouterModule, Routes } from '@angular/router';
-import { LoginComponent } from './login.component';
-
 import { MatButtonModule } from '@angular/material/button';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -30,4 +29,4 @@ const routes: Routes = [
     MatProgressBarModule,
   ],
 })
-export class LoginModule {}
+export class AuthModule {}

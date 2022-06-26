@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { RoleAccesoGuard } from './core/guard/role-acceso.guard';
+import { Role } from './core/models/Role';
 
 const routes: Routes = [
   {
@@ -11,6 +13,8 @@ const routes: Routes = [
     path: 'jornada',
     loadChildren: () =>
       import('./modules/jornada/jornada.module').then((m) => m.JornadaModule),
+    canActivate: [RoleAccesoGuard],
+    data: { roles: [Role.Admin, Role.User] },
   },
 ];
 

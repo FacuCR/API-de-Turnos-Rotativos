@@ -6,19 +6,25 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { AuthInterceptorProviders } from './core/interceptor/auth.interceptor';
+import { UnauthorizedInterceptorProviders } from './core/interceptor/unauthorized.interceptor';
 
 @NgModule({
   declarations: [AppComponent],
-  imports: [ 
-    FormsModule,  
-    MbscModule, 
+  imports: [
+    FormsModule,
+    MbscModule,
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
     HttpClientModule,
   ],
-  providers: [],
+  providers: [
+    [AuthInterceptorProviders],
+    [UnauthorizedInterceptorProviders],
+    [HttpClient],
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

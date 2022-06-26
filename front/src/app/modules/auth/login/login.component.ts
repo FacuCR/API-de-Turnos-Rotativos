@@ -5,6 +5,7 @@ import {
 } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TokenStorageService } from 'src/app/core/services/token/token-storage.service';
 import { AuthService } from '../services/auth.service';
 
@@ -30,8 +31,13 @@ export class LoginComponent implements OnInit {
   constructor(
     public fb: FormBuilder,
     private authService: AuthService,
-    private tokenStorage: TokenStorageService
-  ) {}
+    private tokenStorage: TokenStorageService,
+    private router: Router
+  ) {
+    if (this.tokenStorage.getToken()) {
+      this.navegarAJornadaRoute();
+    }
+  }
 
   ngOnInit(): void {}
 
@@ -48,9 +54,13 @@ export class LoginComponent implements OnInit {
             this.cargando = false;
           }
         }
-        this.tokenStorage.saveToken(data.accessToken);
-        this.tokenStorage.saveUser(data);
+        if (data.body) {
+          this.tokenStorage.saveToken(data.body.accessToken);
+          this.tokenStorage.saveUser(data.body);
+        }
+
         this.loginError = '';
+        this.navegarAJornadaRoute();
       },
       error: (e: HttpErrorResponse) => {
         this.loginError = e.error.message;
@@ -65,5 +75,9 @@ export class LoginComponent implements OnInit {
     return this.form.controls[input].hasError('required')
       ? 'Debes ingresar algo!'
       : '';
+  }
+
+  navegarAJornadaRoute(): void {
+    this.router.navigate(['jornada']);
   }
 }

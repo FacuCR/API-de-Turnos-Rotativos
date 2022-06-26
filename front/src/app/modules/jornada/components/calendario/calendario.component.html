@@ -1,0 +1,27 @@
+<mbsc-eventcalendar
+  [data]="shifts"
+  [options]="calendarOptions"
+  [resources]="calendarOptions.resources"
+  [resourceTemplate]="resourceTemp"
+  [slotTemplate]="slotTemp"
+  class="md-shift-template"
+>
+  <ng-template #resourceTemp let-resource>
+    <div class="resource-template-content">
+      <div class="resource-name mb-1">{{ resource.name }}</div>
+      <div class="resource-user">{{ resource.user }}</div>
+    </div>
+  </ng-template>
+
+  <ng-template #slotTemp let-args>
+    <div
+      class="md-turnos-cont"
+      [ngStyle]="{
+        background: backgroundDelTurno(args.slot.id),
+        padding: '4px'
+      }"
+    >
+      <div class="slot-name">{{ args.slot.name }}</div>
+    </div>
+  </ng-template>
+</mbsc-eventcalendar>

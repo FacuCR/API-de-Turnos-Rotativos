@@ -16,6 +16,13 @@ const routes: Routes = [
     canActivate: [RoleAccesoGuard],
     data: { roles: [Role.Admin, Role.User] },
   },
+  {
+    path: 'registro',
+    loadChildren: () =>
+      import('./modules/sign-up/sign-up.module').then((m) => m.SignUpModule),
+    canActivate: [RoleAccesoGuard],
+    data: { roles: [Role.Admin] },
+  },
 ];
 
 @NgModule({

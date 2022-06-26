@@ -32,7 +32,7 @@ export class RoleAccesoGuard implements CanActivate {
     // Reviso si la ruta esta restringida por roles
     if (user.roles) {
       // si tiene algun role que cumpla la condicion devuelve true
-      let algo: boolean = user.roles.some((rol: Role) => {return route.data['roles'].indexOf(rol) !== -1});
+      let algo: boolean = user.roles.some((rol: string) => {return route.data['roles'].indexOf(rol === "ROLE_ADMIN" ? Role.Admin : Role.User) !== -1});
 
       if(algo) { // autorizado asi que retorno true
         return true;

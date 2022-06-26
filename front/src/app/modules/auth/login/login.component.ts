@@ -48,15 +48,15 @@ export class LoginComponent implements OnInit {
     this.cargando = true;
 
     this.authService.login(usuario, pass).subscribe({
-      next: (data: any) => {
-        if (data.type === HttpEventType.UploadProgress) {
-          if (Math.round((100 * data.loaded) / data.total) == 100) {
+      next: (event: any) => {
+        if (event.type === HttpEventType.UploadProgress) {
+          if (Math.round((100 * event.loaded) / event.total) == 100) {
             this.cargando = false;
           }
         }
-        if (data.body) {
-          this.tokenStorage.saveToken(data.body.accessToken);
-          this.tokenStorage.saveUser(data.body);
+        if (event.body) {
+          this.tokenStorage.saveToken(event.body.accessToken);
+          this.tokenStorage.saveUser(event.body);
         }
 
         this.loginError = '';

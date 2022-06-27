@@ -3,16 +3,17 @@ import { CommonModule } from '@angular/common';
 import { CalendarioComponent } from './components/calendario/calendario.component';
 import { RouterModule, Routes } from '@angular/router';
 import { MbscModule } from '@mobiscroll/angular';
+import { PageComponent } from './page/page.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: CalendarioComponent,
+    component: PageComponent,
   },
 ];
 
 @NgModule({
-  declarations: [CalendarioComponent],
+  declarations: [CalendarioComponent, PageComponent],
   imports: [CommonModule, RouterModule.forChild(routes), MbscModule],
 })
 export class JornadaModule {}

@@ -1,10 +1,17 @@
-import { Component } from '@angular/core';
+import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
 import {
   localeEs,
   MbscCalendarEvent,
   MbscEventcalendarOptions,
   setOptions,
 } from '@mobiscroll/angular';
+import { Empleado } from 'src/app/core/models/Empleado';
+import { Turnos } from 'src/app/core/models/Turnos';
+import { EmpleadoService } from 'src/app/core/services/empleado/empleado.service';
+import { Resource } from '../../models/Resource';
+import { TurnoNormal } from '../../models/TurnoNormal';
+import { TurnoNormalService } from '../../services/turno-normal.service';
 
 setOptions({
   locale: localeEs,
@@ -17,30 +24,45 @@ setOptions({
   templateUrl: './calendario.component.html',
   styleUrls: ['./calendario.component.css'],
 })
-export class CalendarioComponent {
-  shifts: MbscCalendarEvent[] = [
-    {
-      start: '2022-06-23T00:00',
-      end: '2022-06-24T00:00',
-      title: '6 horas',
-      resource: 2,
-      slot: 1,
-    },
-    {
-      start: '2022-06-23T07:00',
-      end: '2022-06-23T13:00',
-      title: '07:00 - 13:00',
-      resource: 3,
-      slot: 1,
-    },
-    {
-      start: '2022-06-23T07:00',
-      end: '2022-06-23T13:00',
-      title: '07:00 - 13:00',
-      resource: 1,
-      slot: 1,
-    },
-  ];
+export class CalendarioComponent implements OnInit {
+  myResources: Resource[] = [];
+  empleadosActuales: Empleado[] = [];
+  turnosNormales: TurnoNormal[] = [];
+  cargando: boolean = false;
+
+  constructor(
+    private empleados: EmpleadoService,
+    private turnoNormalService: TurnoNormalService
+  ) {}
+
+  ngOnInit(): void {
+    this.empleados
+      .getAllEmpleados()
+      .subscribe({
+        next: (event: any) => {
+          this.cargando = true;
+
+          if (event.type === HttpEventType.DownloadProgress) {
+            if (Math.round((100 * event.loaded) / event.total) == 100) {
+              this.cargando = false;
+            }
+          }
+          this.empleadosActuales = event.body;
+          this.empleadosActuales
+            ? (this.myResources = this.castearEmpleadosAResource(
+                this.empleadosActuales
+              ))
+            : '';
+        },
+        error: (e: HttpErrorResponse) => {
+          console.log(e.error);
+          this.cargando = false;
+        },
+      })
+      .add(() => this.cargarTurnos());
+  }
+
+  shifts: MbscCalendarEvent[] = [];
 
   calendarOptions: MbscEventcalendarOptions = {
     view: {
@@ -50,23 +72,6 @@ export class CalendarioComponent {
         startDay: 1,
       },
     },
-    resources: [
-      {
-        id: 1,
-        name: 'Ryan',
-        user: 'Cloud System Engineer',
-      },
-      {
-        id: 2,
-        name: 'Kate',
-        user: 'Help Desk Specialist',
-      },
-      {
-        id: 3,
-        name: 'John',
-        user: 'Application Developer',
-      },
-    ],
     colors: [
       {
         background: '#a5ceff4d',
@@ -108,8 +113,8 @@ export class CalendarioComponent {
       },
     ],
     onEventClick: (args: any) => {
-        console.log("click en " + args.resource);
-    }
+      console.log('click en ' + args.resource);
+    },
   };
 
   backgroundDelTurno(id: number): string {
@@ -119,6 +124,100 @@ export class CalendarioComponent {
       return '#f7f7bb4d';
     } else {
       return '#ce448b4d';
+    }
+  }
+
+  castearEmpleadosAResource(empleados: Empleado[]): Resource[] {
+    let resource: Resource = new Resource();
+    let resources: Resource[] = [];
+    empleados.forEach((empleado) => {
+      resource.id = empleado.id;
+      resource.name = empleado.nombre + ' ' + empleado.apellido;
+      resource.user = empleado.username;
+      resources.push(resource);
+      resource = new Resource();
+    });
+
+    return resources;
+  }
+
+  cargarTurnos(): void {
+    if (this.empleadosActuales) {
+      this.empleadosActuales.forEach((empleado) => {
+        this.turnoNormalService
+          .getAllTurnosNormalesById(empleado.id - 2)
+          .subscribe({
+            next: (event: any) => {
+              this.cargando = true;
+
+              if (event.type === HttpEventType.DownloadProgress) {
+                if (Math.round((100 * event.loaded) / event.total) == 100) {
+                  this.cargando = false;
+                }
+              }
+              event.body && event.body.length != 0
+                ? (this.turnosNormales = event.body)
+                : '';
+            },
+            error: (e: HttpErrorResponse) => {
+              console.log(e.error);
+              this.cargando = false;
+            },
+          })
+          .add(() => {
+            let turnosCorregidos: TurnoNormal[] = [];
+            if (this.turnosNormales) {
+              for (let i = 0; i < this.turnosNormales.length; i++) {
+                let turnoCorregido = new TurnoNormal();
+                turnoCorregido.fecha = this.turnosNormales[i].fecha;
+                turnoCorregido.cantHoras = this.turnosNormales[i].cantHoras;
+                turnoCorregido.turno = this.turnosNormales[i].turno;
+                turnoCorregido.idTurnoNormal =
+                  this.turnosNormales[i].idTurnoNormal;
+                turnoCorregido.usuarioId = this.turnosNormales[i].usuarioId + 1;
+                turnosCorregidos.push(turnoCorregido);
+              }
+              this.turnosNormales = turnosCorregidos;
+              this.cargarShifts();
+            }
+          });
+      });
+    }
+  }
+
+  addDias(fecha: Date, dias: number): Date {
+    let result = new Date(fecha);
+    result.setDate(result.getDate() + dias);
+    return result;
+  }
+
+  cargarShifts(): void {
+    let slotTurno: number = 1;
+    for (let i = 0; i < this.turnosNormales.length; i++) {
+      switch (this.turnosNormales[i].turno) {
+        case Turnos.maniana:
+          slotTurno = 1;
+          break;
+        case Turnos.tarde:
+          slotTurno = 2;
+          break;
+        case Turnos.noche:
+          slotTurno = 3;
+          break;
+        default:
+          slotTurno = 1;
+          break;
+      }
+      let newEvent = {
+        start: this.turnosNormales[i].fecha
+          .toLocaleString("yyyy-MM-dd'T'HH:mm")
+          .slice(0, -13),
+        title: this.turnosNormales[i].cantHoras + ' horas',
+        resource: this.turnosNormales[i].usuarioId,
+        slot: slotTurno,
+      };
+      // Crear un nuevo array conteniendo los eventos anteriores y el nuevo
+      this.shifts = [...this.shifts, newEvent];
     }
   }
 }

@@ -1,8 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-
-const AUTH_API = 'http://localhost:8080/api/auth/';
+import { environment } from 'src/environments/environment';
 
 // TypeScript infiere en el tipo de las opciones {observe: string}. El tipo es 
 // demasiado amplio para pasarlo a HttpClient.post, que espera que el tipo de responseType sea una de las cadenas 
@@ -23,7 +22,7 @@ export class AuthService {
 
   login(username: string, password: string): Observable<any> {
     return this.http.post<any>(
-      AUTH_API + 'signin',
+      environment.auth + 'signin',
       {
         username,
         password,

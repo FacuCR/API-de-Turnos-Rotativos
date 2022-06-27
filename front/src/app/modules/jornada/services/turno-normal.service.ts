@@ -59,7 +59,7 @@ export class TurnoNormalService {
     turnoNormalId: number
   ): Observable<any> {
     jornadaId++;
-    return this.http.post<any>(
+    return this.http.put<any>(
       JORNADA_API + `save/normal/${jornadaId}/"${turnoNormalId}`,
       {
         fecha,
@@ -71,7 +71,7 @@ export class TurnoNormalService {
   }
 
   deleteTurnoNormal(turnoNormalId: number): Observable<any> {
-    return this.http.post<any>(
+    return this.http.delete<any>(
       JORNADA_API + `delete/normal/${turnoNormalId}`,
       httpOptions
     );

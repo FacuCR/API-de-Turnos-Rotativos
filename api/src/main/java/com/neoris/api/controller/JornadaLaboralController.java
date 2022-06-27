@@ -10,6 +10,7 @@ import com.neoris.api.exception.MaxHsJornadaSemanalException;
 import com.neoris.api.model.Turno;
 import com.neoris.api.payload.request.*;
 import com.neoris.api.payload.response.MessageResponse;
+import com.neoris.api.payload.response.TurnosNormalesResponse;
 import com.neoris.api.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -136,8 +139,21 @@ public class JornadaLaboralController {
     @GetMapping("/get/normal/all/{id}")
     public ResponseEntity<?> getAllTurnosNormales(@PathVariable("id") Long idJornada){
         try {
-            List<TurnoNormal> turnosNormales = turnoNormalService.getAllTurnosNormales(idJornada);
-            return new ResponseEntity<>(turnosNormales, HttpStatus.OK);
+            Iterator<TurnoNormal> turnosNormales = turnoNormalService.getAllTurnosNormales(idJornada).iterator();
+            List<TurnosNormalesResponse> turnosNormalesResponses = new ArrayList<>();
+            TurnoNormal turno;
+            TurnosNormalesResponse turnoResponse = new TurnosNormalesResponse();
+            while(turnosNormales.hasNext()) {
+                turno = turnosNormales.next();
+                turnoResponse.setIdTurnoNormal(turno.getIdTurnoNormal());
+                turnoResponse.setFecha(turno.getFecha());
+                turnoResponse.setTurno(turno.getTurno());
+                turnoResponse.setCantHoras(turno.getCantHoras());
+                turnoResponse.setUsuarioId(idJornada);
+                turnosNormalesResponses.add(turnoResponse);
+                turnoResponse = new TurnosNormalesResponse();
+            }
+            return new ResponseEntity<>(turnosNormalesResponses, HttpStatus.OK);
         } catch(Exception e) {
             logger.error("Error: No se pudo obtener los turnos normales del empleado! {}", e);
             return ResponseEntity

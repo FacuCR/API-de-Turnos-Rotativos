@@ -11,7 +11,10 @@ import { Turnos } from 'src/app/core/models/Turnos';
 import { EmpleadoService } from 'src/app/core/services/empleado/empleado.service';
 import { Resource } from '../../models/Resource';
 import { TurnoNormal } from '../../models/TurnoNormal';
+import { TurnoExtraService } from '../../services/turno-extra/turno-extra.service';
 import { TurnoNormalService } from '../../services/turno-normal.service';
+import { TurnoExtra } from '../../models/TurnoExtra';
+import { JornadaTurno } from '../../models/JornadaTurno';
 
 setOptions({
   locale: localeEs,
@@ -28,11 +31,13 @@ export class CalendarioComponent implements OnInit {
   myResources: Resource[] = [];
   empleadosActuales: Empleado[] = [];
   turnosNormales: TurnoNormal[] = [];
+  turnosExtras: TurnoExtra[] = [];
   cargando: boolean = false;
 
   constructor(
     private empleados: EmpleadoService,
-    private turnoNormalService: TurnoNormalService
+    private turnoNormalService: TurnoNormalService,
+    private turnoExtraService: TurnoExtraService
   ) {}
 
   ngOnInit(): void {
@@ -59,7 +64,10 @@ export class CalendarioComponent implements OnInit {
           this.cargando = false;
         },
       })
-      .add(() => this.cargarTurnos());
+      .add(() => {
+        this.cargarTurnosNormales();
+        this.cargarTurnosExtras();
+      });
   }
 
   shifts: MbscCalendarEvent[] = [];
@@ -141,7 +149,7 @@ export class CalendarioComponent implements OnInit {
     return resources;
   }
 
-  cargarTurnos(): void {
+  cargarTurnosNormales(): void {
     if (this.empleadosActuales) {
       this.empleadosActuales.forEach((empleado) => {
         this.turnoNormalService
@@ -178,7 +186,7 @@ export class CalendarioComponent implements OnInit {
                 turnosCorregidos.push(turnoCorregido);
               }
               this.turnosNormales = turnosCorregidos;
-              this.cargarShifts();
+              this.cargarShifts(this.turnosNormales, "#673ab7");
             }
           });
       });
@@ -191,10 +199,10 @@ export class CalendarioComponent implements OnInit {
     return result;
   }
 
-  cargarShifts(): void {
+  cargarShifts(turnos: JornadaTurno[], colorTurno: string): void {
     let slotTurno: number = 1;
-    for (let i = 0; i < this.turnosNormales.length; i++) {
-      switch (this.turnosNormales[i].turno) {
+    for (let i = 0; i < turnos.length; i++) {
+      switch (turnos[i].turno) {
         case Turnos.maniana:
           slotTurno = 1;
           break;
@@ -209,15 +217,60 @@ export class CalendarioComponent implements OnInit {
           break;
       }
       let newEvent = {
-        start: this.turnosNormales[i].fecha
+        start: turnos[i].fecha
           .toLocaleString("yyyy-MM-dd'T'HH:mm")
           .slice(0, -13),
-        title: this.turnosNormales[i].cantHoras + ' horas',
-        resource: this.turnosNormales[i].usuarioId,
+        title: turnos[i].cantHoras + ' horas',
+        resource: turnos[i].usuarioId,
         slot: slotTurno,
+        color: colorTurno,
       };
       // Crear un nuevo array conteniendo los eventos anteriores y el nuevo
       this.shifts = [...this.shifts, newEvent];
+    }
+  }
+
+  cargarTurnosExtras(): void {
+    if (this.empleadosActuales) {
+      this.empleadosActuales.forEach((empleado) => {
+        this.turnoExtraService
+          .getAllTurnosExtrasById(empleado.id - 2)
+          .subscribe({
+            next: (event: any) => {
+              this.cargando = true;
+
+              if (event.type === HttpEventType.DownloadProgress) {
+                if (Math.round((100 * event.loaded) / event.total) == 100) {
+                  this.cargando = false;
+                }
+              }
+              event.body && event.body.length != 0
+                ? (this.turnosExtras = event.body)
+                : '';
+            },
+            error: (e: HttpErrorResponse) => {
+              console.log(e.error);
+              this.cargando = false;
+            },
+          })
+          .add(() => {
+            let turnosCorregidos: TurnoExtra[] = [];
+            if (this.turnosExtras) {
+              for (let i = 0; i < this.turnosExtras.length; i++) {
+                let turnoCorregido = new TurnoExtra();
+                turnoCorregido.fecha = this.turnosExtras[i].fecha;
+                turnoCorregido.cantHoras = "Extra: " + this.turnosExtras[i].cantHoras;
+                turnoCorregido.turno = this.turnosExtras[i].turno;
+                turnoCorregido.idTurnoNormal =
+                  this.turnosExtras[i].idTurnoNormal;
+                turnoCorregido.usuarioId = this.turnosExtras[i].usuarioId + 1;
+                turnosCorregidos.push(turnoCorregido);
+              }
+              this.turnosExtras = turnosCorregidos;
+              this.cargarShifts(this.turnosExtras, "#ffd740");
+            }
+          });
+      });
     }
   }
 }

@@ -2,8 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Role } from 'src/app/core/models/Role';
-
-const AUTH_API = 'http://localhost:8080/api/auth/';
+import { environment } from 'src/environments/environment';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
@@ -20,7 +19,7 @@ export class SignUpService {
 
   crearUsuario(username: string, password: string, role: Role[]): Observable<any> {
     return this.http.post<any>(
-      AUTH_API + 'signup',
+      environment.auth + 'signup',
       {
         username,
         password,

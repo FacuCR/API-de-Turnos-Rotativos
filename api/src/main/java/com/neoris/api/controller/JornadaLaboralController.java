@@ -10,6 +10,7 @@ import com.neoris.api.exception.MaxHsJornadaSemanalException;
 import com.neoris.api.model.Turno;
 import com.neoris.api.payload.request.*;
 import com.neoris.api.payload.response.MessageResponse;
+import com.neoris.api.payload.response.TurnoExtraResponse;
 import com.neoris.api.payload.response.TurnosNormalesResponse;
 import com.neoris.api.service.*;
 import org.slf4j.Logger;
@@ -284,8 +285,23 @@ public class JornadaLaboralController {
     @GetMapping("/get/extra/all/{id}")
     public ResponseEntity<?> getAllTurnosExtras(@PathVariable("id") Long idJornada){
         try {
-            List<TurnoExtra> turnosExtras = turnoExtraService.getAllTurnosExtras(idJornada);
-            return new ResponseEntity<>(turnosExtras, HttpStatus.OK);
+
+            Iterator<TurnoExtra> turnosNormales = turnoExtraService.getAllTurnosExtras(idJornada).iterator();
+            List<TurnoExtraResponse> turnosExtrasResponses = new ArrayList<>();
+            TurnoExtra turno;
+            TurnoExtraResponse turnoResponse = new TurnoExtraResponse();
+            while(turnosNormales.hasNext()) {
+                turno = turnosNormales.next();
+                turnoResponse.setIdTurnoNormal(turno.getIdTurnoExtra());
+                turnoResponse.setFecha(turno.getFecha());
+                turnoResponse.setTurno(turno.getTurno());
+                turnoResponse.setCantHoras(turno.getCantHoras());
+                turnoResponse.setUsuarioId(idJornada);
+                turnosExtrasResponses.add(turnoResponse);
+                turnoResponse = new TurnoExtraResponse();
+            }
+
+            return new ResponseEntity<>(turnosExtrasResponses, HttpStatus.OK);
         } catch(Exception e) {
             logger.error("Error: No se pudo obtener los turnos extras del empleado! {}", e);
             return ResponseEntity

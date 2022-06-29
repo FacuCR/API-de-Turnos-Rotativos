@@ -1,0 +1,11 @@
+<h1 mat-dialog-title>{{ data.evento.start.slice(0, -6) }}</h1>
+<div mat-dialog-content>
+  <p>Que quieres hacer con la jornada?</p>
+</div>
+<div mat-dialog-actions>
+  <button mat-button cdkFocusInitial (click)="onNadaClick()">Nada</button>
+  <button mat-button color="warn" (click)="onEliminarClick()">
+    Eliminar
+  </button>
+  <button mat-button color="primary" (click)="onNadaClick()">Actualizar</button>
+</div>

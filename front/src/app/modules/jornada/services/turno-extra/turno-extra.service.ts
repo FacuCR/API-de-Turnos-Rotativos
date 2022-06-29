@@ -13,17 +13,17 @@ const httpOptions = {
 @Injectable({
   providedIn: 'root',
 })
-export class TurnoNormalService {
+export class TurnoExtraService {
   constructor(private http: HttpClient) {}
 
-  saveTurnoNormal(
+  saveTurnoExtra(
     fecha: string,
     turno: Turnos,
     cantHoras: number,
     jornadaId: number
   ): Observable<any> {
     return this.http.post<any>(
-      environment.jornada + `save/normal/${jornadaId}`,
+      environment.jornada + `save/extra/${jornadaId}`,
       {
         fecha,
         turno,
@@ -33,42 +33,42 @@ export class TurnoNormalService {
     );
   }
 
-  getTurnoNormalById(turnoId: number): Observable<any> {
+  getTurnoExtraById(turnoId: number): Observable<any> {
     turnoId++;
     return this.http.get<any>(
-      environment.jornada + `get/normal/${turnoId}`,
+      environment.jornada + `get/extra/${turnoId}`,
       httpOptions
     );
   }
 
-  getAllTurnosNormalesById(jornadaId: number): Observable<any> {
+  getAllTurnosExtrasById(jornadaId: number): Observable<any> {
     return this.http.get<any>(
-      environment.jornada + `get/normal/all/${jornadaId}`,
+      environment.jornada + `get/extra/all/${jornadaId}`,
       httpOptions
     );
   }
 
-  updateTurnoNormal(
-    fecha: Date,
+  updateTurnoExtra(
+    fecha: string,
     turno: Turnos,
-    cantDeHoras: number,
+    cantHoras: number,
     jornadaId: number,
-    turnoNormalId: number
+    turnoExtraId: number
   ): Observable<any> {
     return this.http.put<any>(
-      environment.jornada + `save/normal/${jornadaId}/"${turnoNormalId}`,
+      environment.jornada + `save/extra/${jornadaId}/"${turnoExtraId}`,
       {
         fecha,
         turno,
-        cantDeHoras,
+        cantHoras,
       },
       httpOptions
     );
   }
 
-  deleteTurnoNormal(turnoNormalId: number): Observable<any> {
+  deleteTurnoExtra(turnoExtraId: number): Observable<any> {
     return this.http.delete<any>(
-      environment.jornada + `delete/normal/${turnoNormalId}`
+      environment.jornada + `delete/extra/${turnoExtraId}`
     );
   }
 }

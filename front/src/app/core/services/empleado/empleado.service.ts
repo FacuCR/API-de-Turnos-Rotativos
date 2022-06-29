@@ -1,8 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-
-const EMPLEADOS_API = 'http://localhost:8080/api/empleados/';
+import { environment } from 'src/environments/environment';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
@@ -18,7 +17,7 @@ export class EmpleadoService {
 
   saveEmpleado(nombre: string, apellido: string, id: number): Observable<any> {
     return this.http.post<any>(
-      EMPLEADOS_API + `save/${id}`,
+      environment.empleado + `save/${id}`,
       {
         nombre,
         apellido,
@@ -28,10 +27,10 @@ export class EmpleadoService {
   }
 
   getAllEmpleados(): Observable<any> {
-    return this.http.get<any>(EMPLEADOS_API + `get`, httpOptions);
+    return this.http.get<any>(environment.empleado + `get`, httpOptions);
   }
 
   getEmpleadoById(id: number): Observable<any> {
-    return this.http.get<any>(EMPLEADOS_API + `get/${id}`, httpOptions);
+    return this.http.get<any>(environment.empleado + `get/${id}`, httpOptions);
   }
 }

@@ -1,0 +1,36 @@
+<mat-progress-bar
+  *ngIf="true"
+  class="position-fixed"
+  mode="indeterminate"
+></mat-progress-bar>
+
+<section
+  class="formularios vh-100 mw-100 d-flex align-items-center justify-content-center"
+>
+  <div
+    class="formularios_main d-flex flex-column align-items-center justify-content-center p-3 mat-elevation-z12"
+  >
+    <h1 class="h1">Formularios</h1>
+    <mat-button-toggle-group
+      class="button__formularios"
+      #group="matButtonToggleGroup"
+      aria-label="Tipo de Jornadas"
+      (click)="cambiarForm(group.value)"
+    >
+      <mat-button-toggle value="turno">Turno</mat-button-toggle>
+      <mat-button-toggle value="extra">Extra</mat-button-toggle>
+      <mat-button-toggle value="libre">Dia Libre</mat-button-toggle>
+      <mat-button-toggle value="vacaciones">Vacaciones</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <div *ngIf="!isAlgunFormActivo" class="formularios__main__default ">
+      <p class="mt-5 texto--secundario">Selecciona el tipo de jornada que quieras cargar</p>
+      <img
+        src="../../../../assets/img/Time management-bro.png"
+        class="img-fluid"
+      />
+    </div>
+    <app-crear-turno *ngIf="isFormTurnoActivo"></app-crear-turno>
+    <app-crear-extra *ngIf="isFormExtraActivo"></app-crear-extra>
+  </div>
+</section>

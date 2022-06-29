@@ -17,18 +17,18 @@ export class TurnoNormalService {
   constructor(private http: HttpClient) {}
 
   saveTurnoNormal(
-    fecha: Date,
+    fecha: string,
     turno: Turnos,
-    cantDeHoras: number,
+    cantHoras: number,
     jornadaId: number
   ): Observable<any> {
-    jornadaId++;
+    jornadaId--;
     return this.http.post<any>(
       environment.jornada + `save/normal/${jornadaId}`,
       {
         fecha,
         turno,
-        cantDeHoras,
+        cantHoras,
       },
       httpOptions
     );

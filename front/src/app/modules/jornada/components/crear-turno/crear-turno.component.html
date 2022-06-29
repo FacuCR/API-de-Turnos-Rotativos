@@ -1,0 +1,70 @@
+<mat-progress-bar
+  *ngIf="cargando"
+  class="position-fixed"
+  mode="indeterminate"
+></mat-progress-bar>
+
+<section
+  class="signup vh-100 mw-100 d-flex flex-column align-items-center justify-content-center"
+>
+  <div class="signup__form p-5">
+    <h1 class="texto--principal">Crear un Turno</h1>
+    <form
+      #formGroupDirective
+      [formGroup]="form"
+      method="POST"
+      (ngSubmit)="onSubmit()"
+      class="d-flex flex-column"
+    >
+      <mat-form-field appearance="fill">
+        <mat-label>Fecha del Turno</mat-label>
+        <input formControlName="fecha" [min]="fechaMinima" matInput [matDatepicker]="picker" />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker touchUi #picker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Horario</mat-label>
+        <mat-select formControlName="turno">
+          <mat-option value="TURNO_MANIANA">Mañana</mat-option>
+          <mat-option value="TURNO_TARDE">Tarde</mat-option>
+          <mat-option value="TURNO_NOCHE">Noche</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field
+        [ngClass]="{ 'mat-form-field-invalid': isInvalido }"
+        appearance="outline"
+        color="primary"
+      >
+        <mat-label>Cantidad de Horas</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="cantHoras"
+          max="8"
+          min="6"
+          required
+        /><mat-error>{{
+          getMensajeDeError("cantHoras")
+        }}</mat-error></mat-form-field
+      >
+
+      <button
+        type="submit"
+        mat-raised-button
+        class="btn-lg mat-elevation-z2"
+        color="primary"
+        [disabled]="!form.valid"
+      >
+        Guardar Turno
+      </button>
+    </form>
+    <div class="texto mt-3 d-flex justify-content-center align-items-center">
+      <div class="texto--exitoso" *ngIf="formExitoso && !formError">
+        {{ formExitoso }}
+      </div>
+      <mat-error *ngIf="formError">{{ formError }}</mat-error>
+    </div>
+  </div>
+</section>

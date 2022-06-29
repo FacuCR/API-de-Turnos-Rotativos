@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PageComponent } from './page.component';
+import { FormulariosJornadaComponent } from './formularios-jornada.component';
 
-describe('PageComponent', () => {
-  let component: PageComponent;
-  let fixture: ComponentFixture<PageComponent>;
+describe('FormulariosJornadaComponent', () => {
+  let component: FormulariosJornadaComponent;
+  let fixture: ComponentFixture<FormulariosJornadaComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ PageComponent ]
+      declarations: [ FormulariosJornadaComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(PageComponent);
+    fixture = TestBed.createComponent(FormulariosJornadaComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

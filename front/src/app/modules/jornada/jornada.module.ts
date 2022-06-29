@@ -4,6 +4,7 @@ import { CalendarioComponent } from './components/calendario/calendario.componen
 import { RouterModule, Routes } from '@angular/router';
 import { MbscModule } from '@mobiscroll/angular';
 import { PageComponent } from './page/page.component';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 const routes: Routes = [
   {
@@ -14,6 +15,11 @@ const routes: Routes = [
 
 @NgModule({
   declarations: [CalendarioComponent, PageComponent],
-  imports: [CommonModule, RouterModule.forChild(routes), MbscModule],
+  imports: [
+    CommonModule,
+    RouterModule.forChild(routes),
+    MbscModule,
+    MatProgressBarModule,
+  ],
 })
 export class JornadaModule {}

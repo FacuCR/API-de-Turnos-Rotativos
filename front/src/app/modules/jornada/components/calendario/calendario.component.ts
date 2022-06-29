@@ -1,5 +1,5 @@
 import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import {
   localeEs,
   MbscCalendarEvent,
@@ -33,6 +33,7 @@ export class CalendarioComponent implements OnInit {
   turnosNormales: TurnoNormal[] = [];
   turnosExtras: TurnoExtra[] = [];
   cargando: boolean = false;
+  @Output() sendCargando = new EventEmitter<boolean>();
 
   constructor(
     private empleados: EmpleadoService,
@@ -46,12 +47,8 @@ export class CalendarioComponent implements OnInit {
       .subscribe({
         next: (event: any) => {
           this.cargando = true;
+          this.sendCargandoEvent(this.cargando);
 
-          if (event.type === HttpEventType.DownloadProgress) {
-            if (Math.round((100 * event.loaded) / event.total) == 100) {
-              this.cargando = false;
-            }
-          }
           this.empleadosActuales = event.body;
           this.empleadosActuales
             ? (this.myResources = this.castearEmpleadosAResource(
@@ -62,15 +59,21 @@ export class CalendarioComponent implements OnInit {
         error: (e: HttpErrorResponse) => {
           console.log(e.error);
           this.cargando = false;
+          this.sendCargandoEvent(this.cargando);
         },
       })
       .add(() => {
         this.cargarTurnosNormales();
-        this.cargarTurnosExtras();
       });
   }
 
-  shifts: MbscCalendarEvent[] = [];
+  shifts: MbscCalendarEvent[] = [
+    {
+      onEventClick: (args: any) => {
+        console.log('click en ' + args);
+      },
+    },
+  ];
 
   calendarOptions: MbscEventcalendarOptions = {
     view: {
@@ -121,7 +124,12 @@ export class CalendarioComponent implements OnInit {
       },
     ],
     onEventClick: (args: any) => {
-      console.log('click en ' + args.resource);
+      console.log(
+        'click en ' +
+          JSON.stringify(args.event) +
+          ' Jornada: ' +
+          (args.resource - 1)
+      );
     },
   };
 
@@ -156,11 +164,10 @@ export class CalendarioComponent implements OnInit {
           .getAllTurnosNormalesById(empleado.id - 2)
           .subscribe({
             next: (event: any) => {
-              this.cargando = true;
-
               if (event.type === HttpEventType.DownloadProgress) {
                 if (Math.round((100 * event.loaded) / event.total) == 100) {
                   this.cargando = false;
+                  this.sendCargandoEvent(this.cargando);
                 }
               }
               event.body && event.body.length != 0
@@ -170,9 +177,11 @@ export class CalendarioComponent implements OnInit {
             error: (e: HttpErrorResponse) => {
               console.log(e.error);
               this.cargando = false;
+              this.sendCargandoEvent(this.cargando);
             },
           })
           .add(() => {
+            this.cargarTurnosExtras();
             let turnosCorregidos: TurnoNormal[] = [];
             if (this.turnosNormales) {
               for (let i = 0; i < this.turnosNormales.length; i++) {
@@ -186,17 +195,11 @@ export class CalendarioComponent implements OnInit {
                 turnosCorregidos.push(turnoCorregido);
               }
               this.turnosNormales = turnosCorregidos;
-              this.cargarShifts(this.turnosNormales, "#673ab7");
+              this.cargarShifts(this.turnosNormales, '#673ab7');
             }
           });
       });
     }
-  }
-
-  addDias(fecha: Date, dias: number): Date {
-    let result = new Date(fecha);
-    result.setDate(result.getDate() + dias);
-    return result;
   }
 
   cargarShifts(turnos: JornadaTurno[], colorTurno: string): void {
@@ -237,11 +240,10 @@ export class CalendarioComponent implements OnInit {
           .getAllTurnosExtrasById(empleado.id - 2)
           .subscribe({
             next: (event: any) => {
-              this.cargando = true;
-
               if (event.type === HttpEventType.DownloadProgress) {
                 if (Math.round((100 * event.loaded) / event.total) == 100) {
                   this.cargando = false;
+                  this.sendCargandoEvent(this.cargando);
                 }
               }
               event.body && event.body.length != 0
@@ -251,6 +253,7 @@ export class CalendarioComponent implements OnInit {
             error: (e: HttpErrorResponse) => {
               console.log(e.error);
               this.cargando = false;
+              this.sendCargandoEvent(this.cargando);
             },
           })
           .add(() => {
@@ -259,7 +262,8 @@ export class CalendarioComponent implements OnInit {
               for (let i = 0; i < this.turnosExtras.length; i++) {
                 let turnoCorregido = new TurnoExtra();
                 turnoCorregido.fecha = this.turnosExtras[i].fecha;
-                turnoCorregido.cantHoras = "Extra: " + this.turnosExtras[i].cantHoras;
+                turnoCorregido.cantHoras =
+                  'Extra: ' + this.turnosExtras[i].cantHoras;
                 turnoCorregido.turno = this.turnosExtras[i].turno;
                 turnoCorregido.idTurnoNormal =
                   this.turnosExtras[i].idTurnoNormal;
@@ -267,10 +271,14 @@ export class CalendarioComponent implements OnInit {
                 turnosCorregidos.push(turnoCorregido);
               }
               this.turnosExtras = turnosCorregidos;
-              this.cargarShifts(this.turnosExtras, "#ffd740");
+              this.cargarShifts(this.turnosExtras, '#ffd740');
             }
           });
       });
     }
+  }
+
+  sendCargandoEvent(cargando: boolean): void {
+    this.sendCargando.emit(cargando);
   }
 }

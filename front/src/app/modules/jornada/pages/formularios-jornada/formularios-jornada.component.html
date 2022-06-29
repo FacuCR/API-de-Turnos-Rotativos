@@ -23,7 +23,7 @@
       <mat-button-toggle value="vacaciones">Vacaciones</mat-button-toggle>
     </mat-button-toggle-group>
 
-    <div *ngIf="!isFormTurnoActivo" class="formularios__main__default ">
+    <div *ngIf="!isAlgunFormActivo" class="formularios__main__default ">
       <p class="mt-5 texto--secundario">Selecciona el tipo de jornada que quieras cargar</p>
       <img
         src="../../../../assets/img/Time management-bro.png"
@@ -31,5 +31,6 @@
       />
     </div>
     <app-crear-turno *ngIf="isFormTurnoActivo"></app-crear-turno>
+    <app-crear-extra *ngIf="isFormExtraActivo"></app-crear-extra>
   </div>
 </section>

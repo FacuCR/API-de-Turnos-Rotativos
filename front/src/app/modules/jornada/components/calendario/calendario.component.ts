@@ -15,6 +15,10 @@ import { TurnoExtraService } from '../../services/turno-extra/turno-extra.servic
 import { TurnoNormalService } from '../../services/turno-normal.service';
 import { TurnoExtra } from '../../models/TurnoExtra';
 import { JornadaTurno } from '../../models/JornadaTurno';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogEventComponent } from '../dialog-event/dialog-event.component';
+import { TokenStorageService } from 'src/app/core/services/token/token-storage.service';
+import { TurnoEliminado } from '../../models/TurnoEliminado';
 
 setOptions({
   locale: localeEs,
@@ -38,7 +42,9 @@ export class CalendarioComponent implements OnInit {
   constructor(
     private empleados: EmpleadoService,
     private turnoNormalService: TurnoNormalService,
-    private turnoExtraService: TurnoExtraService
+    private turnoExtraService: TurnoExtraService,
+    public dialog: MatDialog,
+    private tokenStorage: TokenStorageService
   ) {}
 
   ngOnInit(): void {
@@ -67,13 +73,7 @@ export class CalendarioComponent implements OnInit {
       });
   }
 
-  shifts: MbscCalendarEvent[] = [
-    {
-      onEventClick: (args: any) => {
-        console.log('click en ' + args);
-      },
-    },
-  ];
+  shifts: MbscCalendarEvent[] = [];
 
   calendarOptions: MbscEventcalendarOptions = {
     view: {
@@ -124,12 +124,20 @@ export class CalendarioComponent implements OnInit {
       },
     ],
     onEventClick: (args: any) => {
-      console.log(
-        'click en ' +
-          JSON.stringify(args.event) +
-          ' Jornada: ' +
-          (args.resource - 1)
-      );
+      if (args.event.resource === this.tokenStorage.getUser().id) {
+        const dialogRef = this.dialog.open(DialogEventComponent, {
+          data: {
+            evento: args.event,
+            jornadaId: args.resource,
+          },
+        });
+
+        dialogRef.afterClosed().subscribe((turnoEliminado: TurnoEliminado) => {
+          if(turnoEliminado.isEliminado) {
+            this.deleteEvent(turnoEliminado.idTurnoEliminado);
+          }
+        });
+      }
     },
   };
 
@@ -161,7 +169,7 @@ export class CalendarioComponent implements OnInit {
     if (this.empleadosActuales) {
       this.empleadosActuales.forEach((empleado) => {
         this.turnoNormalService
-          .getAllTurnosNormalesById(empleado.id - 2)
+          .getAllTurnosNormalesById(empleado.id)
           .subscribe({
             next: (event: any) => {
               if (event.type === HttpEventType.DownloadProgress) {
@@ -191,18 +199,18 @@ export class CalendarioComponent implements OnInit {
                 turnoCorregido.turno = this.turnosNormales[i].turno;
                 turnoCorregido.idTurnoNormal =
                   this.turnosNormales[i].idTurnoNormal;
-                turnoCorregido.usuarioId = this.turnosNormales[i].usuarioId + 1;
+                turnoCorregido.usuarioId = this.turnosNormales[i].usuarioId;
                 turnosCorregidos.push(turnoCorregido);
               }
               this.turnosNormales = turnosCorregidos;
-              this.cargarShifts(this.turnosNormales, '#673ab7');
+              this.cargarShiftsDeTurnos(this.turnosNormales, '#673ab7');
             }
           });
       });
     }
   }
 
-  cargarShifts(turnos: JornadaTurno[], colorTurno: string): void {
+  cargarShiftsDeTurnos(turnos: JornadaTurno[], colorTurno: string): void {
     let slotTurno: number = 1;
     for (let i = 0; i < turnos.length; i++) {
       switch (turnos[i].turno) {
@@ -219,7 +227,14 @@ export class CalendarioComponent implements OnInit {
           slotTurno = 1;
           break;
       }
+      let tipoDeJornadaTurno: string = '';
+      if (turnos[i].cantHoras[0] == 'E' || turnos[i].cantHoras[0] == 'e') {
+        tipoDeJornadaTurno = 'extra';
+      } else {
+        tipoDeJornadaTurno = 'turno';
+      }
       let newEvent = {
+        id: turnos[i].idTurnoNormal,
         start: turnos[i].fecha
           .toLocaleString("yyyy-MM-dd'T'HH:mm")
           .slice(0, -13),
@@ -227,9 +242,20 @@ export class CalendarioComponent implements OnInit {
         resource: turnos[i].usuarioId,
         slot: slotTurno,
         color: colorTurno,
+        tipo: tipoDeJornadaTurno,
       };
-      // Crear un nuevo array conteniendo los eventos anteriores y el nuevo
-      this.shifts = [...this.shifts, newEvent];
+      // Si hay algun evento igual no lo agrega ya que solo puede haber un turno en un dia por el mismo usuario
+      if (
+        !this.shifts.some(
+          (shift) =>
+            shift.start === newEvent.start &&
+            shift.resource === newEvent.resource &&
+            shift.slot === newEvent.slot
+        )
+      ) {
+        // Crear un nuevo array conteniendo los eventos anteriores y el nuevo
+        this.shifts = [...this.shifts, newEvent];
+      }
     }
   }
 
@@ -237,7 +263,7 @@ export class CalendarioComponent implements OnInit {
     if (this.empleadosActuales) {
       this.empleadosActuales.forEach((empleado) => {
         this.turnoExtraService
-          .getAllTurnosExtrasById(empleado.id - 2)
+          .getAllTurnosExtrasById(empleado.id)
           .subscribe({
             next: (event: any) => {
               if (event.type === HttpEventType.DownloadProgress) {
@@ -267,11 +293,11 @@ export class CalendarioComponent implements OnInit {
                 turnoCorregido.turno = this.turnosExtras[i].turno;
                 turnoCorregido.idTurnoNormal =
                   this.turnosExtras[i].idTurnoNormal;
-                turnoCorregido.usuarioId = this.turnosExtras[i].usuarioId + 1;
+                turnoCorregido.usuarioId = this.turnosExtras[i].usuarioId;
                 turnosCorregidos.push(turnoCorregido);
               }
               this.turnosExtras = turnosCorregidos;
-              this.cargarShifts(this.turnosExtras, '#ffd740');
+              this.cargarShiftsDeTurnos(this.turnosExtras, '#ffd740');
             }
           });
       });
@@ -280,5 +306,16 @@ export class CalendarioComponent implements OnInit {
 
   sendCargandoEvent(cargando: boolean): void {
     this.sendCargando.emit(cargando);
+  }
+
+  deleteEvent(eventoId: number) {
+    // creo una copia de los eventos
+    const eventos = [...this.shifts];
+    // Find the index of the event to be deleted
+    const index = eventos.indexOf(eventos.filter(evento => evento.id === eventoId)[0]);
+    // Remove the event from the array
+    eventos.splice(index, 1);
+    // Pass the new array to the calendar
+    this.shifts = eventos;
   }
 }

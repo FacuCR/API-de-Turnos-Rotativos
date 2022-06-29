@@ -5,6 +5,7 @@ import { CalendarioComponent } from './components/calendario/calendario.componen
 import { FormulariosJornadaComponent } from './pages/formularios-jornada/formularios-jornada.component';
 import { IndexJornadaComponent } from './pages/index-jornada/index-jornada.component';
 import { CrearTurnoComponent } from './components/crear-turno/crear-turno.component';
+import { CrearExtraComponent } from './components/crear-extra/crear-extra.component';
 
 import { RouterModule, Routes } from '@angular/router';
 
@@ -20,6 +21,8 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
+import { MatDialogModule } from '@angular/material/dialog';
+import { DialogEventComponent } from './components/dialog-event/dialog-event.component';
 
 const routes: Routes = [
   {
@@ -37,7 +40,9 @@ const routes: Routes = [
     CalendarioComponent,
     IndexJornadaComponent,
     FormulariosJornadaComponent,
-    CrearTurnoComponent
+    CrearTurnoComponent,
+    CrearExtraComponent,
+    DialogEventComponent,
   ],
   imports: [
     CommonModule,
@@ -52,6 +57,7 @@ const routes: Routes = [
     MatDatepickerModule,
     MatNativeDateModule,
     MatSelectModule,
+    MatDialogModule,
   ],
 })
 export class JornadaModule {}

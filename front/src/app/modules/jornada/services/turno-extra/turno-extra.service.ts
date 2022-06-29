@@ -17,18 +17,17 @@ export class TurnoExtraService {
   constructor(private http: HttpClient) {}
 
   saveTurnoExtra(
-    fecha: Date,
+    fecha: string,
     turno: Turnos,
-    cantDeHoras: number,
+    cantHoras: number,
     jornadaId: number
   ): Observable<any> {
-    jornadaId++;
     return this.http.post<any>(
       environment.jornada + `save/extra/${jornadaId}`,
       {
         fecha,
         turno,
-        cantDeHoras,
+        cantHoras,
       },
       httpOptions
     );
@@ -43,7 +42,6 @@ export class TurnoExtraService {
   }
 
   getAllTurnosExtrasById(jornadaId: number): Observable<any> {
-    jornadaId++;
     return this.http.get<any>(
       environment.jornada + `get/extra/all/${jornadaId}`,
       httpOptions
@@ -51,19 +49,18 @@ export class TurnoExtraService {
   }
 
   updateTurnoExtra(
-    fecha: Date,
+    fecha: string,
     turno: Turnos,
-    cantDeHoras: number,
+    cantHoras: number,
     jornadaId: number,
     turnoExtraId: number
   ): Observable<any> {
-    jornadaId++;
     return this.http.put<any>(
       environment.jornada + `save/extra/${jornadaId}/"${turnoExtraId}`,
       {
         fecha,
         turno,
-        cantDeHoras,
+        cantHoras,
       },
       httpOptions
     );
@@ -71,8 +68,7 @@ export class TurnoExtraService {
 
   deleteTurnoExtra(turnoExtraId: number): Observable<any> {
     return this.http.delete<any>(
-      environment.jornada + `delete/extra/${turnoExtraId}`,
-      httpOptions
+      environment.jornada + `delete/extra/${turnoExtraId}`
     );
   }
 }

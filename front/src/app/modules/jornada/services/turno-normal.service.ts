@@ -22,7 +22,6 @@ export class TurnoNormalService {
     cantHoras: number,
     jornadaId: number
   ): Observable<any> {
-    jornadaId--;
     return this.http.post<any>(
       environment.jornada + `save/normal/${jornadaId}`,
       {
@@ -43,7 +42,6 @@ export class TurnoNormalService {
   }
 
   getAllTurnosNormalesById(jornadaId: number): Observable<any> {
-    jornadaId++;
     return this.http.get<any>(
       environment.jornada + `get/normal/all/${jornadaId}`,
       httpOptions
@@ -57,7 +55,6 @@ export class TurnoNormalService {
     jornadaId: number,
     turnoNormalId: number
   ): Observable<any> {
-    jornadaId++;
     return this.http.put<any>(
       environment.jornada + `save/normal/${jornadaId}/"${turnoNormalId}`,
       {
@@ -71,8 +68,7 @@ export class TurnoNormalService {
 
   deleteTurnoNormal(turnoNormalId: number): Observable<any> {
     return this.http.delete<any>(
-      environment.jornada + `delete/normal/${turnoNormalId}`,
-      httpOptions
+      environment.jornada + `delete/normal/${turnoNormalId}`
     );
   }
 }

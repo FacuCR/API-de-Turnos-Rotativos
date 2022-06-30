@@ -1,5 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { JornadaEliminada } from '../../models/JornadaEliminada';
 import { DiaLibreService } from '../../services/dia-libre/dia-libre.service';
 import { TurnoExtraService } from '../../services/turno-extra/turno-extra.service';
@@ -21,7 +22,8 @@ export class DialogEventComponent implements OnInit {
     private turnoExtraService: TurnoExtraService,
     private turnoNormalService: TurnoNormalService,
     private diaLibreService: DiaLibreService,
-    private vacacionesService: VacacionesService
+    private vacacionesService: VacacionesService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {}
@@ -96,5 +98,15 @@ export class DialogEventComponent implements OnInit {
       default:
         break;
     }
+  }
+
+  onActualizarClick(): void {
+    let dataEventoAActualizar = {
+      id: this.data.evento.id,
+      tipo: this.data.evento.tipo,
+      fechaInicio: this.data.evento.start
+    }
+    this.dialogRef.close(this.jornadaEliminada);
+    this.router.navigate(['jornada/actualizar', {datos_evento: JSON.stringify(dataEventoAActualizar)}]);
   }
 }

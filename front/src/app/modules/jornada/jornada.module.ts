@@ -27,6 +27,7 @@ import { HeaderComponent } from 'src/app/layout/header/header.component';
 import { CrearDiaLibreComponent } from './components/crear-dia-libre/crear-dia-libre.component';
 import { CrearVacacionesComponent } from './components/crear-vacaciones/crear-vacaciones.component';
 import { CrearCombinacionComponent } from './components/crear-combinacion/crear-combinacion.component';
+import { FormActualizarComponent } from './pages/form-actualizar/form-actualizar.component';
 
 const routes: Routes = [
   {
@@ -36,6 +37,10 @@ const routes: Routes = [
   {
     path: 'formularios',
     component: FormulariosJornadaComponent,
+  },
+  {
+    path: 'actualizar',
+    component: FormActualizarComponent,
   },
 ];
 
@@ -50,7 +55,8 @@ const routes: Routes = [
     HeaderComponent,
     CrearDiaLibreComponent,
     CrearVacacionesComponent,
-    CrearCombinacionComponent
+    CrearCombinacionComponent,
+    FormActualizarComponent,
   ],
   imports: [
     CommonModule,

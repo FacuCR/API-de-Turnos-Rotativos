@@ -21,7 +21,7 @@ nav.main-menu.expanded {
 .main-menu {
   background: var(--primary-color);
   border-right: 1px solid #e5e5e5;
-  position: absolute;
+  position: fixed;
   top: 0;
   bottom: 0;
   height: 100%;
@@ -79,15 +79,6 @@ nav.main-menu.expanded {
   position: absolute;
   left: 0;
   bottom: 0;
-}
-
-.no-touch .scrollable.hover {
-  overflow-y: hidden;
-}
-
-.no-touch .scrollable.hover:hover {
-  overflow-y: auto;
-  overflow: visible;
 }
 
 a:hover,

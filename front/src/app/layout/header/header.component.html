@@ -12,7 +12,7 @@
         <span class="nav-text"> Formularios </span>
       </a>
     </li>
-    <li>
+    <li *ngIf="isAdmin">
       <a routerLink="../registro">
         <i class="fa fa-user fa-2x"></i>
         <span class="nav-text"> Crear un Usuario </span>
@@ -28,9 +28,9 @@
 
   <ul class="logout">
     <li>
-      <a href="#">
+      <a routerLink="/" (click)="onLogoutClick()">
         <i class="fa fa-power-off fa-2x"></i>
-        <span class="nav-text" (click)="onLogoutClick()"> Logout </span>
+        <span class="nav-text"> Logout </span>
       </a>
     </li>
   </ul>

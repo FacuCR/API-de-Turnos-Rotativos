@@ -1,5 +1,4 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import th from '@mobiscroll/angular/dist/js/i18n/th';
 
 @Component({
   selector: 'app-formularios-jornada',

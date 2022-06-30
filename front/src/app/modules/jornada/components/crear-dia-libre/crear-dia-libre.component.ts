@@ -44,9 +44,7 @@ export class CrearDiaLibreComponent implements OnInit {
     this.diaLibreService.saveDiaLibre(fecha, jornadaId).subscribe({
       next: (event: any) => {
         this.formError = '';
-        console.log(event);
-        console.log(event.body);
-        this.formExitoso = 'Dia libre guardado correctamente!';
+        this.formExitoso = event.message;
 
         // Si el formulario se marca como enviado, independientemente de si está enviado o no,
         // los errores se resaltarán.

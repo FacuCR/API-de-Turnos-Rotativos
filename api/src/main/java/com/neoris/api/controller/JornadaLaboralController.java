@@ -9,6 +9,7 @@ import com.neoris.api.exception.MaxHsJornadaDiariaException;
 import com.neoris.api.exception.MaxHsJornadaSemanalException;
 import com.neoris.api.model.Turno;
 import com.neoris.api.payload.request.*;
+import com.neoris.api.payload.response.DiaLibreResponse;
 import com.neoris.api.payload.response.MessageResponse;
 import com.neoris.api.payload.response.TurnoExtraResponse;
 import com.neoris.api.payload.response.TurnosNormalesResponse;
@@ -416,8 +417,19 @@ public class JornadaLaboralController {
     @GetMapping("/get/libre/all/{id}")
     public ResponseEntity<?> getAllTurnosDiasLibres(@PathVariable("id") Long jornadaId){
         try {
-            List<DiaLibre> diasLibres = diaLibreService.getAllDiasLibres(jornadaId);
-            return new ResponseEntity<>(diasLibres, HttpStatus.OK);
+            Iterator<DiaLibre> diasLibres = diaLibreService.getAllDiasLibres(jornadaId).iterator();
+            List<DiaLibreResponse> diasLibresResponses = new ArrayList<>();
+            DiaLibre diaLibre;
+            DiaLibreResponse libreResponse = new DiaLibreResponse();
+            while(diasLibres.hasNext()) {
+                diaLibre = diasLibres.next();
+                libreResponse.setIdDiaLibre(diaLibre.getIdDiaLibre());
+                libreResponse.setFecha(diaLibre.getFecha());
+                libreResponse.setUsuarioId(jornadaId);
+                diasLibresResponses.add(libreResponse);
+                libreResponse = new DiaLibreResponse();
+            }
+            return new ResponseEntity<>(diasLibresResponses, HttpStatus.OK);
         } catch(Exception e) {
             logger.error("Error: No se pudo obtener los días libres del empleado! {}", e);
             return ResponseEntity

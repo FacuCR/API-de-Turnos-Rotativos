@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TurnoEliminado } from '../../models/TurnoEliminado';
+import { DiaLibreService } from '../../services/dia-libre/dia-libre.service';
 import { TurnoExtraService } from '../../services/turno-extra/turno-extra.service';
 import { TurnoNormalService } from '../../services/turno-normal.service';
 
@@ -17,7 +18,8 @@ export class DialogEventComponent implements OnInit {
     public dialogRef: MatDialogRef<DialogEventComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private turnoExtraService: TurnoExtraService,
-    private turnoNormalService: TurnoNormalService
+    private turnoNormalService: TurnoNormalService,
+    private diaLibreService: DiaLibreService
   ) {}
 
   ngOnInit(): void {}
@@ -27,28 +29,48 @@ export class DialogEventComponent implements OnInit {
   }
 
   onEliminarClick(): void {
-    if (this.data.evento.tipo === 'turno') {
-      this.turnoNormalService
-        .deleteTurnoNormal(this.data.evento.id)
-        .subscribe({
-          next: () => {
-            this.turnoEliminado.isEliminado = true;
-          },
-        })
-        .add(() => {
-          this.dialogRef.close(this.turnoEliminado);
-        });
-    } else {
-      this.turnoExtraService
-        .deleteTurnoExtra(this.data.evento.id)
-        .subscribe({
-          next: () => {
-            this.turnoEliminado.isEliminado = true;
-          },
-        })
-        .add(() => {
-          this.dialogRef.close(this.turnoEliminado);
-        });
+    switch (this.data.evento.tipo) {
+      case 'turno':
+        this.turnoNormalService
+          .deleteTurnoNormal(this.data.evento.id)
+          .subscribe({
+            next: () => {
+              this.turnoEliminado.isEliminado = true;
+            },
+          })
+          .add(() => {
+            this.dialogRef.close(this.turnoEliminado);
+          });
+        break;
+      case 'extra':
+        this.turnoExtraService
+          .deleteTurnoExtra(this.data.evento.id)
+          .subscribe({
+            next: () => {
+              this.turnoEliminado.isEliminado = true;
+            },
+          })
+          .add(() => {
+            this.dialogRef.close(this.turnoEliminado);
+          });
+        break;
+      case 'libre':
+        this.diaLibreService
+          .deleteDiaLibre(this.data.evento.id)
+          .subscribe({
+            next: () => {
+              this.turnoEliminado.isEliminado = true;
+            },
+          })
+          .add(() => {
+            this.dialogRef.close(this.turnoEliminado);
+          });
+        break;
+      case 'vacaciones':
+        break;
+
+      default:
+        break;
     }
   }
 }

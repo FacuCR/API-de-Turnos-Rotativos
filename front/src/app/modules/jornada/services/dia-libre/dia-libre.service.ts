@@ -13,9 +13,9 @@ const httpOptions = {
 export class DiaLibreService {
   constructor(private http: HttpClient) {}
 
-  saveTurnoExtra(fecha: string, jornadaId: number): Observable<any> {
+  saveDiaLibre(fecha: string, jornadaId: number): Observable<any> {
     return this.http.post<any>(
-      environment.jornada + `save/extra/${jornadaId}`,
+      environment.jornada + `save/libre/${jornadaId}`,
       {
         fecha,
       },
@@ -25,14 +25,14 @@ export class DiaLibreService {
 
   getDiaLibreById(diaLibreId: number): Observable<any> {
     return this.http.get<any>(
-      environment.jornada + `get/extra/${diaLibreId}`,
+      environment.jornada + `get/libre/${diaLibreId}`,
       httpOptions
     );
   }
 
   getAllDiasLibresById(jornadaId: number): Observable<any> {
     return this.http.get<any>(
-      environment.jornada + `get/extra/all/${jornadaId}`,
+      environment.jornada + `get/libre/all/${jornadaId}`,
       httpOptions
     );
   }
@@ -43,7 +43,7 @@ export class DiaLibreService {
     diaLibreId: number
   ): Observable<any> {
     return this.http.put<any>(
-      environment.jornada + `save/extra/${jornadaId}/"${diaLibreId}`,
+      environment.jornada + `save/libre/${jornadaId}/"${diaLibreId}`,
       {
         fecha,
       },
@@ -51,9 +51,9 @@ export class DiaLibreService {
     );
   }
 
-  deleteTurnoExtra(diaLibreId: number): Observable<any> {
+  deleteDiaLibre(diaLibreId: number): Observable<any> {
     return this.http.delete<any>(
-      environment.jornada + `delete/extra/${diaLibreId}`
+      environment.jornada + `delete/libre/${diaLibreId}`
     );
   }
 }

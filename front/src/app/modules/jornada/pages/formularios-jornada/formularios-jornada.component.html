@@ -30,11 +30,12 @@
         class="img-fluid"
       />
     </div>
+    <app-crear-dia-libre *ngIf="isFormLibreActivo"></app-crear-dia-libre>
     <app-crear-turno *ngIf="isFormTurnoActivo"></app-crear-turno>
     <app-crear-extra *ngIf="isFormExtraActivo"></app-crear-extra>
     <button
         mat-raised-button
-        class="btn-lg mat-elevation-z2"
+        class="btn-lg mt-2 mat-elevation-z2"
         color="accent"
         routerLink=''
       >

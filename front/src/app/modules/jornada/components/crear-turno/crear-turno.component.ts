@@ -8,6 +8,7 @@ import {
 } from '@angular/forms';
 import { Turnos } from 'src/app/core/models/Turnos';
 import { TokenStorageService } from 'src/app/core/services/token/token-storage.service';
+import { DateAddDiasService } from '../../services/date-add-dias/date-add-dias.service';
 import { TurnoNormalService } from '../../services/turno-normal.service';
 
 @Component({
@@ -32,12 +33,13 @@ export class CrearTurnoComponent implements OnInit {
   formError: string = '';
   formExitoso: string = '';
   cargando: boolean = false;
-  fechaMinima: Date = new Date();
+  fechaMinima: Date = this.dateAddService.addDias(1, new Date());
 
   constructor(
     public fb: FormBuilder,
     private turnoNormalService: TurnoNormalService,
-    private tokenStorage: TokenStorageService
+    private tokenStorage: TokenStorageService,
+    private dateAddService: DateAddDiasService
   ) {}
 
   ngOnInit(): void {}

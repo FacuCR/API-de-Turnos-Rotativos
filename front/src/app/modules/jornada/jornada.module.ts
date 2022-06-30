@@ -23,6 +23,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDialogModule } from '@angular/material/dialog';
 import { DialogEventComponent } from './components/dialog-event/dialog-event.component';
+import { HeaderComponent } from 'src/app/layout/header/header.component';
 
 const routes: Routes = [
   {
@@ -43,6 +44,7 @@ const routes: Routes = [
     CrearTurnoComponent,
     CrearExtraComponent,
     DialogEventComponent,
+    HeaderComponent
   ],
   imports: [
     CommonModule,

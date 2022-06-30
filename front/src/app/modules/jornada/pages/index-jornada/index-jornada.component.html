@@ -1,2 +1,12 @@
-<mat-progress-bar *ngIf="cargando" class="position-fixed" mode="indeterminate"></mat-progress-bar>
-<app-calendario (sendCargando)="recibirCargando($event)"></app-calendario>
+<mat-progress-bar
+  *ngIf="cargando"
+  class="position-fixed"
+  mode="indeterminate"
+></mat-progress-bar>
+<main>
+  <app-header></app-header>
+  <div class="d-flex">
+    <div class="contenido invisible">rellenos</div>
+  <app-calendario class="calendario" (sendCargando)="recibirCargando($event)"></app-calendario>
+  </div>
+</main>

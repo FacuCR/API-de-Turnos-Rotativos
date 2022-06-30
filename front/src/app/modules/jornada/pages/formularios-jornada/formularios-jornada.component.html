@@ -24,7 +24,7 @@
     </mat-button-toggle-group>
 
     <div *ngIf="!isAlgunFormActivo" class="formularios__main__default ">
-      <p class="mt-5 texto--secundario">Selecciona el tipo de jornada que quieras cargar</p>
+      <p class="mt-4 texto--secundario">Selecciona el tipo de jornada que quieras cargar</p>
       <img
         src="../../../../assets/img/Time management-bro.png"
         class="img-fluid"
@@ -32,5 +32,13 @@
     </div>
     <app-crear-turno *ngIf="isFormTurnoActivo"></app-crear-turno>
     <app-crear-extra *ngIf="isFormExtraActivo"></app-crear-extra>
+    <button
+        mat-raised-button
+        class="btn-lg mat-elevation-z2"
+        color="accent"
+        routerLink=''
+      >
+        Volver al Inicio
+      </button>
   </div>
 </section>

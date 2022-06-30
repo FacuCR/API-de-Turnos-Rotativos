@@ -1,0 +1,31 @@
+<nav class="main-menu">
+  <ul>
+    <li>
+      <a routerLink="/jornada"  routerLinkActive="active">
+        <i class="fa fa-home fa-2x"></i>
+        <span class="nav-text"> Dashboard </span>
+      </a>
+    </li>
+    <li class="has-subnav">
+      <a routerLink="formularios"  routerLinkActive="active">
+        <i class="fa fa-list fa-2x"></i>
+        <span class="nav-text"> Formularios </span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="../registro">
+        <i class="fa fa-user fa-2x"></i>
+        <span class="nav-text"> Crear un Usuario </span>
+      </a>
+    </li>
+  </ul>
+
+  <ul class="logout">
+    <li>
+      <a href="#">
+        <i class="fa fa-power-off fa-2x"></i>
+        <span class="nav-text" (click)="onLogoutClick()"> Logout </span>
+      </a>
+    </li>
+  </ul>
+</nav>

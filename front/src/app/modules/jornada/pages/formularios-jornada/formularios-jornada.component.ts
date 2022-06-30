@@ -12,6 +12,7 @@ export class FormulariosJornadaComponent implements OnInit {
   isFormTurnoActivo: boolean = false;
   isFormExtraActivo: boolean = false;
   isFormLibreActivo: boolean = false;
+  isFormVacacionesActivo: boolean = false;
   isAlgunFormActivo: boolean = false;
 
   constructor() {}
@@ -22,6 +23,7 @@ export class FormulariosJornadaComponent implements OnInit {
     this.isFormTurnoActivo = false;
     this.isFormExtraActivo = false;
     this.isFormLibreActivo = false;
+    this.isFormVacacionesActivo = false;
     switch (form) {
       case 'turno':
         this.isFormTurnoActivo = true;
@@ -32,6 +34,9 @@ export class FormulariosJornadaComponent implements OnInit {
       case 'libre':
         this.isFormLibreActivo = true;
         break;
+      case 'vacaciones':
+        this.isFormVacacionesActivo = true;
+        break;
 
       default:
         break;
@@ -39,6 +44,7 @@ export class FormulariosJornadaComponent implements OnInit {
     this.isAlgunFormActivo =
       this.isFormTurnoActivo ||
       this.isFormExtraActivo ||
-      this.isFormLibreActivo;
+      this.isFormLibreActivo ||
+      this.isFormVacacionesActivo;
   }
 }

@@ -12,4 +12,16 @@ export class DateAddDiasService {
     fecha.setDate(fecha.getDate() + dias);
     return fecha;
   }
+
+  formatDate(date: Date): string {
+    return [
+      this.padTo2Digits(date.getDate()),
+      this.padTo2Digits(date.getMonth() + 1),
+      date.getFullYear(),
+    ].join('/');
+  }
+
+  padTo2Digits(num: number) {
+    return num.toString().padStart(2, '0');
+  }
 }

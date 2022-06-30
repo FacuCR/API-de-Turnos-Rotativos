@@ -1,0 +1,37 @@
+<section
+  class="vacaciones"
+>
+  <div class="vacaciones__form pt-2">
+    <h2 class="texto--principal">Asignar Vacaciones</h2>
+    <form
+      #formGroupDirective
+      [formGroup]="form"
+      method="POST"
+      (ngSubmit)="onSubmit()"
+      class="d-flex flex-column"
+    >
+      <mat-form-field appearance="fill">
+        <mat-label>Fecha de las Vacaciones</mat-label>
+        <input formControlName="fecha" [min]="fechaMinima" matInput [matDatepicker]="picker" />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker touchUi #picker></mat-datepicker>
+      </mat-form-field>
+
+      <button
+        type="submit"
+        mat-raised-button
+        class="btn-lg mat-elevation-z2"
+        color="primary"
+        [disabled]="!form.valid"
+      >
+        Guardar Vacaciones
+      </button>
+    </form>
+    <div class="texto mt-3 d-flex justify-content-center align-items-center">
+      <div class="texto--exitoso" *ngIf="formExitoso && !formError">
+        {{ formExitoso }}
+      </div>
+      <mat-error *ngIf="formError">{{ formError }}</mat-error>
+    </div>
+  </div>
+</section>

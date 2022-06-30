@@ -19,6 +19,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogEventComponent } from '../dialog-event/dialog-event.component';
 import { TokenStorageService } from 'src/app/core/services/token/token-storage.service';
 import { TurnoEliminado } from '../../models/TurnoEliminado';
+import { DiaLibreService } from '../../services/dia-libre/dia-libre.service';
+import { DiaLibre } from '../../models/DiaLibre';
 
 setOptions({
   locale: localeEs,
@@ -36,6 +38,7 @@ export class CalendarioComponent implements OnInit {
   empleadosActuales: Empleado[] = [];
   turnosNormales: TurnoNormal[] = [];
   turnosExtras: TurnoExtra[] = [];
+  diasLibres: DiaLibre[] = [];
   cargando: boolean = false;
   @Output() sendCargando = new EventEmitter<boolean>();
 
@@ -43,6 +46,7 @@ export class CalendarioComponent implements OnInit {
     private empleados: EmpleadoService,
     private turnoNormalService: TurnoNormalService,
     private turnoExtraService: TurnoExtraService,
+    private diaLibreService: DiaLibreService,
     public dialog: MatDialog,
     private tokenStorage: TokenStorageService
   ) {}
@@ -124,6 +128,7 @@ export class CalendarioComponent implements OnInit {
       },
     ],
     onEventClick: (args: any) => {
+      console.log(args.event);
       if (args.event.resource === this.tokenStorage.getUser().id) {
         const dialogRef = this.dialog.open(DialogEventComponent, {
           data: {
@@ -133,7 +138,7 @@ export class CalendarioComponent implements OnInit {
         });
 
         dialogRef.afterClosed().subscribe((turnoEliminado: TurnoEliminado) => {
-          if(turnoEliminado.isEliminado) {
+          if (turnoEliminado.isEliminado) {
             this.deleteEvent(turnoEliminado.idTurnoEliminado);
           }
         });
@@ -190,19 +195,7 @@ export class CalendarioComponent implements OnInit {
           })
           .add(() => {
             this.cargarTurnosExtras();
-            let turnosCorregidos: TurnoNormal[] = [];
             if (this.turnosNormales) {
-              for (let i = 0; i < this.turnosNormales.length; i++) {
-                let turnoCorregido = new TurnoNormal();
-                turnoCorregido.fecha = this.turnosNormales[i].fecha;
-                turnoCorregido.cantHoras = this.turnosNormales[i].cantHoras;
-                turnoCorregido.turno = this.turnosNormales[i].turno;
-                turnoCorregido.idTurnoNormal =
-                  this.turnosNormales[i].idTurnoNormal;
-                turnoCorregido.usuarioId = this.turnosNormales[i].usuarioId;
-                turnosCorregidos.push(turnoCorregido);
-              }
-              this.turnosNormales = turnosCorregidos;
               this.cargarShiftsDeTurnos(this.turnosNormales, '#673ab7');
             }
           });
@@ -259,6 +252,59 @@ export class CalendarioComponent implements OnInit {
     }
   }
 
+  cargarShiftDiaLibre(diasLibre: DiaLibre[], color: string): void {
+    for (let i = 0; i < diasLibre.length; i++) {
+      let newEvent = {
+        id: diasLibre[i].idDiaLibre,
+        start: diasLibre[i].fecha
+          .toLocaleString("yyyy-MM-dd'T'HH:mm")
+          .slice(0, -13),
+        title: 'Dia libre',
+        resource: diasLibre[i].usuarioId,
+        slot: 1,
+        color: color,
+        tipo: 'libre',
+      };
+      let newEvent2 = {
+        id: diasLibre[i].idDiaLibre,
+        start: diasLibre[i].fecha
+          .toLocaleString("yyyy-MM-dd'T'HH:mm")
+          .slice(0, -13),
+        title: 'Dia libre',
+        resource: diasLibre[i].usuarioId,
+        slot: 2,
+        color: color,
+        tipo: 'libre',
+      };
+      let newEvent3 = {
+        id: diasLibre[i].idDiaLibre,
+        start: diasLibre[i].fecha
+          .toLocaleString("yyyy-MM-dd'T'HH:mm")
+          .slice(0, -13),
+        title: 'Dia libre',
+        resource: diasLibre[i].usuarioId,
+        slot: 3,
+        color: color,
+        tipo: 'libre',
+      };
+
+      // Si hay algun evento igual no lo agrega ya que solo puede haber un evento en un dia en el mismo turno por el mismo usuario
+      if (
+        !this.shifts.some(
+          (shift) =>
+            shift.start === newEvent.start &&
+            shift.resource === newEvent.resource &&
+            shift.slot === newEvent.slot
+        )
+      ) {
+        // Crear un nuevo array conteniendo los eventos anteriores y el nuevo
+        this.shifts = [...this.shifts, newEvent];
+        this.shifts = [...this.shifts, newEvent2];
+        this.shifts = [...this.shifts, newEvent3];
+      }
+    }
+  }
+
   cargarTurnosExtras(): void {
     if (this.empleadosActuales) {
       this.empleadosActuales.forEach((empleado) => {
@@ -283,22 +329,31 @@ export class CalendarioComponent implements OnInit {
             },
           })
           .add(() => {
-            let turnosCorregidos: TurnoExtra[] = [];
+            this.cargarDiasLibre();
             if (this.turnosExtras) {
               for (let i = 0; i < this.turnosExtras.length; i++) {
-                let turnoCorregido = new TurnoExtra();
-                turnoCorregido.fecha = this.turnosExtras[i].fecha;
-                turnoCorregido.cantHoras =
+                this.turnosExtras[i].cantHoras =
                   'Extra: ' + this.turnosExtras[i].cantHoras;
-                turnoCorregido.turno = this.turnosExtras[i].turno;
-                turnoCorregido.idTurnoNormal =
-                  this.turnosExtras[i].idTurnoNormal;
-                turnoCorregido.usuarioId = this.turnosExtras[i].usuarioId;
-                turnosCorregidos.push(turnoCorregido);
               }
-              this.turnosExtras = turnosCorregidos;
               this.cargarShiftsDeTurnos(this.turnosExtras, '#ffd740');
             }
+          });
+      });
+    }
+  }
+
+  cargarDiasLibre(): void {
+    if (this.empleadosActuales) {
+      this.empleadosActuales.forEach((empleado) => {
+        this.diaLibreService
+          .getAllDiasLibresById(empleado.id)
+          .subscribe({
+            next: (event: any) => {
+              event && event.length != 0 ? (this.diasLibres = event) : '';
+            },
+          })
+          .add(() => {
+            this.cargarShiftDiaLibre(this.diasLibres, '#f44336');
           });
       });
     }
@@ -310,12 +365,16 @@ export class CalendarioComponent implements OnInit {
 
   deleteEvent(eventoId: number) {
     // creo una copia de los eventos
-    const eventos = [...this.shifts];
-    // Find the index of the event to be deleted
-    const index = eventos.indexOf(eventos.filter(evento => evento.id === eventoId)[0]);
-    // Remove the event from the array
-    eventos.splice(index, 1);
-    // Pass the new array to the calendar
+    const eventos: MbscCalendarEvent[] = [...this.shifts];
+    // Encuentro el index del evento que va a ser borrado
+    while (eventos.some((evento) => evento.id === eventoId)) {
+      let index: number = eventos.indexOf(
+        eventos.filter((evento) => evento.id === eventoId)[0]
+      );
+      // Borro el evento del array
+      eventos.splice(index, 1);
+    }
+    // Paso el nuevo array al calendario
     this.shifts = eventos;
   }
 }

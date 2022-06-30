@@ -34,7 +34,6 @@ export class TurnoExtraService {
   }
 
   getTurnoExtraById(turnoId: number): Observable<any> {
-    turnoId++;
     return this.http.get<any>(
       environment.jornada + `get/extra/${turnoId}`,
       httpOptions

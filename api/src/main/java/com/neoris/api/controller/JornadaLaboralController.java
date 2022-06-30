@@ -9,10 +9,7 @@ import com.neoris.api.exception.MaxHsJornadaDiariaException;
 import com.neoris.api.exception.MaxHsJornadaSemanalException;
 import com.neoris.api.model.Turno;
 import com.neoris.api.payload.request.*;
-import com.neoris.api.payload.response.DiaLibreResponse;
-import com.neoris.api.payload.response.MessageResponse;
-import com.neoris.api.payload.response.TurnoExtraResponse;
-import com.neoris.api.payload.response.TurnosNormalesResponse;
+import com.neoris.api.payload.response.*;
 import com.neoris.api.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -586,8 +583,20 @@ public class JornadaLaboralController {
     @GetMapping("/get/vacaciones/all/{id}")
     public ResponseEntity<?> getAllVacaciones(@PathVariable("id") Long jornadaId){
         try {
-            List<Vacaciones> vacaciones = vacacionesService.getAllVacaciones(jornadaId);
-            return new ResponseEntity<>(vacaciones, HttpStatus.OK);
+            Iterator<Vacaciones> vacacionesIterator = vacacionesService.getAllVacaciones(jornadaId).iterator();
+            List<VacacionesResponse> todasLasVacacionesResponses = new ArrayList<>();
+            Vacaciones vacaciones;
+            VacacionesResponse vacacionesResponse = new VacacionesResponse();
+            while(vacacionesIterator.hasNext()) {
+                vacaciones = vacacionesIterator.next();
+                vacacionesResponse.setIdVacaciones(vacaciones.getIdVacaciones());
+                vacacionesResponse.setFecha(vacaciones.getFechaInicio());
+                vacacionesResponse.setFechaFinal(vacaciones.getFechaFinal());
+                vacacionesResponse.setUsuarioId(jornadaId);
+                todasLasVacacionesResponses.add(vacacionesResponse);
+                vacacionesResponse = new VacacionesResponse();
+            }
+            return new ResponseEntity<>(todasLasVacacionesResponses, HttpStatus.OK);
         } catch(Exception e) {
             logger.error("Error: No se pudo obtener todas las vacaciones del empleado! {}", e);
             return ResponseEntity

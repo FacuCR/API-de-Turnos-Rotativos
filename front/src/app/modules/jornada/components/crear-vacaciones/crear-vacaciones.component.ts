@@ -1,21 +1,17 @@
-import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  FormGroupDirective,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
 import { TokenStorageService } from 'src/app/core/services/token/token-storage.service';
 import { DateAddDiasService } from '../../services/date-add-dias/date-add-dias.service';
-import { DiaLibreService } from '../../services/dia-libre/dia-libre.service';
+import { VacacionesService } from '../../services/vacaciones/vacaciones.service';
 
 @Component({
-  selector: 'app-crear-dia-libre',
-  templateUrl: './crear-dia-libre.component.html',
-  styleUrls: ['./crear-dia-libre.component.css'],
+  selector: 'app-crear-vacaciones',
+  templateUrl: './crear-vacaciones.component.html',
+  styleUrls: ['./crear-vacaciones.component.css']
 })
-export class CrearDiaLibreComponent implements OnInit {
+export class CrearVacacionesComponent implements OnInit {
+
   form: FormGroup = this.fb.group({
     fecha: ['', Validators.required],
   });
@@ -30,7 +26,7 @@ export class CrearDiaLibreComponent implements OnInit {
 
   constructor(
     public fb: FormBuilder,
-    private diaLibreService: DiaLibreService,
+    private vacacionesService: VacacionesService,
     private tokenStorage: TokenStorageService,
     private dateAddService: DateAddDiasService
   ) {}
@@ -41,7 +37,7 @@ export class CrearDiaLibreComponent implements OnInit {
     const fecha: string = this.dateAddService.formatDate(this.form.get('fecha')?.value);
     const jornadaId: number = this.tokenStorage.getUser().id;
 
-    this.diaLibreService.saveDiaLibre(fecha, jornadaId).subscribe({
+    this.vacacionesService.saveVacaciones(fecha, jornadaId).subscribe({
       next: (event: any) => {
         this.formError = '';
         this.formExitoso = event.message;

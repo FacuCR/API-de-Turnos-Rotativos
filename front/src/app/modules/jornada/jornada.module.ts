@@ -25,6 +25,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { DialogEventComponent } from './components/dialog-event/dialog-event.component';
 import { HeaderComponent } from 'src/app/layout/header/header.component';
 import { CrearDiaLibreComponent } from './components/crear-dia-libre/crear-dia-libre.component';
+import { CrearVacacionesComponent } from './components/crear-vacaciones/crear-vacaciones.component';
 
 const routes: Routes = [
   {
@@ -46,7 +47,8 @@ const routes: Routes = [
     CrearExtraComponent,
     DialogEventComponent,
     HeaderComponent,
-    CrearDiaLibreComponent
+    CrearDiaLibreComponent,
+    CrearVacacionesComponent
   ],
   imports: [
     CommonModule,

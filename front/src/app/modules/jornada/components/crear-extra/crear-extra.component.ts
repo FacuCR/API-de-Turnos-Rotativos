@@ -42,7 +42,7 @@ export class CrearExtraComponent implements OnInit {
 
   onSubmit(): void {
     this.cargando = true;
-    const fecha: string = this.formatDate(this.form.get('fecha')?.value);
+    const fecha: string = this.dateAddService.formatDate(this.form.get('fecha')?.value);
     const turno: Turnos = this.form.get('turno')?.value;
     const cantHoras: number = this.form.get('cantHoras')?.value;
     const jornadaId: number = this.tokenStorage.getUser().id;
@@ -80,18 +80,6 @@ export class CrearExtraComponent implements OnInit {
     return this.form.controls[input].hasError('required')
       ? 'Debes ingresar algo!'
       : '';
-  }
-
-  formatDate(date: Date): string {
-    return [
-      this.padTo2Digits(date.getDate()),
-      this.padTo2Digits(date.getMonth() + 1),
-      date.getFullYear(),
-    ].join('/');
-  }
-
-  padTo2Digits(num: number) {
-    return num.toString().padStart(2, '0');
   }
 
 }

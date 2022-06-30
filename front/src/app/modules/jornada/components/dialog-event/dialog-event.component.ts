@@ -4,6 +4,7 @@ import { TurnoEliminado } from '../../models/TurnoEliminado';
 import { DiaLibreService } from '../../services/dia-libre/dia-libre.service';
 import { TurnoExtraService } from '../../services/turno-extra/turno-extra.service';
 import { TurnoNormalService } from '../../services/turno-normal.service';
+import { VacacionesService } from '../../services/vacaciones/vacaciones.service';
 
 @Component({
   selector: 'app-dialog-event',
@@ -19,7 +20,8 @@ export class DialogEventComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private turnoExtraService: TurnoExtraService,
     private turnoNormalService: TurnoNormalService,
-    private diaLibreService: DiaLibreService
+    private diaLibreService: DiaLibreService,
+    private vacacionesService: VacacionesService
   ) {}
 
   ngOnInit(): void {}
@@ -37,6 +39,9 @@ export class DialogEventComponent implements OnInit {
             next: () => {
               this.turnoEliminado.isEliminado = true;
             },
+            error: () => {
+              this.turnoEliminado.isEliminado = false;
+            }
           })
           .add(() => {
             this.dialogRef.close(this.turnoEliminado);
@@ -49,6 +54,9 @@ export class DialogEventComponent implements OnInit {
             next: () => {
               this.turnoEliminado.isEliminado = true;
             },
+            error: () => {
+              this.turnoEliminado.isEliminado = false;
+            }
           })
           .add(() => {
             this.dialogRef.close(this.turnoEliminado);
@@ -61,12 +69,28 @@ export class DialogEventComponent implements OnInit {
             next: () => {
               this.turnoEliminado.isEliminado = true;
             },
+            error: () => {
+              this.turnoEliminado.isEliminado = false;
+            }
           })
           .add(() => {
             this.dialogRef.close(this.turnoEliminado);
           });
         break;
       case 'vacaciones':
+        this.vacacionesService
+          .deleteVacaciones(this.data.evento.id)
+          .subscribe({
+            next: () => {
+              this.turnoEliminado.isEliminado = true;
+            },
+            error: () => {
+              this.turnoEliminado.isEliminado = false;
+            }
+          })
+          .add(() => {
+            this.dialogRef.close(this.turnoEliminado);
+          });
         break;
 
       default:

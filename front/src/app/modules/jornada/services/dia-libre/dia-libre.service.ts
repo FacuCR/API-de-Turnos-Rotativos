@@ -1,73 +1,59 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Turnos } from 'src/app/core/models/Turnos';
 import { environment } from 'src/environments/environment';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
-  observe: 'events' as const,
-  reportProgress: true,
 };
 
 @Injectable({
   providedIn: 'root',
 })
-export class TurnoExtraService {
+export class DiaLibreService {
   constructor(private http: HttpClient) {}
 
-  saveTurnoExtra(
-    fecha: string,
-    turno: Turnos,
-    cantHoras: number,
-    jornadaId: number
-  ): Observable<any> {
+  saveTurnoExtra(fecha: string, jornadaId: number): Observable<any> {
     return this.http.post<any>(
       environment.jornada + `save/extra/${jornadaId}`,
       {
         fecha,
-        turno,
-        cantHoras,
       },
       httpOptions
     );
   }
 
-  getTurnoExtraById(turnoId: number): Observable<any> {
+  getDiaLibreById(diaLibreId: number): Observable<any> {
     return this.http.get<any>(
-      environment.jornada + `get/extra/${turnoId}`,
+      environment.jornada + `get/extra/${diaLibreId}`,
       httpOptions
     );
   }
 
-  getAllTurnosExtrasById(jornadaId: number): Observable<any> {
+  getAllDiasLibresById(jornadaId: number): Observable<any> {
     return this.http.get<any>(
       environment.jornada + `get/extra/all/${jornadaId}`,
       httpOptions
     );
   }
 
-  updateTurnoExtra(
+  updateDiaLibre(
     fecha: string,
-    turno: Turnos,
-    cantHoras: number,
     jornadaId: number,
-    turnoExtraId: number
+    diaLibreId: number
   ): Observable<any> {
     return this.http.put<any>(
-      environment.jornada + `save/extra/${jornadaId}/"${turnoExtraId}`,
+      environment.jornada + `save/extra/${jornadaId}/"${diaLibreId}`,
       {
         fecha,
-        turno,
-        cantHoras,
       },
       httpOptions
     );
   }
 
-  deleteTurnoExtra(turnoExtraId: number): Observable<any> {
+  deleteTurnoExtra(diaLibreId: number): Observable<any> {
     return this.http.delete<any>(
-      environment.jornada + `delete/extra/${turnoExtraId}`
+      environment.jornada + `delete/extra/${diaLibreId}`
     );
   }
 }

@@ -10,17 +10,28 @@ const httpOptions = {
 };
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CombinacionService {
+  constructor(private http: HttpClient) {}
 
-  constructor(private http: HttpClient) { }
-
-  saveCombinacion(combinacion: Combinacion, jornadaId: number): Observable<any> {
+  saveCombinacion(
+    combinacion: Combinacion,
+    jornadaId: number
+  ): Observable<any> {
+    const fecha = combinacion.fecha;
+    const turnoNormal = combinacion.turnoNormal;
+    const turnoExtra = combinacion.turnoExtra;
+    const cantHorasNormal = combinacion.cantHorasNormal;
+    const cantHorasExtra = combinacion.cantHorasExtra;
     return this.http.post<any>(
       environment.jornada + `save/combinacion/${jornadaId}`,
       {
-        combinacion,
+        fecha,
+        turnoNormal,
+        turnoExtra,
+        cantHorasNormal,
+        cantHorasExtra,
       },
       httpOptions
     );

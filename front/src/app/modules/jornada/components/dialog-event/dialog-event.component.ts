@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { TurnoEliminado } from '../../models/TurnoEliminado';
+import { JornadaEliminada } from '../../models/JornadaEliminada';
 import { DiaLibreService } from '../../services/dia-libre/dia-libre.service';
 import { TurnoExtraService } from '../../services/turno-extra/turno-extra.service';
 import { TurnoNormalService } from '../../services/turno-normal.service';
@@ -12,7 +12,7 @@ import { VacacionesService } from '../../services/vacaciones/vacaciones.service'
   styleUrls: ['./dialog-event.component.css'],
 })
 export class DialogEventComponent implements OnInit {
-  turnoEliminado: TurnoEliminado = new TurnoEliminado(this.data.evento.id);
+  jornadaEliminada: JornadaEliminada = new JornadaEliminada(this.data.evento.id, this.data.evento.tipo);
 
   eliminado: boolean = false;
   constructor(
@@ -37,14 +37,14 @@ export class DialogEventComponent implements OnInit {
           .deleteTurnoNormal(this.data.evento.id)
           .subscribe({
             next: () => {
-              this.turnoEliminado.isEliminado = true;
+              this.jornadaEliminada.isEliminado = true;
             },
             error: () => {
-              this.turnoEliminado.isEliminado = false;
+              this.jornadaEliminada.isEliminado = false;
             }
           })
           .add(() => {
-            this.dialogRef.close(this.turnoEliminado);
+            this.dialogRef.close(this.jornadaEliminada);
           });
         break;
       case 'extra':
@@ -52,14 +52,14 @@ export class DialogEventComponent implements OnInit {
           .deleteTurnoExtra(this.data.evento.id)
           .subscribe({
             next: () => {
-              this.turnoEliminado.isEliminado = true;
+              this.jornadaEliminada.isEliminado = true;
             },
             error: () => {
-              this.turnoEliminado.isEliminado = false;
+              this.jornadaEliminada.isEliminado = false;
             }
           })
           .add(() => {
-            this.dialogRef.close(this.turnoEliminado);
+            this.dialogRef.close(this.jornadaEliminada);
           });
         break;
       case 'libre':
@@ -67,14 +67,14 @@ export class DialogEventComponent implements OnInit {
           .deleteDiaLibre(this.data.evento.id)
           .subscribe({
             next: () => {
-              this.turnoEliminado.isEliminado = true;
+              this.jornadaEliminada.isEliminado = true;
             },
             error: () => {
-              this.turnoEliminado.isEliminado = false;
+              this.jornadaEliminada.isEliminado = false;
             }
           })
           .add(() => {
-            this.dialogRef.close(this.turnoEliminado);
+            this.dialogRef.close(this.jornadaEliminada);
           });
         break;
       case 'vacaciones':
@@ -82,14 +82,14 @@ export class DialogEventComponent implements OnInit {
           .deleteVacaciones(this.data.evento.id)
           .subscribe({
             next: () => {
-              this.turnoEliminado.isEliminado = true;
+              this.jornadaEliminada.isEliminado = true;
             },
             error: () => {
-              this.turnoEliminado.isEliminado = false;
+              this.jornadaEliminada.isEliminado = false;
             }
           })
           .add(() => {
-            this.dialogRef.close(this.turnoEliminado);
+            this.dialogRef.close(this.jornadaEliminada);
           });
         break;
 

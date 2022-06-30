@@ -18,7 +18,7 @@ import { JornadaTurno } from '../../models/JornadaTurno';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogEventComponent } from '../dialog-event/dialog-event.component';
 import { TokenStorageService } from 'src/app/core/services/token/token-storage.service';
-import { TurnoEliminado } from '../../models/TurnoEliminado';
+import { JornadaEliminada } from '../../models/JornadaEliminada';
 import { DiaLibreService } from '../../services/dia-libre/dia-libre.service';
 import { DiaLibre } from '../../models/DiaLibre';
 import { Vacaciones } from '../../models/Vacaciones';
@@ -147,9 +147,9 @@ export class CalendarioComponent implements OnInit {
         });
 
         // Luego del dialogRef si se borro alguna jornada de la BD llama el metodo deleteEvent para borrarlo del calendario
-        dialogRef.afterClosed().subscribe((turnoEliminado: TurnoEliminado) => {
-          if (turnoEliminado.isEliminado) {
-            this.deleteEvent(turnoEliminado.idTurnoEliminado);
+        dialogRef.afterClosed().subscribe((jornadaEliminada: JornadaEliminada) => {
+          if (jornadaEliminada.isEliminado) {
+            this.deleteEvent(jornadaEliminada.idJornadaEliminada, jornadaEliminada.tipo);
           }
         });
       }
@@ -455,13 +455,13 @@ export class CalendarioComponent implements OnInit {
   }
 
   // Borrar un evento del calendario para no tener que recargar la pag
-  deleteEvent(eventoId: number) {
+  deleteEvent(eventoId: number, tipo: string) {
     // creo una copia de los eventos
     const eventos: MbscCalendarEvent[] = [...this.shifts];
     // Encuentro el index del evento que va a ser borrado
-    while (eventos.some((evento) => evento.id === eventoId)) {
+    while (eventos.some((evento) => evento.id === eventoId && evento['tipo'] === tipo)) {
       let index: number = eventos.indexOf(
-        eventos.filter((evento) => evento.id === eventoId)[0]
+        eventos.filter((evento) => evento.id === eventoId && evento['tipo'] === tipo)[0]
       );
       // Borro el evento del array
       eventos.splice(index, 1);

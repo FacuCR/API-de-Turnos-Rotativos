@@ -26,6 +26,7 @@ import { DialogEventComponent } from './components/dialog-event/dialog-event.com
 import { HeaderComponent } from 'src/app/layout/header/header.component';
 import { CrearDiaLibreComponent } from './components/crear-dia-libre/crear-dia-libre.component';
 import { CrearVacacionesComponent } from './components/crear-vacaciones/crear-vacaciones.component';
+import { CrearCombinacionComponent } from './components/crear-combinacion/crear-combinacion.component';
 
 const routes: Routes = [
   {
@@ -48,7 +49,8 @@ const routes: Routes = [
     DialogEventComponent,
     HeaderComponent,
     CrearDiaLibreComponent,
-    CrearVacacionesComponent
+    CrearVacacionesComponent,
+    CrearCombinacionComponent
   ],
   imports: [
     CommonModule,

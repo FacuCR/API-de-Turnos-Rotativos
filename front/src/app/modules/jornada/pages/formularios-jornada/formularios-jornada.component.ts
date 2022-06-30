@@ -1,4 +1,10 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 
 @Component({
   selector: 'app-formularios-jornada',
@@ -13,6 +19,7 @@ export class FormulariosJornadaComponent implements OnInit {
   isFormExtraActivo: boolean = false;
   isFormLibreActivo: boolean = false;
   isFormVacacionesActivo: boolean = false;
+  isFormCombinacionActivo: boolean = false;
   isAlgunFormActivo: boolean = false;
   screenXl: boolean = false;
 
@@ -27,6 +34,7 @@ export class FormulariosJornadaComponent implements OnInit {
     this.isFormExtraActivo = false;
     this.isFormLibreActivo = false;
     this.isFormVacacionesActivo = false;
+    this.isFormCombinacionActivo = false;
     switch (form) {
       case 'turno':
         this.isFormTurnoActivo = true;
@@ -40,6 +48,9 @@ export class FormulariosJornadaComponent implements OnInit {
       case 'vacaciones':
         this.isFormVacacionesActivo = true;
         break;
+      case 'combinacion':
+        this.isFormCombinacionActivo = true;
+        break;
 
       default:
         break;
@@ -48,7 +59,8 @@ export class FormulariosJornadaComponent implements OnInit {
       this.isFormTurnoActivo ||
       this.isFormExtraActivo ||
       this.isFormLibreActivo ||
-      this.isFormVacacionesActivo;
+      this.isFormVacacionesActivo ||
+      this.isFormCombinacionActivo;
   }
 
   // Para poner el boutton group en modo vertical si la pantalla no es amplia

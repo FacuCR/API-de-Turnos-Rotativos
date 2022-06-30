@@ -23,6 +23,13 @@ const routes: Routes = [
     canActivate: [RoleAccesoGuard],
     data: { roles: [Role.Admin] },
   },
+  {
+    path: 'perfil',
+    loadChildren: () =>
+      import('./modules/perfil/perfil.module').then((m) => m.PerfilModule),
+    canActivate: [RoleAccesoGuard],
+    data: { roles: [Role.Admin, Role.User] },
+  },
 ];
 
 @NgModule({

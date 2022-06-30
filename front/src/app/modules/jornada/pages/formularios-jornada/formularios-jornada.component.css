@@ -7,3 +7,6 @@
 .formularios__main__default {
   width: 20rem;
 }
+:host .mat-raised-button {
+  border-radius: 1.25rem !important;
+}

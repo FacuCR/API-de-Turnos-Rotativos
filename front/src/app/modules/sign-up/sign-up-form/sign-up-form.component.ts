@@ -1,5 +1,6 @@
 import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { Location } from '@angular/common';
 import {
   FormBuilder,
   FormGroup,
@@ -33,7 +34,11 @@ export class SignUpFormComponent implements OnInit {
   signupExitoso: string = '';
   cargando: boolean = false;
 
-  constructor(public fb: FormBuilder, private signUpService: SignUpService) {}
+  constructor(
+    public fb: FormBuilder,
+    private signUpService: SignUpService,
+    private _location: Location
+  ) {}
 
   ngOnInit(): void {}
 
@@ -53,7 +58,7 @@ export class SignUpFormComponent implements OnInit {
         if (event.type === HttpEventType.UploadProgress) {
           if (Math.round((100 * event.loaded) / event.total) == 100) {
             this.cargando = false;
-            this.signupExitoso = "Usuario creado correctamente!";
+            this.signupExitoso = 'Usuario creado correctamente!';
           }
         }
 
@@ -78,5 +83,9 @@ export class SignUpFormComponent implements OnInit {
     return this.form.controls[input].hasError('required')
       ? 'Debes ingresar algo!'
       : '';
+  }
+
+  backClicked() {
+    this._location.back();
   }
 }

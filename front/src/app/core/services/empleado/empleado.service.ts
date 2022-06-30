@@ -33,4 +33,11 @@ export class EmpleadoService {
   getEmpleadoById(id: number): Observable<any> {
     return this.http.get<any>(environment.empleado + `get/${id}`, httpOptions);
   }
+  
+  saveAntiguedad(antiguedad: number, usuarioId: number): Observable<any> {
+    return this.http.post<any>(
+      environment.jornada + `save/antiguedad/${usuarioId}/${antiguedad}`,
+      httpOptions
+    );
+  }
 }

@@ -21,6 +21,8 @@ import { TokenStorageService } from 'src/app/core/services/token/token-storage.s
 import { TurnoEliminado } from '../../models/TurnoEliminado';
 import { DiaLibreService } from '../../services/dia-libre/dia-libre.service';
 import { DiaLibre } from '../../models/DiaLibre';
+import { Vacaciones } from '../../models/Vacaciones';
+import { VacacionesService } from '../../services/vacaciones/vacaciones.service';
 
 setOptions({
   locale: localeEs,
@@ -39,6 +41,7 @@ export class CalendarioComponent implements OnInit {
   turnosNormales: TurnoNormal[] = [];
   turnosExtras: TurnoExtra[] = [];
   diasLibres: DiaLibre[] = [];
+  vacaciones: Vacaciones[] = [];
   cargando: boolean = false;
   @Output() sendCargando = new EventEmitter<boolean>();
 
@@ -47,6 +50,7 @@ export class CalendarioComponent implements OnInit {
     private turnoNormalService: TurnoNormalService,
     private turnoExtraService: TurnoExtraService,
     private diaLibreService: DiaLibreService,
+    private vacacionesService: VacacionesService,
     public dialog: MatDialog,
     private tokenStorage: TokenStorageService
   ) {}
@@ -146,6 +150,7 @@ export class CalendarioComponent implements OnInit {
     },
   };
 
+  // Color de fondo de los turnos(slots)
   backgroundDelTurno(id: number): string {
     if (id === 1) {
       return '#a5ceff4d';
@@ -156,6 +161,7 @@ export class CalendarioComponent implements OnInit {
     }
   }
 
+  // Casteo los empleados para guardarlos en el resource del calendario
   castearEmpleadosAResource(empleados: Empleado[]): Resource[] {
     let resource: Resource = new Resource();
     let resources: Resource[] = [];
@@ -170,6 +176,7 @@ export class CalendarioComponent implements OnInit {
     return resources;
   }
 
+  // Solicatos los turnos normales de todos los usuarios de la BD
   cargarTurnosNormales(): void {
     if (this.empleadosActuales) {
       this.empleadosActuales.forEach((empleado) => {
@@ -203,6 +210,7 @@ export class CalendarioComponent implements OnInit {
     }
   }
 
+  // Cargar los turnos a los eventos del calendario
   cargarShiftsDeTurnos(turnos: JornadaTurno[], colorTurno: string): void {
     let slotTurno: number = 1;
     for (let i = 0; i < turnos.length; i++) {
@@ -252,6 +260,7 @@ export class CalendarioComponent implements OnInit {
     }
   }
 
+  // Cargar los dias libres a los eventos del calendario
   cargarShiftDiaLibre(diasLibre: DiaLibre[], color: string): void {
     for (let i = 0; i < diasLibre.length; i++) {
       let newEvent = {
@@ -305,6 +314,63 @@ export class CalendarioComponent implements OnInit {
     }
   }
 
+  // Cargar las vacaciones a los eventos del calendario
+  cargarShiftVacaciones(vacaciones: Vacaciones[], color: string): void {
+    for (let i = 0; i < vacaciones.length; i++) {
+      let newEvent = {
+        id: vacaciones[i].idVacaciones,
+        start: vacaciones[i].fecha
+          .toLocaleString("yyyy-MM-dd'T'HH:mm")
+          .slice(0, -13),
+        end: vacaciones[i].fechaFinal,
+        title: 'Vacaciones',
+        resource: vacaciones[i].usuarioId,
+        slot: 1,
+        color: color,
+        tipo: 'vacaciones',
+      };
+      let newEvent2 = {
+        id: vacaciones[i].idVacaciones,
+        start: vacaciones[i].fecha
+          .toLocaleString("yyyy-MM-dd'T'HH:mm")
+          .slice(0, -13),
+        end: vacaciones[i].fechaFinal,
+        title: 'Vacaciones',
+        resource: vacaciones[i].usuarioId,
+        slot: 2,
+        color: color,
+        tipo: 'vacaciones',
+      };
+      let newEvent3 = {
+        id: vacaciones[i].idVacaciones,
+        start: vacaciones[i].fecha
+          .toLocaleString("yyyy-MM-dd'T'HH:mm")
+          .slice(0, -13),
+        end: vacaciones[i].fechaFinal,
+        title: 'Vacaciones',
+        resource: vacaciones[i].usuarioId,
+        slot: 3,
+        color: color,
+        tipo: 'vacaciones',
+      };
+      // Si hay algun evento igual no lo agrega ya que solo puede haber un evento en un dia en el mismo turno por el mismo usuario
+      if (
+        !this.shifts.some(
+          (shift) =>
+            shift.start === newEvent.start &&
+            shift.resource === newEvent.resource &&
+            shift.slot === newEvent.slot
+        )
+      ) {
+        // Crear un nuevo array conteniendo los eventos anteriores y el nuevo
+        this.shifts = [...this.shifts, newEvent];
+        this.shifts = [...this.shifts, newEvent2];
+        this.shifts = [...this.shifts, newEvent3];
+      }
+    }
+  }
+
+  // Solicatos los turnos extras de todos los usuarios de la BD
   cargarTurnosExtras(): void {
     if (this.empleadosActuales) {
       this.empleadosActuales.forEach((empleado) => {
@@ -330,6 +396,7 @@ export class CalendarioComponent implements OnInit {
           })
           .add(() => {
             this.cargarDiasLibre();
+            this.cargarVacaciones();
             if (this.turnosExtras) {
               for (let i = 0; i < this.turnosExtras.length; i++) {
                 this.turnosExtras[i].cantHoras =
@@ -342,6 +409,7 @@ export class CalendarioComponent implements OnInit {
     }
   }
 
+  // Solicatos los dias libres de todos los usuarios de la BD
   cargarDiasLibre(): void {
     if (this.empleadosActuales) {
       this.empleadosActuales.forEach((empleado) => {
@@ -359,10 +427,31 @@ export class CalendarioComponent implements OnInit {
     }
   }
 
+  // Solicatos las vacaciones de todos los usuarios de la BD
+  cargarVacaciones(): void {
+    if (this.empleadosActuales) {
+      this.empleadosActuales.forEach((empleado) => {
+        this.vacacionesService
+          .getAllVacacionesById(empleado.id)
+          .subscribe({
+            next: (event: any) => {
+              console.log(event);
+              event && event.length != 0 ? (this.vacaciones = event) : '';
+            },
+          })
+          .add(() => {
+            this.cargarShiftVacaciones(this.vacaciones, 'green');
+          });
+      });
+    }
+  }
+
+  // Enviar al padre el estado de cargando
   sendCargandoEvent(cargando: boolean): void {
     this.sendCargando.emit(cargando);
   }
 
+  // Borrar un evento del calendario para no tener que recargar la pag
   deleteEvent(eventoId: number) {
     // creo una copia de los eventos
     const eventos: MbscCalendarEvent[] = [...this.shifts];

@@ -81,9 +81,12 @@ export class CalendarioComponent implements OnInit {
       });
   }
 
+  // Los eventos del calendario
   shifts: MbscCalendarEvent[] = [];
 
+  // Las opciones del calendario
   calendarOptions: MbscEventcalendarOptions = {
+    // Tipo de vista del calendario , en este caso se visualiza por semanas
     view: {
       timeline: {
         type: 'week',
@@ -91,6 +94,7 @@ export class CalendarioComponent implements OnInit {
         startDay: 1,
       },
     },
+    // colores de las tablas del calendario
     colors: [
       {
         background: '#a5ceff4d',
@@ -117,6 +121,7 @@ export class CalendarioComponent implements OnInit {
         },
       },
     ],
+    // Los slots los use para crear turnos
     slots: [
       {
         id: 1,
@@ -131,8 +136,10 @@ export class CalendarioComponent implements OnInit {
         name: 'Noche',
       },
     ],
+    // Metodo que se llama cuando se hace click en algun evento del calendario
     onEventClick: (args: any) => {
       console.log(args.event);
+      // Solo muestra el dialogRef si es un evento del usuario
       if (args.event.resource === this.tokenStorage.getUser().id) {
         const dialogRef = this.dialog.open(DialogEventComponent, {
           data: {
@@ -141,6 +148,7 @@ export class CalendarioComponent implements OnInit {
           },
         });
 
+        // Luego del dialogRef si se borro alguna jornada de la BD llama el metodo deleteEvent para borrarlo del calendario
         dialogRef.afterClosed().subscribe((turnoEliminado: TurnoEliminado) => {
           if (turnoEliminado.isEliminado) {
             this.deleteEvent(turnoEliminado.idTurnoEliminado);
@@ -435,7 +443,6 @@ export class CalendarioComponent implements OnInit {
           .getAllVacacionesById(empleado.id)
           .subscribe({
             next: (event: any) => {
-              console.log(event);
               event && event.length != 0 ? (this.vacaciones = event) : '';
             },
           })

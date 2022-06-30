@@ -14,7 +14,7 @@
       <mat-button-toggle value="extra">Extra</mat-button-toggle>
       <mat-button-toggle value="libre">Dia Libre</mat-button-toggle>
       <mat-button-toggle value="vacaciones">Vacaciones</mat-button-toggle>
-      <mat-button-toggle value="super">Super Turno</mat-button-toggle>
+      <mat-button-toggle value="combinacion">Super Turno</mat-button-toggle>
     </mat-button-toggle-group>
 
     <div *ngIf="!isAlgunFormActivo" class="formularios__main__default mt-4">
@@ -30,6 +30,7 @@
     <app-crear-turno *ngIf="isFormTurnoActivo"></app-crear-turno>
     <app-crear-extra *ngIf="isFormExtraActivo"></app-crear-extra>
     <app-crear-vacaciones *ngIf="isFormVacacionesActivo"></app-crear-vacaciones>
+    <app-crear-combinacion *ngIf="isFormCombinacionActivo"></app-crear-combinacion>
     <button
       mat-raised-button
       class="btn-lg mt-2 mat-elevation-z2"

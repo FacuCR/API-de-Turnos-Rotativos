@@ -71,7 +71,6 @@ export class CalendarioComponent implements OnInit {
             : '';
         },
         error: (e: HttpErrorResponse) => {
-          console.log(e.error);
           this.cargando = false;
           this.sendCargandoEvent(this.cargando);
         },
@@ -138,7 +137,6 @@ export class CalendarioComponent implements OnInit {
     ],
     // Metodo que se llama cuando se hace click en algun evento del calendario
     onEventClick: (args: any) => {
-      console.log(args.event);
       // Solo muestra el dialogRef si es un evento del usuario
       if (args.event.resource === this.tokenStorage.getUser().id) {
         const dialogRef = this.dialog.open(DialogEventComponent, {
@@ -203,7 +201,6 @@ export class CalendarioComponent implements OnInit {
                 : '';
             },
             error: (e: HttpErrorResponse) => {
-              console.log(e.error);
               this.cargando = false;
               this.sendCargandoEvent(this.cargando);
             },
@@ -397,7 +394,6 @@ export class CalendarioComponent implements OnInit {
                 : '';
             },
             error: (e: HttpErrorResponse) => {
-              console.log(e.error);
               this.cargando = false;
               this.sendCargandoEvent(this.cargando);
             },

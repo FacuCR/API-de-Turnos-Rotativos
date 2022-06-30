@@ -1,11 +1,10 @@
-<section
-  class="formularios vh-100 mw-100 d-flex align-items-center justify-content-center"
->
+<section class="formularios min-vh-100 d-flex align-items-center justify-content-center">
   <div
     class="formularios_main d-flex flex-column align-items-center justify-content-center p-3 mat-elevation-z12"
   >
     <h1 class="h1">Formularios</h1>
     <mat-button-toggle-group
+      [vertical]="!screenXl"
       class="button__formularios"
       #group="matButtonToggleGroup"
       aria-label="Tipo de Jornadas"
@@ -15,10 +14,13 @@
       <mat-button-toggle value="extra">Extra</mat-button-toggle>
       <mat-button-toggle value="libre">Dia Libre</mat-button-toggle>
       <mat-button-toggle value="vacaciones">Vacaciones</mat-button-toggle>
+      <mat-button-toggle value="super">Super Turno</mat-button-toggle>
     </mat-button-toggle-group>
 
-    <div *ngIf="!isAlgunFormActivo" class="formularios__main__default ">
-      <p class="mt-4 texto--secundario">Selecciona el tipo de jornada que quieras cargar</p>
+    <div *ngIf="!isAlgunFormActivo" class="formularios__main__default mt-4">
+      <p class="texto--secundario">
+        Selecciona el tipo de jornada que quieras cargar
+      </p>
       <img
         src="../../../../assets/img/Time management-bro.png"
         class="img-fluid"
@@ -29,12 +31,12 @@
     <app-crear-extra *ngIf="isFormExtraActivo"></app-crear-extra>
     <app-crear-vacaciones *ngIf="isFormVacacionesActivo"></app-crear-vacaciones>
     <button
-        mat-raised-button
-        class="btn-lg mt-2 mat-elevation-z2"
-        color="accent"
-        routerLink=''
-      >
-        Volver al Inicio
-      </button>
+      mat-raised-button
+      class="btn-lg mt-2 mat-elevation-z2"
+      color="accent"
+      routerLink=""
+    >
+      Volver al Inicio
+    </button>
   </div>
 </section>

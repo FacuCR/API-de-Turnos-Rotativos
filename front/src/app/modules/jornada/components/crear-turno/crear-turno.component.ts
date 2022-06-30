@@ -46,7 +46,9 @@ export class CrearTurnoComponent implements OnInit {
 
   onSubmit(): void {
     this.cargando = true;
-    const fecha: string = this.dateAddService.formatDate(this.form.get('fecha')?.value);
+    const fecha: string = this.dateAddService.formatDate(
+      this.form.get('fecha')?.value
+    );
     const turno: Turnos = this.form.get('turno')?.value;
     const cantHoras: number = this.form.get('cantHoras')?.value;
     const jornadaId: number = this.tokenStorage.getUser().id;
@@ -59,8 +61,10 @@ export class CrearTurnoComponent implements OnInit {
           if (event.type === HttpEventType.UploadProgress) {
             if (Math.round((100 * event.loaded) / event.total) == 100) {
               this.cargando = false;
-              this.formExitoso = 'Turno guardado correctamente!';
             }
+          }
+          if (event.type === HttpEventType.Response) {
+            this.formExitoso = event.body.message;
           }
 
           // Si el formulario se marca como enviado, independientemente de si está enviado o no,

@@ -1,6 +1,11 @@
 import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormGroupDirective,
+  Validators,
+} from '@angular/forms';
 import { Turnos } from 'src/app/core/models/Turnos';
 import { TokenStorageService } from 'src/app/core/services/token/token-storage.service';
 import { DateAddDiasService } from '../../services/date-add-dias/date-add-dias.service';
@@ -9,10 +14,9 @@ import { TurnoExtraService } from '../../services/turno-extra/turno-extra.servic
 @Component({
   selector: 'app-crear-extra',
   templateUrl: './crear-extra.component.html',
-  styleUrls: ['./crear-extra.component.css']
+  styleUrls: ['./crear-extra.component.css'],
 })
 export class CrearExtraComponent implements OnInit {
-
   form: FormGroup = this.fb.group({
     fecha: ['', Validators.required],
     turno: ['', Validators.required],
@@ -42,7 +46,9 @@ export class CrearExtraComponent implements OnInit {
 
   onSubmit(): void {
     this.cargando = true;
-    const fecha: string = this.dateAddService.formatDate(this.form.get('fecha')?.value);
+    const fecha: string = this.dateAddService.formatDate(
+      this.form.get('fecha')?.value
+    );
     const turno: Turnos = this.form.get('turno')?.value;
     const cantHoras: number = this.form.get('cantHoras')?.value;
     const jornadaId: number = this.tokenStorage.getUser().id;
@@ -55,8 +61,10 @@ export class CrearExtraComponent implements OnInit {
           if (event.type === HttpEventType.UploadProgress) {
             if (Math.round((100 * event.loaded) / event.total) == 100) {
               this.cargando = false;
-              this.formExitoso = 'Turno guardado correctamente!';
             }
+          }
+          if (event.type === HttpEventType.Response) {
+            this.formExitoso = event.body.message;
           }
 
           // Si el formulario se marca como enviado, independientemente de si está enviado o no,
@@ -81,5 +89,4 @@ export class CrearExtraComponent implements OnInit {
       ? 'Debes ingresar algo!'
       : '';
   }
-
 }

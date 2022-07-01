@@ -43,7 +43,7 @@ export class DiaLibreService {
     diaLibreId: number
   ): Observable<any> {
     return this.http.put<any>(
-      environment.jornada + `save/libre/${jornadaId}/"${diaLibreId}`,
+      environment.jornada + `save/libre/${jornadaId}/${diaLibreId}`,
       {
         fecha,
       },

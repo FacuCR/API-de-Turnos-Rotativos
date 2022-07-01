@@ -21,6 +21,7 @@
       [id]="sendId"
       *ngIf="isFormExtraActivo"
     ></app-actualizar-extra>
+    <app-actualizar-libre [id]="sendId" *ngIf="isFormLibreActivo"></app-actualizar-libre>
     <button
       mat-raised-button
       class="btn-lg mt-2 mat-elevation-z2"

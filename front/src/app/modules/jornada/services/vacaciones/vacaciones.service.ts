@@ -44,7 +44,7 @@ export class VacacionesService {
     vacacionesId: number
   ): Observable<any> {
     return this.http.put<any>(
-      environment.jornada + `save/vacaciones/${jornadaId}/"${vacacionesId}`,
+      environment.jornada + `save/vacaciones/${jornadaId}/${vacacionesId}`,
       {
         fecha,
       },

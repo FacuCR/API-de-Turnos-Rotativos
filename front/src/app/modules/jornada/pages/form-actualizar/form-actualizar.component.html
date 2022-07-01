@@ -21,7 +21,14 @@
       [id]="sendId"
       *ngIf="isFormExtraActivo"
     ></app-actualizar-extra>
-    <app-actualizar-libre [id]="sendId" *ngIf="isFormLibreActivo"></app-actualizar-libre>
+    <app-actualizar-libre
+      [id]="sendId"
+      *ngIf="isFormLibreActivo"
+    ></app-actualizar-libre>
+    <app-actualizar-vacaciones
+      [id]="sendId"
+      *ngIf="isFormVacacionesActivo"
+    ></app-actualizar-vacaciones>
     <button
       mat-raised-button
       class="btn-lg mt-2 mat-elevation-z2"

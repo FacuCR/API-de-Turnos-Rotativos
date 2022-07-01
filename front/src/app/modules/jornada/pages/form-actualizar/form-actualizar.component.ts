@@ -30,7 +30,10 @@ export class FormActualizarComponent implements OnInit {
     if (this.isDatosDisponibles) {
       this.datosDelEvento = JSON.parse(this.isDatosDisponibles);
       this.mostrarFormCorrespondiente(this.datosDelEvento.tipo);
-      this.datosDelEvento.fechaInicio = this.datosDelEvento.fechaInicio.slice(0, -6);
+      this.datosDelEvento.fechaInicio = this.datosDelEvento.fechaInicio.slice(
+        0,
+        -6
+      );
       this.sendId = this.datosDelEvento.id;
     }
   }

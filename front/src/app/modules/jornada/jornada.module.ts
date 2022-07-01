@@ -31,6 +31,7 @@ import { FormActualizarComponent } from './pages/form-actualizar/form-actualizar
 import { ActualizarTurnoComponent } from './components/actualizar-turno/actualizar-turno.component';
 import { ActualizarExtraComponent } from './components/actualizar-extra/actualizar-extra.component';
 import { ActualizarLibreComponent } from './components/actualizar-libre/actualizar-libre.component';
+import { ActualizarVacacionesComponent } from './components/actualizar-vacaciones/actualizar-vacaciones.component';
 
 const routes: Routes = [
   {
@@ -63,6 +64,7 @@ const routes: Routes = [
     ActualizarTurnoComponent,
     ActualizarExtraComponent,
     ActualizarLibreComponent,
+    ActualizarVacacionesComponent,
   ],
   imports: [
     CommonModule,

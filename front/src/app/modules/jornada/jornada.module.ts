@@ -28,6 +28,7 @@ import { CrearDiaLibreComponent } from './components/crear-dia-libre/crear-dia-l
 import { CrearVacacionesComponent } from './components/crear-vacaciones/crear-vacaciones.component';
 import { CrearCombinacionComponent } from './components/crear-combinacion/crear-combinacion.component';
 import { FormActualizarComponent } from './pages/form-actualizar/form-actualizar.component';
+import { ActualizarTurnoComponent } from './components/actualizar-turno/actualizar-turno.component';
 
 const routes: Routes = [
   {
@@ -57,6 +58,7 @@ const routes: Routes = [
     CrearVacacionesComponent,
     CrearCombinacionComponent,
     FormActualizarComponent,
+    ActualizarTurnoComponent,
   ],
   imports: [
     CommonModule,

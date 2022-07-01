@@ -13,6 +13,12 @@ export class FormActualizarComponent implements OnInit {
     fechaInicio: '',
   };
 
+  isFormTurnoActivo: boolean = false;
+  isFormExtraActivo: boolean = false;
+  isFormLibreActivo: boolean = false;
+  isFormVacacionesActivo: boolean = false;
+  isAlgunFormActivo: boolean = false;
+
   isDatosDisponibles: string | null = '';
 
   constructor(private route: ActivatedRoute) {}
@@ -21,6 +27,33 @@ export class FormActualizarComponent implements OnInit {
     this.isDatosDisponibles = this.route.snapshot.paramMap.get('datos_evento');
     if (this.isDatosDisponibles) {
       this.datosDelEvento = JSON.parse(this.isDatosDisponibles);
+      this.mostrarFormCorrespondiente(this.datosDelEvento.tipo);
+      this.datosDelEvento.fechaInicio = this.datosDelEvento.fechaInicio.slice(0, -6);
     }
+  }
+
+  mostrarFormCorrespondiente(form: string) {
+    switch (form) {
+      case 'turno':
+        this.isFormTurnoActivo = true;
+        break;
+      case 'extra':
+        this.isFormExtraActivo = true;
+        break;
+      case 'libre':
+        this.isFormLibreActivo = true;
+        break;
+      case 'vacaciones':
+        this.isFormVacacionesActivo = true;
+        break;
+
+      default:
+        break;
+    }
+    this.isAlgunFormActivo =
+      this.isFormTurnoActivo ||
+      this.isFormExtraActivo ||
+      this.isFormLibreActivo ||
+      this.isFormVacacionesActivo;
   }
 }

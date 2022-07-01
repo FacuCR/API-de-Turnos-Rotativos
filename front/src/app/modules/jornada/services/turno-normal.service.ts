@@ -34,7 +34,6 @@ export class TurnoNormalService {
   }
 
   getTurnoNormalById(turnoId: number): Observable<any> {
-    turnoId++;
     return this.http.get<any>(
       environment.jornada + `get/normal/${turnoId}`,
       httpOptions
@@ -49,18 +48,18 @@ export class TurnoNormalService {
   }
 
   updateTurnoNormal(
-    fecha: Date,
+    fecha: string,
     turno: Turnos,
-    cantDeHoras: number,
+    cantHoras: number,
     jornadaId: number,
     turnoNormalId: number
   ): Observable<any> {
     return this.http.put<any>(
-      environment.jornada + `save/normal/${jornadaId}/"${turnoNormalId}`,
+      environment.jornada + `save/normal/${jornadaId}/${turnoNormalId}`,
       {
         fecha,
         turno,
-        cantDeHoras,
+        cantHoras,
       },
       httpOptions
     );

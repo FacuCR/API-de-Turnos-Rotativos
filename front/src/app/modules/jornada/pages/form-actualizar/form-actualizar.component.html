@@ -13,7 +13,7 @@
           class="img-fluid"
         />
       </div>
-      <app-actualizar-turno *ngIf="isFormTurnoActivo"></app-actualizar-turno>
+      <app-actualizar-turno [id]="sendId" *ngIf="isFormTurnoActivo"></app-actualizar-turno>
       <button
         mat-raised-button
         class="btn-lg mt-2 mat-elevation-z2"

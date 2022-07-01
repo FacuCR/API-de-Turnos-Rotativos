@@ -19,6 +19,8 @@ export class FormActualizarComponent implements OnInit {
   isFormVacacionesActivo: boolean = false;
   isAlgunFormActivo: boolean = false;
 
+  sendId: number = 0;
+
   isDatosDisponibles: string | null = '';
 
   constructor(private route: ActivatedRoute) {}
@@ -29,6 +31,7 @@ export class FormActualizarComponent implements OnInit {
       this.datosDelEvento = JSON.parse(this.isDatosDisponibles);
       this.mostrarFormCorrespondiente(this.datosDelEvento.tipo);
       this.datosDelEvento.fechaInicio = this.datosDelEvento.fechaInicio.slice(0, -6);
+      this.sendId = this.datosDelEvento.id;
     }
   }
 

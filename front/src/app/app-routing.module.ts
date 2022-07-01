@@ -30,6 +30,7 @@ const routes: Routes = [
     canActivate: [RoleAccesoGuard],
     data: { roles: [Role.Admin, Role.User] },
   },
+  { path: '**', redirectTo: '' },
 ];
 
 @NgModule({

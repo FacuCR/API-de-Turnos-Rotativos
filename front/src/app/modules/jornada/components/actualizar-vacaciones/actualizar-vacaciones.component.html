@@ -1,8 +1,6 @@
-<section
-  class="libre"
->
-  <div class="libre__form pt-2">
-    <h2 class="texto--principal">Crear un Dia Libre</h2>
+<section class="vacaciones">
+  <div class="vacaciones__form pt-2">
+    <h2 class="texto--principal">Actualizar Vacaciones</h2>
     <form
       #formGroupDirective
       [formGroup]="form"
@@ -11,8 +9,13 @@
       class="d-flex flex-column"
     >
       <mat-form-field appearance="fill">
-        <mat-label>Fecha del Dia Libre</mat-label>
-        <input formControlName="fecha" [min]="fechaMinima" matInput [matDatepicker]="picker" />
+        <mat-label>Fecha de las Vacaciones</mat-label>
+        <input
+          formControlName="fecha"
+          [min]="fechaMinima"
+          matInput
+          [matDatepicker]="picker"
+        />
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker touchUi #picker></mat-datepicker>
       </mat-form-field>
@@ -24,7 +27,7 @@
         color="primary"
         [disabled]="!form.valid"
       >
-        Guardar Dia Libre
+        Guardar Vacaciones
       </button>
     </form>
     <div class="texto mt-3 d-flex justify-content-center align-items-center">

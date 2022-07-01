@@ -1,0 +1,41 @@
+<section
+  class="formularios min-vh-100 d-flex align-items-center justify-content-center"
+>
+  <div
+    class="formularios_main d-flex flex-column align-items-center justify-content-center p-3 mat-elevation-z12"
+  >
+    <h1 class="h1">Actualizar Jornada del {{ datosDelEvento.fechaInicio }}</h1>
+
+    <div *ngIf="!isAlgunFormActivo" class="formularios__main__default mt-4">
+      <p class="texto--secundario">Ocurrio un Problema, intentalo de nuevo</p>
+      <img
+        src="../../../../../assets/img/404 Error-bro.png"
+        class="img-fluid"
+      />
+    </div>
+    <app-actualizar-turno
+      [id]="sendId"
+      *ngIf="isFormTurnoActivo"
+    ></app-actualizar-turno>
+    <app-actualizar-extra
+      [id]="sendId"
+      *ngIf="isFormExtraActivo"
+    ></app-actualizar-extra>
+    <app-actualizar-libre
+      [id]="sendId"
+      *ngIf="isFormLibreActivo"
+    ></app-actualizar-libre>
+    <app-actualizar-vacaciones
+      [id]="sendId"
+      *ngIf="isFormVacacionesActivo"
+    ></app-actualizar-vacaciones>
+    <button
+      mat-raised-button
+      class="btn-lg mt-2 mat-elevation-z2"
+      color="accent"
+      routerLink=""
+    >
+      Volver al Inicio
+    </button>
+  </div>
+</section>

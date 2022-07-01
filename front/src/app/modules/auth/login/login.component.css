@@ -7,7 +7,7 @@
 .login__form {
   height: 100%;
   background: var(--primary-color);
-  color: var(--secondary-color);
+  color: var(--bs-gray-100);
 }
 .login__form > *,
 .login__form form > * {
@@ -30,5 +30,12 @@
   border-radius: 20px !important;
 }
 mat-label {
-  color: var(--secondary-color);
+  color: var(--bs-gray-100);
+}
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+  color: #7C4DFF;
+  opacity: 1;
+}
+::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+  color: #B388FF;
 }

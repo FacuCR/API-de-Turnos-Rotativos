@@ -1,3 +1,5 @@
+<mat-progress-bar *ngIf="cargando" class="position-fixed" mode="indeterminate"></mat-progress-bar>
+
 <section
   class="login d-flex justify-content-between align-items-center row row-cols-2"
 >
@@ -12,7 +14,7 @@
       Planificador para rendir más en su trabajo
     </p>
     <p class="texto--secundario">
-      prepárate para que tu presencia tenga sentido
+      que organizar tu presencia sea mas facil
     </p>
   </div>
 
@@ -30,7 +32,7 @@
       <mat-form-field
         [ngClass]="{ 'mat-form-field-invalid': isInvalido }"
         appearance="outline"
-        color="accent"
+        color="primary"
         class="mb-3"
       >
         <mat-label>Nombre de Usuario</mat-label>
@@ -49,7 +51,7 @@
       <mat-form-field
         [ngClass]="{ 'mat-form-field-invalid': isInvalido }"
         appearance="outline"
-        color="accent"
+        color="primary"
       >
         <mat-label>Contraseña</mat-label>
         <input
@@ -74,5 +76,6 @@
         Enviar
       </button>
     </form>
+    <mat-error *ngIf="loginError">{{ loginError }}</mat-error>
   </div>
 </section>

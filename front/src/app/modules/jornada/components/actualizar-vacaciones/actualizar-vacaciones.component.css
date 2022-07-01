@@ -1,0 +1,15 @@
+.texto--exitoso {
+  color: var(--bs-success);
+}
+.texto--principal {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+.texto--secundario {
+  font-size: 1rem;
+  font-weight: 100;
+}
+
+:host .mat-raised-button {
+  border-radius: 1.25rem !important;
+}

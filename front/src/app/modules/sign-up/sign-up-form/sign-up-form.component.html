@@ -1,0 +1,90 @@
+<mat-progress-bar
+  *ngIf="cargando"
+  class="position-fixed"
+  mode="indeterminate"
+></mat-progress-bar>
+
+<section
+  class="signup vh-100 mw-100 d-flex flex-column align-items-center justify-content-center"
+>
+  <div class="signup__form p-5 mat-elevation-z12">
+    <h1 class="texto--principal">Registro</h1>
+    <p class="texto--secundario">crear un nuevo usuario</p>
+    <form
+      #formGroupDirective
+      [formGroup]="form"
+      method="POST"
+      (ngSubmit)="onSubmit()"
+      class="d-flex flex-column"
+    >
+      <mat-form-field
+        [ngClass]="{ 'mat-form-field-invalid': isInvalido }"
+        appearance="outline"
+        color="primary"
+        class="mb-3"
+      >
+        <mat-label>Nombre de Usuario</mat-label>
+        <input
+          matInput
+          placeholder="ej: user123"
+          formControlName="usuario"
+          minlength="1"
+          maxlength="20"
+          required
+        />
+        <mat-error>{{ getMensajeDeError("usuario") }}</mat-error>
+        <mat-icon matPrefix class="my-icon me-3">account_circle</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field
+        [ngClass]="{ 'mat-form-field-invalid': isInvalido }"
+        appearance="outline"
+        color="primary"
+      >
+        <mat-label>Contraseña</mat-label>
+        <input
+          matInput
+          [type]="ocultar ? 'password' : 'text'"
+          formControlName="password"
+          minlength="6"
+          required
+        /><mat-error>{{ getMensajeDeError("password") }}</mat-error>
+        <mat-icon matPrefix class="my-icon me-3"
+          >keyboard_hide</mat-icon
+        ></mat-form-field
+      >
+
+      <mat-checkbox
+        class="mb-3"
+        color="primary"
+        formControlName="admin"
+        ngDefaultControl
+        >permisos admin</mat-checkbox
+      >
+
+      <button
+        type="submit"
+        mat-raised-button
+        class="btn-lg mat-elevation-z2"
+        color="primary"
+        [disabled]="!form.valid"
+      >
+        Crear Usuario
+      </button>
+      <button
+        mat-raised-button
+        class="btn-lg mt-4 mat-elevation-z2"
+        color="accent"
+        (click)="backClicked()"
+      >
+        Volver al Inicio
+      </button>
+    </form>
+    <div class="texto mt-3 d-flex justify-content-center align-items-center">
+      <div class="texto--exitoso" *ngIf="signupExitoso">
+        {{ signupExitoso }}
+      </div>
+      <mat-error *ngIf="signupError">{{ signupError }}</mat-error>
+    </div>
+  </div>
+</section>

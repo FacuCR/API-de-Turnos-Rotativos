@@ -1,23 +1,24 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
-import { LoginComponent } from './login.component';
-
 import { MatButtonModule } from '@angular/material/button';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { PerfilFormComponent } from './perfil-form/perfil-form.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: LoginComponent,
+    component: PerfilFormComponent,
   },
 ];
 
 @NgModule({
-  declarations: [LoginComponent],
+  declarations: [PerfilFormComponent],
   imports: [
     CommonModule,
     RouterModule.forChild(routes),
@@ -26,6 +27,8 @@ const routes: Routes = [
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
+    MatProgressBarModule,
+    MatCheckboxModule,
   ],
 })
-export class LoginModule {}
+export class PerfilModule {}

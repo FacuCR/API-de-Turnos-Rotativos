@@ -9,7 +9,7 @@ import com.neoris.api.exception.MaxHsJornadaDiariaException;
 import com.neoris.api.exception.MaxHsJornadaSemanalException;
 import com.neoris.api.model.Turno;
 import com.neoris.api.payload.request.*;
-import com.neoris.api.payload.response.MessageResponse;
+import com.neoris.api.payload.response.*;
 import com.neoris.api.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -136,8 +138,21 @@ public class JornadaLaboralController {
     @GetMapping("/get/normal/all/{id}")
     public ResponseEntity<?> getAllTurnosNormales(@PathVariable("id") Long idJornada){
         try {
-            List<TurnoNormal> turnosNormales = turnoNormalService.getAllTurnosNormales(idJornada);
-            return new ResponseEntity<>(turnosNormales, HttpStatus.OK);
+            Iterator<TurnoNormal> turnosNormales = turnoNormalService.getAllTurnosNormales(idJornada).iterator();
+            List<TurnosNormalesResponse> turnosNormalesResponses = new ArrayList<>();
+            TurnoNormal turno;
+            TurnosNormalesResponse turnoResponse = new TurnosNormalesResponse();
+            while(turnosNormales.hasNext()) {
+                turno = turnosNormales.next();
+                turnoResponse.setIdTurnoNormal(turno.getIdTurnoNormal());
+                turnoResponse.setFecha(turno.getFecha());
+                turnoResponse.setTurno(turno.getTurno());
+                turnoResponse.setCantHoras(turno.getCantHoras());
+                turnoResponse.setUsuarioId(idJornada);
+                turnosNormalesResponses.add(turnoResponse);
+                turnoResponse = new TurnosNormalesResponse();
+            }
+            return new ResponseEntity<>(turnosNormalesResponses, HttpStatus.OK);
         } catch(Exception e) {
             logger.error("Error: No se pudo obtener los turnos normales del empleado! {}", e);
             return ResponseEntity
@@ -268,8 +283,23 @@ public class JornadaLaboralController {
     @GetMapping("/get/extra/all/{id}")
     public ResponseEntity<?> getAllTurnosExtras(@PathVariable("id") Long idJornada){
         try {
-            List<TurnoExtra> turnosExtras = turnoExtraService.getAllTurnosExtras(idJornada);
-            return new ResponseEntity<>(turnosExtras, HttpStatus.OK);
+
+            Iterator<TurnoExtra> turnosNormales = turnoExtraService.getAllTurnosExtras(idJornada).iterator();
+            List<TurnoExtraResponse> turnosExtrasResponses = new ArrayList<>();
+            TurnoExtra turno;
+            TurnoExtraResponse turnoResponse = new TurnoExtraResponse();
+            while(turnosNormales.hasNext()) {
+                turno = turnosNormales.next();
+                turnoResponse.setIdTurnoNormal(turno.getIdTurnoExtra());
+                turnoResponse.setFecha(turno.getFecha());
+                turnoResponse.setTurno(turno.getTurno());
+                turnoResponse.setCantHoras(turno.getCantHoras());
+                turnoResponse.setUsuarioId(idJornada);
+                turnosExtrasResponses.add(turnoResponse);
+                turnoResponse = new TurnoExtraResponse();
+            }
+
+            return new ResponseEntity<>(turnosExtrasResponses, HttpStatus.OK);
         } catch(Exception e) {
             logger.error("Error: No se pudo obtener los turnos extras del empleado! {}", e);
             return ResponseEntity
@@ -384,8 +414,19 @@ public class JornadaLaboralController {
     @GetMapping("/get/libre/all/{id}")
     public ResponseEntity<?> getAllTurnosDiasLibres(@PathVariable("id") Long jornadaId){
         try {
-            List<DiaLibre> diasLibres = diaLibreService.getAllDiasLibres(jornadaId);
-            return new ResponseEntity<>(diasLibres, HttpStatus.OK);
+            Iterator<DiaLibre> diasLibres = diaLibreService.getAllDiasLibres(jornadaId).iterator();
+            List<DiaLibreResponse> diasLibresResponses = new ArrayList<>();
+            DiaLibre diaLibre;
+            DiaLibreResponse libreResponse = new DiaLibreResponse();
+            while(diasLibres.hasNext()) {
+                diaLibre = diasLibres.next();
+                libreResponse.setIdDiaLibre(diaLibre.getIdDiaLibre());
+                libreResponse.setFecha(diaLibre.getFecha());
+                libreResponse.setUsuarioId(jornadaId);
+                diasLibresResponses.add(libreResponse);
+                libreResponse = new DiaLibreResponse();
+            }
+            return new ResponseEntity<>(diasLibresResponses, HttpStatus.OK);
         } catch(Exception e) {
             logger.error("Error: No se pudo obtener los días libres del empleado! {}", e);
             return ResponseEntity
@@ -542,8 +583,20 @@ public class JornadaLaboralController {
     @GetMapping("/get/vacaciones/all/{id}")
     public ResponseEntity<?> getAllVacaciones(@PathVariable("id") Long jornadaId){
         try {
-            List<Vacaciones> vacaciones = vacacionesService.getAllVacaciones(jornadaId);
-            return new ResponseEntity<>(vacaciones, HttpStatus.OK);
+            Iterator<Vacaciones> vacacionesIterator = vacacionesService.getAllVacaciones(jornadaId).iterator();
+            List<VacacionesResponse> todasLasVacacionesResponses = new ArrayList<>();
+            Vacaciones vacaciones;
+            VacacionesResponse vacacionesResponse = new VacacionesResponse();
+            while(vacacionesIterator.hasNext()) {
+                vacaciones = vacacionesIterator.next();
+                vacacionesResponse.setIdVacaciones(vacaciones.getIdVacaciones());
+                vacacionesResponse.setFecha(vacaciones.getFechaInicio());
+                vacacionesResponse.setFechaFinal(vacaciones.getFechaFinal());
+                vacacionesResponse.setUsuarioId(jornadaId);
+                todasLasVacacionesResponses.add(vacacionesResponse);
+                vacacionesResponse = new VacacionesResponse();
+            }
+            return new ResponseEntity<>(todasLasVacacionesResponses, HttpStatus.OK);
         } catch(Exception e) {
             logger.error("Error: No se pudo obtener todas las vacaciones del empleado! {}", e);
             return ResponseEntity

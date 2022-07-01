@@ -1,0 +1,20 @@
+.formularios {
+  background: var(--primary-color);
+}
+.formularios_main {
+  background: var(--bs-gray-100);
+  max-width: 50%;
+  max-height: 100%;
+}
+.texto--secundario {
+  font-size: 1rem;
+  font-weight: 100;
+  text-align: center;
+}
+
+.formularios__main__default {
+  max-width: 20rem;
+}
+:host .mat-raised-button {
+  border-radius: 1.25rem !important;
+}

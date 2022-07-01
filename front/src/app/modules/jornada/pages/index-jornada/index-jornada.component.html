@@ -5,8 +5,8 @@
 ></mat-progress-bar>
 <main>
   <app-header></app-header>
-  <div class="d-flex">
-    <div class="relleno invisible">rellenos</div>
-  <app-calendario class="calendario" (sendCargando)="recibirCargando($event)"></app-calendario>
-  </div>
+  <app-calendario
+    class="calendario"
+    (sendCargando)="recibirCargando($event)"
+  ></app-calendario>
 </main>

@@ -75,3 +75,19 @@ sienta tan inutil :(
 2. Creo un usuario al cual se le asigna una jornada![signup](https://user-images.githubusercontent.com/48571169/174406941-7cfef23b-33cf-4e8f-a773-1247e7c78e00.jpg)
 
 3. Uso esa jornada para guardarle un turno![crearTurno](https://user-images.githubusercontent.com/48571169/174406950-d81a48ef-fc92-4fed-9fe6-1c1eba3c5dc9.jpg)
+
+----
+
+## 🛠️ Como usar el Front
+Al iniciar se vera la pagina de logeo, iniciar con el usuario principal creado de antemano de usuario y contraseña
+| admin   |   123456   | respectivamentes.
+en la izquierda se vera un menu, seleccionar crear usuarios(solo los admins pueden crear usuarios)
+![menu](https://user-images.githubusercontent.com/48571169/176810988-c21b2276-89d6-4810-aefb-1bfa51d8e989.jpg)
+![menu-hover](https://user-images.githubusercontent.com/48571169/176810997-62cbd0b3-2c34-46ad-bcab-93a2573d0dec.jpg)
+
+Iniciar sesion con el nuevo usuario y configurar su perfil para poder empezar a ver sus jornadas
+![menu-hover](https://user-images.githubusercontent.com/48571169/176811203-c418154b-ef67-4424-95a1-3ab1f23fff90.jpg)
+
+Luego en la pestaña formularios se pueden empezar a cargar las jornadas
+
+![menu-hover](https://user-images.githubusercontent.com/48571169/176811385-7b74ea4b-6c22-4440-8e88-4a9810c05bd7.jpg)

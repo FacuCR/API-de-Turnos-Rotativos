@@ -55,7 +55,7 @@ export class TurnoExtraService {
     turnoExtraId: number
   ): Observable<any> {
     return this.http.put<any>(
-      environment.jornada + `save/extra/${jornadaId}/"${turnoExtraId}`,
+      environment.jornada + `save/extra/${jornadaId}/${turnoExtraId}`,
       {
         fecha,
         turno,
